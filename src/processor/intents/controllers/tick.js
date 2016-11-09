@@ -1,0 +1,61 @@
+var _ = require('lodash'),
+    utils = require('../../../utils'),
+    driver = utils.getDriver(),
+    C = driver.constants;
+
+module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roomController, gameTime, roomInfo) {
+
+    if(!object || object.type != 'controller') return;
+
+    if(object.reservation && (gameTime >= object.reservation.endTime-1 || object.user)) {
+        bulk.update(object, {reservation: null});
+    }
+
+    if(!object.user) {
+        return;
+    }
+
+    if(object._upgraded || !object.downgradeTime || object.tutorial) {
+        bulk.update(object, {downgradeTime: gameTime + C.CONTROLLER_DOWNGRADE[object.level] + 1});
+        return;
+    }
+
+    if(gameTime == object.downgradeTime-3000) {
+        driver.sendNotification(object.user, `Attention! Your Controller in room ${object.room} will be downgraded to level ${object.level-1} in 3000 ticks (~2 hours)! Upgrade it to prevent losing of this room. <a href='http://support.screeps.com/hc/en-us/articles/203086021-Territory-control'>Learn more</a>`);
+    }
+
+
+    if(gameTime >= object.downgradeTime-1) {
+
+        object.level--;
+        driver.sendNotification(object.user, `Your Controller in room ${object.room} has been downgraded to level ${object.level} due to absence of upgrading activity!`);
+        if(object.level == 0) {
+            object.progress = 0;
+            object.user = null;
+            object.downgradeTime = null;
+            object.upgradeBlocked = null;
+            object.safeMode = null;
+            object.safeModeAvailable = 0;
+            object.safeModeCooldown = roomInfo.novice > Date.now() ? null : gameTime + C.SAFE_MODE_COOLDOWN
+        }
+        else {
+            object.downgradeTime = gameTime + C.CONTROLLER_DOWNGRADE[object.level] + 1;
+            object.progress += Math.round(C.CONTROLLER_LEVELS[object.level] * 0.9);
+            object.safeModeAvailable = 0;
+            object.safeModeCooldown = roomInfo.novice > Date.now() ? null : gameTime + C.SAFE_MODE_COOLDOWN
+        }
+
+        bulk.update(object, {
+            downgradeTime: object.downgradeTime,
+            level: object.level,
+            progress: object.progress,
+            user: object.user,
+            upgradeBlocked: object.upgradeBlocked,
+            safeMode: object.safeMode,
+            safeModeCooldown: object.safeModeCooldown,
+            safeModeAvailable: object.safeModeAvailable
+        });
+    }
+
+
+};

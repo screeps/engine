@@ -1,0 +1,1 @@
+This is a module for Screeps standalone server. See [main repository](https://github.com/screeps/screeps) for more info.

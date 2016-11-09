@@ -1,0 +1,38 @@
+{
+  "name": "@screeps/engine",
+  "version": "0.0.6",
+  "bin": {
+    "screeps-engine-main": "dist/main.js",
+    "screeps-engine-runner": "dist/runner.js",
+    "screeps-engine-processor": "dist/processor.js"
+  },
+  "main": "dist/index.js",
+  "dependencies": {
+    "lodash": "^3.10.0",
+    "q": "^1.0.1",
+    "bulk-require": "^0.2.1"
+  },
+  "devDependencies": {
+    "babel-plugin-transform-es2015-destructuring": "^6.0.2",
+    "babel-plugin-transform-strict-mode": "^6.0.2",
+    "babel-preset-es2015": "^6.0.15",
+    "gulp": "^3.8.8",
+    "gulp-babel": "^6.0.0",
+    "gulp-plumber": "^0.6.6",
+    "gulp-sourcemaps": "^1.3.0",
+    "gulp-traceur": "^0.13.0",
+    "gulp-watch": "^1.1.0"
+  },
+  "license": "ISC",
+  "author": "Artem Chivchalov <contact@screeps.com>",
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/screeps/engine.git"
+  },
+  "babel": {
+    "plugins": [
+      "transform-es2015-destructuring",
+      "transform-strict-mode"
+    ]
+  }
+}
