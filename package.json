@@ -1,6 +1,6 @@
 {
   "name": "@screeps/engine",
-  "version": "0.0.6",
+  "version": "1.0.0",
   "bin": {
     "screeps-engine-main": "dist/main.js",
     "screeps-engine-runner": "dist/runner.js",
@@ -25,9 +25,9 @@
   },
   "license": "ISC",
   "author": "Artem Chivchalov <contact@screeps.com>",
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/screeps/engine.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/screeps/engine.git"
   },
   "babel": {
     "plugins": [
