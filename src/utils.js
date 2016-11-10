@@ -3,12 +3,7 @@ var _ = require('lodash');
 var driver, C, offsetsByDirection;
 
 exports.getDriver = function getDriver() {
-    try {
-        driver = require('@screeps/driver');
-    }
-    catch(e) {
-        driver = require('./core/index');
-    }
+    driver = require((typeof process != 'undefined') && process.env.DRIVER_MODULE ? process.env.DRIVER_MODULE : './core/index');
     C = driver.constants;
     offsetsByDirection = {
         [C.TOP]: [0,-1],
