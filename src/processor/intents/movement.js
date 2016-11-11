@@ -18,6 +18,29 @@ function checkObstacleAtXY(x,y,object, roomIsInSafeMode) {
         || utils.checkTerrain(roomTerrain, x, y, C.TERRAIN_MASK_WALL);
 }
 
+function calcResourcesWeight(creep) {
+    var totalCarry = 0, weight = 0;
+    C.RESOURCES_ALL.forEach(resourceType => {
+        totalCarry += creep[resourceType] || 0;
+    });
+    for(var i = creep.body.length-1; i >= 0; i--) {
+        if(!totalCarry) {
+            break;
+        }
+        var part = creep.body[i];
+        if(part.type != C.CARRY || !part.hits) {
+            continue;
+        }
+        var boost = 1;
+        if(part.boost) {
+            boost = C.BOOSTS[C.CARRY][part.boost].capacity || 1;
+        }
+        totalCarry -= Math.min(totalCarry, C.CARRY_CAPACITY * boost);
+        weight++;
+    }
+    return weight;
+}
+
 exports.init = function(_roomObjects, _roomTerrain) {
     matrix = {};
     objects = {};
@@ -63,7 +86,7 @@ exports.check = function(roomIsInSafeMode) {
             var rates = _.map(matrix[i], (object) => {
                 var moveBodyparts = _.filter(object.body, (i) => i.hits > 0 && i.type == C.MOVE).length,
                     weight = _.filter(object.body, (i) => i.type != C.MOVE && i.type != C.CARRY).length;
-                weight += Math.ceil(object.energy / C.CARRY_CAPACITY);
+                weight += calcResourcesWeight(object);
                 weight = weight || 1;
                 var key = `${object.x},${object.y}`,
                     rate1 = affectedCnt[key] || 0;
@@ -156,11 +179,7 @@ exports.execute = function(object, bulk, roomController, gameTime) {
     }
 
     var fatigue = _(object.body).filter((i) => i.type != C.MOVE && i.type != C.CARRY).size();
-    var totalCarry = 0;
-    C.RESOURCES_ALL.forEach(resourceType => {
-        totalCarry += object[resourceType] || 0;
-    });
-    fatigue += Math.ceil(totalCarry / C.CARRY_CAPACITY);
+    fatigue += calcResourcesWeight(object);
     fatigue *= fatigueRate;
 
     if((move.x == 0 || move.x == 49 || move.y == 0 || move.y == 49) &&
