@@ -3,7 +3,9 @@ var _ = require('lodash');
 var driver, C, offsetsByDirection;
 
 exports.getDriver = function getDriver() {
-    driver = require((typeof process != 'undefined') && process.env.DRIVER_MODULE ? process.env.DRIVER_MODULE : './core/index');
+    driver = typeof process != 'undefined' && process.env.DRIVER_MODULE ?
+        require(process.env.DRIVER_MODULE) :
+        require('./core/index');
     C = driver.constants;
     offsetsByDirection = {
         [C.TOP]: [0,-1],
