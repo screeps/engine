@@ -484,7 +484,7 @@
                 runCodeCache[userId].globals.require.timestamp = runCodeCache[userId].runtimeData.userCodeTimestamp;
             }
 
-            driver.config.onPlayerSandbox(runCodeCache[userId].globals, userId);
+            driver.config.emit('playerSandbox',runCodeCache[userId].globals, userId);
 
             runCodeCache[userId].resetUsedCpu();
 

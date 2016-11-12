@@ -8,7 +8,7 @@ var q = require('q'),
 
 function runUser(userId, onlyInRoom) {
 
-    driver.config.onRunnerLoopStage('runUser', userId, onlyInRoom);
+    driver.config.emit('runnerLoopStage','runUser', userId, onlyInRoom);
 
     //driver.influxAccumulator.resetTime();
 
@@ -17,7 +17,7 @@ function runUser(userId, onlyInRoom) {
 
     function saveResult(runResult) {
 
-        driver.config.onRunnerLoopStage('saveResultStart', runResult);
+        driver.config.emit('runnerLoopStage','saveResultStart', runResult);
 
         //driver.influxAccumulator.mark('endMakeRuntime');
         if(runResult.console) {
@@ -45,7 +45,7 @@ function runUser(userId, onlyInRoom) {
         }
         return q.all(promises)
         .then(() => {
-            driver.config.onRunnerLoopStage('saveResultFinish', runResult);
+            driver.config.emit('runnerLoopStage','saveResultFinish', runResult);
             //driver.influxAccumulator.mark('saveUser');
             if(runResult.error) {
                 return q.reject(runResult.error);
@@ -63,7 +63,7 @@ driver.connect('runner')
     function loop() {
         var userId, fetchedUserId;
 
-        driver.config.onRunnerLoopStage('start');
+        driver.config.emit('runnerLoopStage','start');
 
         usersQueue.fetch()
             .then((_userId) => {
@@ -87,7 +87,7 @@ driver.connect('runner')
             .then(() => usersQueue.markDone(fetchedUserId))
             .catch((error) => console.error('Error in runner loop:', _.isObject(error) && error.stack || error))
             .finally(() => {
-                driver.config.onRunnerLoopStage('finish', userId);
+                driver.config.emit('runnerLoopStage','finish', userId);
                 setTimeout(loop, 0);
             });
     }
