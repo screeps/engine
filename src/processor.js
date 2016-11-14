@@ -27,7 +27,7 @@ function processRoom(roomId, intents, objects, terrain, gameTime, roomInfo, flag
         roomInfo.active = false;
 
         var terrainItem = terrain[_.findKey(terrain)];
-        if (terrainItem.type == 'terrain') {
+        if (terrainItem.terrain) {
             terrain = terrainItem.terrain;
         }
 
