@@ -13,7 +13,7 @@ function loop() {
     var resetInterval, startLoopTime = process.hrtime ? process.hrtime() : Date.now(),
         stage = 'start';
 
-    driver.config.onMainLoopStage(stage);
+    driver.config.emit('mainLoopStage',stage);
 
 
     if(typeof self == 'undefined') {
@@ -26,52 +26,52 @@ function loop() {
     driver.notifyTickStarted()
         .then(() => {
             stage = 'getUsers';
-            driver.config.onMainLoopStage(stage);
+            driver.config.emit('mainLoopStage',stage);
             return driver.getAllUsers();
         })
         .then((users) => {
             stage = 'addUsersToQueue';
-            driver.config.onMainLoopStage(stage, users);
+            driver.config.emit('mainLoopStage',stage, users);
             return usersQueue.addMulti(_.map(users, (user) => user._id.toString()))
         })
         .then(() => {
             stage = 'waitForUsers';
-            driver.config.onMainLoopStage(stage);
+            driver.config.emit('mainLoopStage',stage);
             return usersQueue.whenAllDone();
         })
         .then(() => {
             stage = 'getRooms';
-            driver.config.onMainLoopStage(stage);
+            driver.config.emit('mainLoopStage',stage);
             return driver.getAllRooms();
         })
         .then((rooms) => {
             stage = 'addRoomsToQueue';
-            driver.config.onMainLoopStage(stage, rooms);
+            driver.config.emit('mainLoopStage',stage, rooms);
             return roomsQueue.addMulti(_.map(rooms, (room) => room._id.toString()))
         })
         .then(() => {
             stage = 'waitForRooms';
-            driver.config.onMainLoopStage(stage);
+            driver.config.emit('mainLoopStage',stage);
             return roomsQueue.whenAllDone();
         })
         .then(() => {
             stage = 'commit1';
-            driver.config.onMainLoopStage(stage);
+            driver.config.emit('mainLoopStage',stage);
             return driver.commitDbBulk();
         })
         .then(() => {
             stage = 'global';
-            driver.config.onMainLoopStage(stage);
+            driver.config.emit('mainLoopStage',stage);
             return require('./processor/global')();
         })
         .then(() => {
             stage = 'commit2';
-            driver.config.onMainLoopStage(stage);
+            driver.config.emit('mainLoopStage',stage);
             return driver.commitDbBulk();
         })
         .then(() => {
             stage = 'incrementGameTime';
-            driver.config.onMainLoopStage(stage);
+            driver.config.emit('mainLoopStage',stage);
             return driver.incrementGameTime()
         })
         .then(gameTime => {
@@ -82,12 +82,12 @@ function loop() {
             }
 
             stage = 'notifyRoomsDone';
-            driver.config.onMainLoopStage(stage);
+            driver.config.emit('mainLoopStage',stage);
             return driver.notifyRoomsDone(gameTime);
         })
         .then(() => {
             stage = 'custom';
-            driver.config.onMainLoopStage(stage);
+            driver.config.emit('mainLoopStage',stage);
             return driver.config.mainLoopCustomStage();
         })
         .catch((error) => {
@@ -111,7 +111,7 @@ function loop() {
                 usedTime = Date.now() - startLoopTime;
             }
 
-            driver.config.onMainLoopStage('finish');
+            driver.config.emit('mainLoopStage','finish');
 
             setTimeout(loop, Math.max(driver.config.mainLoopMinDuration - usedTime, 0));
         })

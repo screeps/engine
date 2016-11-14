@@ -107,7 +107,7 @@ function processRoom(roomId, intents, objects, terrain, gameTime, roomInfo, flag
                 roomSpawns.push(object);
             }
 
-            if(!driver.config.onProcessObject(object, objects, terrain, gameTime, roomInfo, bulk, userBulk)) {
+            if(!driver.config.emit('processObject',object, objects, terrain, gameTime, roomInfo, bulk, userBulk)) {
                 object._skip = true;
             }
 
@@ -205,7 +205,7 @@ function processRoom(roomId, intents, objects, terrain, gameTime, roomInfo, flag
                     }
 
 
-                    driver.config.onProcessObjectIntents(object, userId, objectIntents, objects, terrain,
+                    driver.config.emit('processObjectIntents',object, userId, objectIntents, objects, terrain,
                         gameTime, roomInfo, bulk, userBulk);
                 }
             });
@@ -355,9 +355,9 @@ function processRoom(roomId, intents, objects, terrain, gameTime, roomInfo, flag
             resultPromises.push(core.setUserRoomVisibility(user, roomId));
         }*/
 
-        driver.config.onProcessRoom(roomId, roomInfo);
+        driver.config.emit('processRoom',roomId, roomInfo);
 
-        driver.config.onProcessorLoopStage('saveRoom', roomId);
+        driver.config.emit('processorLoopStage','saveRoom', roomId);
 
         resultPromises.push(driver.mapViewSave(roomId, mapView));
         resultPromises.push(bulk.execute());
@@ -407,11 +407,11 @@ driver.connect('processor').then(() => driver.queue.create('rooms', 'read'))
 
         var roomId;
 
-        driver.config.onProcessorLoopStage('start');
+        driver.config.emit('processorLoopStage','start');
 
         roomsQueue.fetch()
             .then((_roomId) => {
-                driver.config.onProcessorLoopStage('getRoomData', _roomId);
+                driver.config.emit('processorLoopStage','getRoomData', _roomId);
                 roomId = _roomId;
                 return q.all([
                     driver.getRoomIntents(_roomId),
@@ -423,7 +423,7 @@ driver.connect('processor').then(() => driver.queue.create('rooms', 'read'))
                 ])
             })
             .then((result) => {
-                driver.config.onProcessorLoopStage('processRoom', roomId);
+                driver.config.emit('processorLoopStage','processRoom', roomId);
                 processRoom(roomId, result[0], result[1], result[2], result[3], result[4], result[5])
                 .catch((error) => console.log('Error processing room '+roomId+':', _.isObject(error) ? (error.stack || error) : error))
                 .then(() => {
@@ -433,7 +433,7 @@ driver.connect('processor').then(() => driver.queue.create('rooms', 'read'))
             })
             .catch((error) => console.error('Error in processor loop:', _.isObject(error) && error.stack || error))
             .then(() => {
-                driver.config.onProcessorLoopStage('finish', roomId);
+                driver.config.emit('processorLoopStage','finish', roomId);
                 setTimeout(loop, 0)
             });
     }
