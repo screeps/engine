@@ -107,9 +107,7 @@ function processRoom(roomId, intents, objects, terrain, gameTime, roomInfo, flag
                 roomSpawns.push(object);
             }
 
-            if(!driver.config.emit('processObject',object, objects, terrain, gameTime, roomInfo, bulk, userBulk)) {
-                object._skip = true;
-            }
+            driver.config.emit('processObject',object, objects, terrain, gameTime, roomInfo, bulk, userBulk);
 
         });
 
