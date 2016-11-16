@@ -132,7 +132,7 @@
                     return getUsedCpuFn();
                 },
                 tickLimit: runtimeData.cpu,
-                limit: Math.min(300, 20 + gclLevel*10),
+                limit: runtimeData.user.cpu,
                 bucket: runtimeData.cpuBucket
             },
             map: {},
