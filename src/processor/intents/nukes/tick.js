@@ -52,7 +52,8 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
         if(roomController) {
             if(roomController.safeMode > gameTime) {
                 bulk.update(roomController, {
-                    safeMode: gameTime
+                    safeMode: gameTime,
+                    safeModeCooldown: null
                 });
             }
 
