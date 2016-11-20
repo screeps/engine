@@ -533,7 +533,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_INVALID_TARGET;
         }
 
-        if(target.my === false && _.any(target.pos.lookFor('structure'), i => i.structureType == C.STRUCTURE_RAMPART && !i.my)) {
+        if(target.my === false && _.any(target.pos.lookFor('structure'), i => i.structureType == C.STRUCTURE_RAMPART && !i.my && !i.isPublic)) {
             return C.ERR_NOT_OWNER;
         }
         if(this.room.controller && !this.room.controller.my && this.room.controller.safeMode) {
