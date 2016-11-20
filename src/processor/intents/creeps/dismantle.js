@@ -23,7 +23,7 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
         return;
     }
     var rampart = _.find(roomObjects, {type: 'rampart', x: target.x, y: target.y});
-    if(rampart) {
+    if(rampart && object.user != rampart.user) {
         target = rampart;
     }
 
