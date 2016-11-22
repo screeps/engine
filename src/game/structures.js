@@ -434,7 +434,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(lab1.mineralAmount < C.LAB_REACTION_AMOUNT || lab2.mineralAmount < C.LAB_REACTION_AMOUNT) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
-        if(!C.REACTIONS[lab1.mineralType][lab2.mineralType] || this.mineralType && this.mineralType != C.REACTIONS[lab1.mineralType][lab2.mineralType]) {
+        if(!(lab1.mineralType in C.REACTIONS) || !C.REACTIONS[lab1.mineralType][lab2.mineralType] ||
+        this.mineralType && this.mineralType != C.REACTIONS[lab1.mineralType][lab2.mineralType]) {
             return C.ERR_INVALID_ARGS;
         }
 
