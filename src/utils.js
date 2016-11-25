@@ -787,6 +787,12 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                 id: ""+objectIntentsResult.generateSafeMode.id,
             };
         }
+        if(objectIntentsResult.signController) {
+            objectIntents.signController = {
+                id: ""+objectIntentsResult.signController.id,
+                sign: (""+objectIntentsResult.signController.sign).substring(0,100)
+            };
+        }
 
 
         for(var iCustomType in driver.config.customIntentTypes) {

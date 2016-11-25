@@ -259,7 +259,12 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         upgradeBlocked: o => o.upgradeBlocked && o.upgradeBlocked > runtimeData.time ? o.upgradeBlocked - runtimeData.time : undefined,
         safeMode: o => o.safeMode && o.safeMode > runtimeData.time ? o.safeMode - runtimeData.time : undefined,
         safeModeCooldown: o => o.safeModeCooldown && o.safeModeCooldown > runtimeData.time ? o.safeModeCooldown - runtimeData.time : undefined,
-        safeModeAvailable: o => o.safeModeAvailable || 0
+        safeModeAvailable: o => o.safeModeAvailable || 0,
+        sign: o => o.sign ? {
+                username: runtimeData.users[o.sign.user].username,
+                text: o.sign.text,
+                date: new Date(o.sign.time)
+            } : undefined
     });
 
     StructureController.prototype.unclaim = register.wrapFn(function() {

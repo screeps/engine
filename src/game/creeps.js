@@ -1101,6 +1101,27 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
+    Creep.prototype.signController = register.wrapFn(function(target, sign) {
+
+        if(this.spawning) {
+            return C.ERR_BUSY;
+        }
+
+        if(!target || !target.id || !register.structures[target.id] || !(target instanceof globals.Structure)) {
+            register.assertTargetObject(target);
+            return C.ERR_INVALID_TARGET;
+        }
+        if(!target.pos.isNearTo(this.pos)) {
+            return C.ERR_NOT_IN_RANGE;
+        }
+        if(target.structureType != 'controller') {
+            return C.ERR_INVALID_TARGET;
+        }
+
+        intents.set(this.id, 'signController', {id: target.id, sign: ""+sign});
+        return C.OK;
+    });
+
 
     globals.Creep = Creep;
 };
