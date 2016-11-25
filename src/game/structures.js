@@ -263,7 +263,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         sign: o => o.sign ? {
                 username: runtimeData.users[o.sign.user].username,
                 text: o.sign.text,
-                date: new Date(o.sign.time)
+                time: o.sign.time,
+                datetime: new Date(o.sign.datetime)
             } : undefined
     });
 

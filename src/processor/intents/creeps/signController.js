@@ -20,5 +20,10 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
         return;
     }
 
-    bulk.update(target, {sign: intent.sign ? {user: object.user, text: intent.sign, time: Date.now()} : null});
+    bulk.update(target, {sign: intent.sign ? {
+        user: object.user,
+        text: intent.sign,
+        time: gameTime,
+        datetime: Date.now()
+    } : null});
 };
