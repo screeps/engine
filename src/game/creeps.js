@@ -537,7 +537,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NOT_OWNER;
         }
         if(this.room.controller && !this.room.controller.my && this.room.controller.safeMode) {
-            return C.ERR_NO_BODYPART;
+            return C.ERR_NOT_OWNER;
         }
         
         if(resourceType == C.RESOURCE_ENERGY) {
