@@ -18,7 +18,7 @@ module.exports = function(object, intent, scope) {
     if(!target) {
         return;
     }
-    if(Math.abs(target.x - object.x) > 1 || Math.abs(target.y - object.y) > 1) {
+    if(Math.abs(target.x - object.x) > C.RANGE_HARVEST || Math.abs(target.y - object.y) > C.RANGE_HARVEST) {
         return;
     }
 

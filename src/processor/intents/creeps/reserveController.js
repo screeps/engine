@@ -16,7 +16,7 @@ module.exports = function(object, intent, {roomObjects, bulk, gameTime, eventLog
     if(!target || target.type != 'controller') {
         return;
     }
-    if(Math.abs(target.x - object.x) > 1 || Math.abs(target.y - object.y) > 1) {
+    if(Math.abs(target.x - object.x) > C.RANGE_RESERVE_CONTROLLER || Math.abs(target.y - object.y) > C.RANGE_RESERVE_CONTROLLER) {
         return;
     }
     if(target.user || target.reservation && target.reservation.user != object.user) {

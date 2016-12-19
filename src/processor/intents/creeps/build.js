@@ -20,7 +20,7 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
         !C.CONSTRUCTION_COST[target.structureType]) {
         return;
     }
-    if(Math.abs(target.x - object.x) > 3 || Math.abs(target.y - object.y) > 3) {
+    if(Math.abs(target.x - object.x) > C.RANGE_BUILD || Math.abs(target.y - object.y) > C.RANGE_BUILD) {
         return;
     }
 
