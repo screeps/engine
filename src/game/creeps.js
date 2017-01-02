@@ -98,7 +98,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 throw new Error('Could not set creep memory');
             }
             globals.Memory.creeps[this.name] = value;
-        }
+        },
+        configurable: true
     });
 
     Creep.prototype.toString = register.wrapFn(function() {
