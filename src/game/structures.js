@@ -1131,18 +1131,15 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     StructureSpawn.prototype.renewCreep = register.wrapFn(function(target) {
 
-        if(!this.my) {
-            return C.ERR_NOT_OWNER;
-        }
         if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
+        if(!this.my || !target.my) {
+            return C.ERR_NOT_OWNER;
+        }
         if(runtimeData.roomObjects[this.id].off) {
             return C.ERR_RCL_NOT_ENOUGH;
-        }
-        if(!target.my) {
-            return C.ERR_NOT_OWNER;
         }
         if(!target.pos.isNearTo(this.pos)) {
             return C.ERR_NOT_IN_RANGE;
