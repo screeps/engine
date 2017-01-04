@@ -1131,6 +1131,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     StructureSpawn.prototype.renewCreep = register.wrapFn(function(target) {
 
+        if(this.spawning) {
+            return C.ERR_BUSY;
+        }
         if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
@@ -1143,9 +1146,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
         if(!target.pos.isNearTo(this.pos)) {
             return C.ERR_NOT_IN_RANGE;
-        }
-        if(this.spawning) {
-            return C.ERR_BUSY;
         }
         if(this.room.energyAvailable < Math.ceil(C.SPAWN_RENEW_RATIO * utils.calcCreepCost(target.body) / C.CREEP_SPAWN_TIME / target.body.length)) {
             return C.ERR_NOT_ENOUGH_ENERGY;
