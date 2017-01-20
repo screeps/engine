@@ -94,7 +94,7 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
         bulk.update(object._id, {fatigue: object.fatigue});
     }
 
-    if(_.isNaN(object.hits)) {
+    if(_.isNaN(object.hits) || object.hits <= 0) {
         require('./_die')(object, roomObjects, bulk, stats);
     }
 
