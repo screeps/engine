@@ -70,12 +70,7 @@ module.exports = function(object, target, damage, damageType, roomObjects, roomT
         require('./creeps/_clear-newbie-walls')(roomObjects, bulk);
     }
     else if (target.hits <= 0) {
-
-        if(target.type == 'creep') {
-            require('./creeps/_die')(target, roomObjects, bulk, stats);
-        }
-        else {
-
+        if (target.type != 'creep') {
             C.RESOURCES_ALL.forEach(resourceType => {
                 if (target[resourceType] > 0) {
                     require('./creeps/_create-energy')(target.x, target.y, target.room,
@@ -132,10 +127,7 @@ module.exports = function(object, target, damage, damageType, roomObjects, roomT
         damageBody(object, attackBackPower, roomObjects, roomTerrain, bulk);
         object.actionLog.attacked = {x: target.x, y: target.y};
 
-        if(object.hits <= 0) {
-            require('./creeps/_die')(object, roomObjects, bulk, stats);
-        }
-        else {
+        if(object.hits > 0) {
             bulk.update(object, {
                 hits: object.hits,
                 body: object.body,
