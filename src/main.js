@@ -124,7 +124,8 @@ function loop() {
 driver.connect('main')
     .then(() =>  q.all([
         driver.queue.create('users', 'write'),
-        driver.queue.create('rooms', 'write')
+        driver.queue.create('rooms', 'write'),
+        driver.initUserRoomVisibility()
     ]))
     .then((data) => {
         usersQueue = data[0];
