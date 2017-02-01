@@ -488,6 +488,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 nuke: register.byRoom[id].spatial.nukes
             }
         };
+
+        this.visual = new globals.RoomVisual(id);
     });
 
     Room.serializePath = register.wrapFn(function(path) {
@@ -1045,6 +1047,52 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     });
 
     globals.Room = Room;
+
+    /**
+     * RoomVisual
+     * @param id
+     * @returns {object}
+     * @constructor
+     */
+    var RoomVisual = register.wrapFn(function(roomName) {
+        this.roomName = roomName;
+    });
+
+    RoomVisual.prototype.circle = register.wrapFn(function(x,y,style) {
+        globals.console.addVisual(this.roomName, {t: 'c', x,y,s:style});
+        return this;
+    });
+
+    RoomVisual.prototype.line = register.wrapFn(function(x1,y1,x2,y2,style) {
+        globals.console.addVisual(this.roomName, {t: 'l', x1,y1,x2,y2,s:style});
+        return this;
+    });
+
+    RoomVisual.prototype.rect = register.wrapFn(function(x1,y1,w,h,style) {
+        globals.console.addVisual(this.roomName, {t: 'r', x1,y1,w,h,s:style});
+        return this;
+    });
+
+    RoomVisual.prototype.path = register.wrapFn(function(points,style) {
+        globals.console.addVisual(this.roomName, {t: 'p', points,s:style});
+        return this;
+    });
+
+    RoomVisual.prototype.text = register.wrapFn(function(text,x,y,style) {
+        globals.console.addVisual(this.roomName, {t: 't', text,x,y,s:style});
+        return this;
+    });
+
+    RoomVisual.prototype.getSize = register.wrapFn(function() {
+        return globals.console.getVisualSize(this.roomName);
+    });
+
+    RoomVisual.prototype.clean = register.wrapFn(function() {
+        globals.console.cleanVisual(this.roomName);
+        return this;
+    });
+
+    globals.RoomVisual = RoomVisual;
 };
 
 exports.makePos = function(_register) {
