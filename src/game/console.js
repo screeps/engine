@@ -35,12 +35,7 @@ exports.makeConsole = function(id, sandboxedFunctionWrapper) {
         },
         addVisual: {
             value: sandboxedFunctionWrapper(function(roomName, data) {
-                if(!visual[id][roomName]) {
-                    if(Object.keys(visual[id]).length >= 20) {
-                        throw new Error('You cannot use RoomVisual in more than 20 rooms in the same tick.');
-                    }
-                    visual[id][roomName] = "";
-                }
+                visual[id][roomName] = visual[id][roomName] || "";
                 if(visual[id][roomName].length > 500*1024) {
                     throw new Error(`RoomVisual size in room ${roomName} has exceeded 500 KB limit`);
                 }
