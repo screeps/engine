@@ -840,38 +840,38 @@ exports.sendAttackingNotification = function(target, roomController) {
 
 exports.checkStructureAgainstController = function(object, roomObjects, roomController) {
     // owner-less objects are always active
-    if (!object.user) {
+    if(!object.user) {
         return true;
     }
 
     // eliminate some other easy cases
-    if (!roomController || roomController.level < 1 || roomController.user !== object.user) {
+    if(!roomController || roomController.level < 1 || roomController.user !== object.user) {
         return false;
     }
 
     let allowedRemaining = C.CONTROLLER_STRUCTURES[object.type][roomController.level];
     
     // if only one object ever allowed, this is it
-    if (C.CONTROLLER_STRUCTURES[object.type][8] === 1) {
+    if(C.CONTROLLER_STRUCTURES[object.type][8] === 1) {
         return allowedRemaining !== 0;
     }
 
     // Scan through the room objects of the same type and count how many are closer. 
     let foundSelf = false;
     let objectDist = Math.max(Math.abs(object.x - roomController.x), Math.abs(object.y - roomController.y));
-    for (let i = 0; i < roomObjects.length; i++) {
+    for(let i = 0; i < roomObjects.length; i++) {
         let compareObj = roomObjects[i];
-        if (compareObj.type === object.type && compareObj.user === object.user) {
+        if(compareObj.type === object.type && compareObj.user === object.user) {
             let compareDist = Math.max(Math.abs(compareObj.x - roomController.x), Math.abs(compareObj.y - roomController.y));
             
-            if (compareDist < objectDist) {
+            if(compareDist < objectDist) {
                 allowedRemaining--;
                 if (allowedRemaining === 0) {
                     return false;
                 }
-            } else if (!foundSelf && compareDist === objectDist) {
+            } else if(!foundSelf && compareDist === objectDist) {
                 // Objects of equal distance that are discovered before we scan over the selected object are considered closer
-                if (object === compareObj) {
+                if(object === compareObj) {
                     foundSelf = true;
                 } else {
                     allowedRemaining--;
