@@ -163,6 +163,10 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             opts.serializeMemory = true;
         }
 
+        if(opts.visualizePathStyle) {
+            _.defaults(opts.visualizePathStyle, {fill: 'transparent', stroke: '#fff', lineStyle: 'dashed', strokeWidth: .15, opacity: .1});
+        }
+
         if(x == this.pos.x && y == this.pos.y && roomName == this.pos.roomName) {
             return C.OK;
         }
@@ -230,6 +234,10 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 if(path.length == 0) {
                     return this.pos.isNearTo(targetPos) ? C.OK : C.ERR_NO_PATH;
                 }
+                if(opts.visualizePathStyle) {
+                    var points = [[this.pos.x, this.pos.y]].concat(path.map(i => [i.x, i.y]));
+                    this.room.visual.poly(points, opts.visualizePathStyle);
+                }
                 var result = this.moveByPath(path);
 
                 if(result == C.OK) {
@@ -256,6 +264,12 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(path.length == 0) {
             return C.ERR_NO_PATH;
         }
+
+        if(opts.visualizePathStyle) {
+            var points = [[this.pos.x, this.pos.y]].concat(path.map(i => [i.x, i.y]));
+            this.room.visual.poly(points, opts.visualizePathStyle);
+        }
+
         this.move(path[0].direction);
         return C.OK;
     });
