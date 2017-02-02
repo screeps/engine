@@ -55,7 +55,7 @@ exports.makeConsole = function(id, sandboxedFunctionWrapper) {
                 return visual[id][roomName].length;
             })
         },
-        cleanVisual: {
+        clearVisual: {
             value: sandboxedFunctionWrapper(function(roomName) {
                 visual[id][roomName] = "";
             })

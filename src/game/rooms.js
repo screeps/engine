@@ -1073,7 +1073,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return this;
     });
 
-    RoomVisual.prototype.path = register.wrapFn(function(points,style) {
+    RoomVisual.prototype.poly = register.wrapFn(function(points,style) {
         globals.console.addVisual(this.roomName, {t: 'p', points,s:style});
         return this;
     });
@@ -1087,8 +1087,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return globals.console.getVisualSize(this.roomName);
     });
 
-    RoomVisual.prototype.clean = register.wrapFn(function() {
-        globals.console.cleanVisual(this.roomName);
+    RoomVisual.prototype.clear = register.wrapFn(function() {
+        globals.console.clearVisual(this.roomName);
         return this;
     });
 
