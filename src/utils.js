@@ -580,8 +580,6 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
             };
         }
 
-        if(!(i in userRuntimeData.userObjects)) continue;
-
         if(objectIntentsResult.move) {
             objectIntents.move = {
                 direction: parseInt(objectIntentsResult.move.direction)

@@ -136,7 +136,7 @@ function processRoom(roomId, intents, objects, terrain, gameTime, roomInfo, flag
                         continue;
                     }
 
-                    if (!object || object._skip) continue;
+                    if (!object || object._skip || object.user && object.user != userId) continue;
 
                     if (object.type == 'creep')
                         require('./processor/intents/creeps/intents')(object, objectIntents, objects, terrain, bulk, userBulk, roomController, stats, gameTime, roomInfo);
