@@ -859,8 +859,9 @@ exports.checkStructureAgainstController = function(object, roomObjects, roomCont
     // Scan through the room objects of the same type and count how many are closer. 
     let foundSelf = false;
     let objectDist = Math.max(Math.abs(object.x - roomController.x), Math.abs(object.y - roomController.y));
-    for(let i = 0; i < roomObjects.length; i++) {
-        let compareObj = roomObjects[i];
+    let objectIds = _.keys(roomObjects);
+    for (let i = 0; i < objectIds.length; i++) {
+        let compareObj = roomObjects[objectIds[i]];
         if(compareObj.type === object.type && compareObj.user === object.user) {
             let compareDist = Math.max(Math.abs(compareObj.x - roomController.x), Math.abs(compareObj.y - roomController.y));
             
