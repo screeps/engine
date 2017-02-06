@@ -6,6 +6,27 @@ var utils = require('./../utils'),
 
 var runtimeData, intents, register, globals, controllersClaimedInTick;
 
+function _getActiveBodyparts(body, type) {
+    var count = 0;
+    for(let i = body.length-1; i>=0; i--) {
+        if (body[i].hits <= 0)
+            break;
+        if (body[i].type === type)
+            count++;
+    }
+    return count;
+}
+
+function _hasActiveBodypart(body, type) {
+    for(let i = body.length-1; i>=0; i--) {
+        if (body[i].hits <= 0)
+            break;
+        if (body[i].type === type)
+            return true;
+    }
+    return false;
+}
+
 exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     runtimeData = _runtimeData;
@@ -116,7 +137,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(data(this.id).fatigue > 0) {
             return C.ERR_TIRED;
         }
-        if(this.getActiveBodyparts(C.MOVE) == 0) {
+        if(!_hasActiveBodypart(this.body, C.MOVE)) {
             return C.ERR_NO_BODYPART;
         }
         direction = +direction;
@@ -145,7 +166,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(data(this.id).fatigue > 0 && (!opts || !opts.visualizePathStyle)) {
             return C.ERR_TIRED;
         }
-        if(!this.hasActiveBodypart(C.MOVE)) {
+        if(!_hasActiveBodypart(this.body, C.MOVE)) {
             return C.ERR_NO_BODYPART;
         }
 
@@ -312,7 +333,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.spawning) {
             return C.ERR_BUSY;
         }
-        if(!this.hasActiveBodypart(C.WORK)) {
+        if(!_hasActiveBodypart(this.body, C.WORK)) {
             return C.ERR_NO_BODYPART;
         }
         if(!target || !target.id) {
@@ -669,29 +690,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    Object.defineProperty(Creep.prototype, 'getActiveBodyparts', {
-        value: register.wrapFn(function(type) {
-            var count = 0;
-            for(let i = this.body.length-1; i>=0; i--) {
-                if (this.body[i].hits <= 0)
-                    break;
-                if (this.body[i].type === type)
-                    count++;		
-            }
-            return count;
-        })
-    });
-
-   Object.defineProperty(Creep.prototype, 'hasActiveBodypart', {
-        value: register.wrapFn(function(type) {
-            for(let i = this.body.length-1; i>=0; i--) {
-                if (this.body[i].hits <= 0)
-                    break;
-                if (this.body[i].type === type)
-                    return true;
-            }
-            return false;
-        })
+    Creep.prototype.getActiveBodyparts = register.wrapFn(function(type) {
+        return _getActiveBodyparts(this.body, type);
     });
 
     Creep.prototype.attack = register.wrapFn(function(target) {
@@ -702,7 +702,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.spawning) {
             return C.ERR_BUSY;
         }
-        if(!this.hasActiveBodypart(C.ATTACK)) {
+        if(!_hasActiveBodypart(this.body, C.ATTACK)) {
             return C.ERR_NO_BODYPART;
         }
         if(this.room.controller && !this.room.controller.my && this.room.controller.safeMode) {
@@ -730,7 +730,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.spawning) {
             return C.ERR_BUSY;
         }
-        if(!this.hasActiveBodypart(C.RANGED_ATTACK)) {
+        if(!_hasActiveBodypart(this.body, C.RANGED_ATTACK)) {
             return C.ERR_NO_BODYPART;
         }
         if(this.room.controller && !this.room.controller.my && this.room.controller.safeMode) {
@@ -758,7 +758,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.spawning) {
             return C.ERR_BUSY;
         }
-        if(!this.hasActiveBodypart(C.RANGED_ATTACK)) {
+        if(!_hasActiveBodypart(this.body, C.RANGED_ATTACK)) {
             return C.ERR_NO_BODYPART;
         }
         if(this.room.controller && !this.room.controller.my && this.room.controller.safeMode) {
@@ -778,7 +778,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.spawning) {
             return C.ERR_BUSY;
         }
-        if(!this.hasActiveBodypart(C.HEAL)) {
+        if(!_hasActiveBodypart(this.body, C.HEAL)) {
             return C.ERR_NO_BODYPART;
         }
         if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
@@ -805,7 +805,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.spawning) {
             return C.ERR_BUSY;
         }
-        if(!this.hasActiveBodypart(C.HEAL)) {
+        if(!_hasActiveBodypart(this.body, C.HEAL)) {
             return C.ERR_NO_BODYPART;
         }
         if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
@@ -832,7 +832,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.spawning) {
             return C.ERR_BUSY;
         }
-        if(!this.hasActiveBodypart(C.WORK)) {
+        if(!_hasActiveBodypart(this.body, C.WORK)) {
             return C.ERR_NO_BODYPART;
         }
         if(!this.carry.energy) {
@@ -860,7 +860,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.spawning) {
             return C.ERR_BUSY;
         }
-        if(!this.hasActiveBodypart(C.WORK)) {
+        if(!_hasActiveBodypart(this.body, C.WORK)) {
             return C.ERR_NO_BODYPART;
         }
         if(!this.carry.energy) {
@@ -878,7 +878,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_INVALID_TARGET;
         }
 
-        var buildPower = this.getActiveBodyparts(C.WORK) * C.BUILD_POWER,
+        var buildPower = _getActiveBodyparts(this.body, C.WORK) * C.BUILD_POWER,
             buildRemaining = target.progressTotal - target.progress,
             buildEffect = Math.min(buildPower, buildRemaining, this.carry.energy);
 
@@ -938,7 +938,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
-        if(!this.hasActiveBodypart(C.CLAIM)) {
+        if(!_hasActiveBodypart(this.body, C.CLAIM)) {
             return C.ERR_NO_BODYPART;
         }
         if(!target.pos.isNearTo(this.pos)) {
@@ -974,7 +974,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
-        if(this.getActiveBodyparts(C.CLAIM) < 5) {
+        if(_getActiveBodyparts(this.body, C.CLAIM) < 5) {
             return C.ERR_NO_BODYPART;
         }
         if(!target.pos.isNearTo(this.pos)) {
@@ -999,7 +999,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.spawning) {
             return C.ERR_BUSY;
         }
-        if(!this.hasActiveBodypart(C.WORK)) {
+        if(!_hasActiveBodypart(this.body, C.WORK)) {
             return C.ERR_NO_BODYPART;
         }
         if(!this.carry.energy) {
@@ -1051,7 +1051,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(target.reservation && target.reservation.username != runtimeData.user.username) {
             return C.ERR_INVALID_TARGET;
         }
-        if(!this.hasActiveBodypart(C.CLAIM)) {
+        if(!_hasActiveBodypart(this.body, C.CLAIM)) {
             return C.ERR_NO_BODYPART;
         }
 
@@ -1096,7 +1096,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.spawning) {
             return C.ERR_BUSY;
         }
-        if(!this.hasActiveBodypart(C.WORK)) {
+        if(!_hasActiveBodypart(this.body, C.WORK)) {
             return C.ERR_NO_BODYPART;
         }
         if(!target || !target.id || !register.structures[target.id] ||
