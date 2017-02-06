@@ -129,13 +129,20 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     Creep.prototype.moveTo = register.wrapFn(function(firstArg, secondArg, opts) {
 
+        var visualized = false;
+
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
         if(this.spawning) {
             return C.ERR_BUSY;
         }
-        if(data(this.id).fatigue > 0) {
+        if(_.isObject(firstArg)) {
+            opts = _.clone(secondArg);
+        }
+        opts = opts || {};
+
+        if(data(this.id).fatigue > 0 && (!opts || !opts.visualizePathStyle)) {
             return C.ERR_TIRED;
         }
         if(this.getActiveBodyparts(C.MOVE) == 0) {
@@ -150,11 +157,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
 
         var targetPos = new globals.RoomPosition(x,y,roomName);
-
-        if(_.isObject(firstArg)) {
-            opts = _.clone(secondArg);
-        }
-        opts = opts || {};
 
         if(_.isUndefined(opts.reusePath)) {
             opts.reusePath = 5;
@@ -236,6 +238,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 }
                 if(opts.visualizePathStyle) {
                     this.room.visual.poly(path.map(i => [i.x, i.y]), opts.visualizePathStyle);
+                    visualized = true;
                 }
                 var result = this.moveByPath(path);
 
@@ -264,12 +267,11 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NO_PATH;
         }
 
-        if(opts.visualizePathStyle) {
+        if(opts.visualizePathStyle && !visualized) {
             this.room.visual.poly(path.map(i => [i.x, i.y]), opts.visualizePathStyle);
         }
 
-        this.move(path[0].direction);
-        return C.OK;
+        return this.move(path[0].direction);
     });
 
     Creep.prototype.moveByPath = register.wrapFn(function(path) {
