@@ -237,7 +237,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                     return this.pos.isNearTo(targetPos) ? C.OK : C.ERR_NO_PATH;
                 }
                 if(opts.visualizePathStyle) {
-                    this.room.visual.poly(path.map(i => [i.x, i.y]), opts.visualizePathStyle);
+                    this.room.visual.poly(path, opts.visualizePathStyle);
                     visualized = true;
                 }
                 var result = this.moveByPath(path);
@@ -268,7 +268,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
 
         if(opts.visualizePathStyle && !visualized) {
-            this.room.visual.poly(path.map(i => [i.x, i.y]), opts.visualizePathStyle);
+            this.room.visual.poly(path, opts.visualizePathStyle);
         }
 
         return this.move(path[0].direction);

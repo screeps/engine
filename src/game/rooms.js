@@ -1059,26 +1059,51 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     });
 
     RoomVisual.prototype.circle = register.wrapFn(function(x,y,style) {
+        if(typeof x == 'object') {
+            style = y;
+            y = x.y;
+            x = x.x;
+        }
         globals.console.addVisual(this.roomName, {t: 'c', x,y,s:style});
         return this;
     });
 
     RoomVisual.prototype.line = register.wrapFn(function(x1,y1,x2,y2,style) {
+        if(typeof x1 == 'object' && typeof y1 == 'object') {
+            style = x2;
+            x2 = y1.x;
+            y2 = y1.y;
+            y1 = x1.y;
+            x1 = x1.x;
+        }
         globals.console.addVisual(this.roomName, {t: 'l', x1,y1,x2,y2,s:style});
         return this;
     });
 
-    RoomVisual.prototype.rect = register.wrapFn(function(x1,y1,w,h,style) {
-        globals.console.addVisual(this.roomName, {t: 'r', x1,y1,w,h,s:style});
+    RoomVisual.prototype.rect = register.wrapFn(function(x,y,w,h,style) {
+        if(typeof x == 'object') {
+            style = h;
+            h = w;
+            w = y;
+            y = x.y;
+            x = x.x;
+        }
+        globals.console.addVisual(this.roomName, {t: 'r', x,y,w,h,s:style});
         return this;
     });
 
     RoomVisual.prototype.poly = register.wrapFn(function(points,style) {
+        points = points.map(i => i.x !== undefined ? [i.x, i.y] : i);
         globals.console.addVisual(this.roomName, {t: 'p', points,s:style});
         return this;
     });
 
     RoomVisual.prototype.text = register.wrapFn(function(text,x,y,style) {
+        if(typeof x == 'object') {
+            style = y;
+            y = x.y;
+            x = x.x;
+        }
         globals.console.addVisual(this.roomName, {t: 't', text,x,y,s:style});
         return this;
     });
