@@ -8,7 +8,7 @@ var runtimeData, intents, register, globals, controllersClaimedInTick;
 
 function _getActiveBodyparts(body, type) {
     var count = 0;
-    for(let i = body.length-1; i>=0; i--) {
+    for(var i = body.length-1; i>=0; i--) {
         if (body[i].hits <= 0)
             break;
         if (body[i].type === type)
@@ -18,7 +18,7 @@ function _getActiveBodyparts(body, type) {
 }
 
 function _hasActiveBodypart(body, type) {
-    for(let i = body.length-1; i>=0; i--) {
+    for(var i = body.length-1; i>=0; i--) {
         if (body[i].hits <= 0)
             break;
         if (body[i].type === type)
