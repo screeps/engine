@@ -353,9 +353,6 @@ function _findClosestByPath2(fromPos, objects, opts) {
     }
 
     objects.forEach(obj => {
-        if(lastPos.isEqualTo(obj)) {
-            return obj;
-        }
         if(lastPos.isNearTo(obj)) {
             result = obj;
         }
