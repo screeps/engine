@@ -667,8 +667,10 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    Creep.prototype.getActiveBodyparts = register.wrapFn(function(type) {
-        return _.filter(this.body, (i) => i.hits > 0 && i.type == type).length;
+    Object.defineProperty(Creep.prototype, 'getActiveBodyparts', {
+        value: register.wrapFn(function(type) {
+            return _.filter(this.body, (i) => i.hits > 0 && i.type == type).length;
+        })
     });
 
     Creep.prototype.attack = register.wrapFn(function(target) {
