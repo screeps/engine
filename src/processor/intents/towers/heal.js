@@ -40,19 +40,7 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
         return;
     }
 
-    target.hits += effect;
-
-    if(target.hits > target.hitsMax) {
-        target.hits = target.hitsMax;
-    }
-
-    require('../creeps/_recalc-body')(target);
-
-    bulk.update(target, {
-        hits: target.hits,
-        body: target.body,
-        energyCapacity: target.energyCapacity
-    });
+    target._healToApply = (target._healToApply || 0) + effect;
 
     object.energy -= C.TOWER_ENERGY_COST;
     bulk.update(object, {energy: object.energy});
