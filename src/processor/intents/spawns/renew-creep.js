@@ -46,6 +46,8 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
             i.boost = null;
         });
         require('../creeps/_recalc-body')(target);
+        // we may not be able to hold all of the resources we could before now.
+        require('../creeps/_drop-resources-without-space')(target, roomObjects, roomTerrain, bulk);
         bulk.update(target, {body: target.body, energyCapacity: target.energyCapacity});
     }
 
