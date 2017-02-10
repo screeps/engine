@@ -102,4 +102,14 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
         require('./_die')(object, roomObjects, bulk, stats);
     }
 
+    if(object._damageToApply) {
+        require('./_damage-body')(object, object._damageToApply, roomObjects, roomTerrain, bulk);
+        delete object._damageToApply;
+
+        bulk.update(object, {
+            hits: object.hits,
+            body: object.body,
+            energyCapacity: object.energyCapacity
+        });
+    }
 };

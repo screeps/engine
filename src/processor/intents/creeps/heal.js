@@ -32,7 +32,7 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
     }
 
 
-    recalcBody(target);
+    require('./_recalc-body')(target);
     object.actionLog.heal = {x: target.x, y: target.y};
     target.actionLog.healed = {x: object.x, y: object.y};
 
@@ -41,10 +41,4 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
         body: target.body,
         energyCapacity: target.energyCapacity
     });
-
-    function recalcBody(object) {
-        require('./_recalc-body')(object);
-    }
-
-
 };

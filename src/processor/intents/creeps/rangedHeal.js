@@ -32,7 +32,7 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
     }
 
 
-    recalcBody(target);
+    require('./_recalc-body')(target);
     object.actionLog.rangedHeal = {x: target.x, y: target.y};
     target.actionLog.healed = {x: object.x, y: object.y};
 
@@ -41,22 +41,4 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
         body: target.body,
         energyCapacity: target.energyCapacity
     });
-
-    function recalcBody(object) {
-
-        var hits = object.hits;
-
-        for(var i = object.body.length-1; i>=0; i--) {
-            if(hits > 100)
-                object.body[i].hits = 100;
-            else
-                object.body[i].hits = hits;
-            hits -= 100;
-            if(hits < 0) hits = 0;
-        }
-
-        object.energyCapacity = _.filter(object.body, (i) => i.hits > 0 && i.type == C.CARRY).length * C.CARRY_CAPACITY;
-    }
-
-
 };
