@@ -4,7 +4,8 @@ var q = require('q'),
     usersQueue, roomsQueue,
     utils = require('./utils'),
     driver = utils.getDriver(),
-    config = require('./config');
+    config = require('./config'),
+    roomsUsersTracker = require('./rooms-users-tracker');
 
 var lastAccessibleRoomsUpdate = 0;
 
@@ -14,7 +15,6 @@ function loop() {
         stage = 'start';
 
     driver.config.emit('mainLoopStage',stage);
-
 
     if(typeof self == 'undefined') {
         resetInterval = setInterval(() => {
@@ -27,27 +27,23 @@ function loop() {
         .then(() => {
             stage = 'getUsers';
             driver.config.emit('mainLoopStage',stage);
-            return driver.getAllUsers();
+            return q.all([
+                driver.getAllRooms(),
+                driver.getAllUsers()
+            ]);
         })
-        .then((users) => {
+        .then((data) => {
             stage = 'addUsersToQueue';
+
+            var [rooms, users] = data;
+
             driver.config.emit('mainLoopStage',stage, users);
-            return usersQueue.addMulti(_.map(users, (user) => user._id.toString()))
-        })
-        .then(() => {
-            stage = 'waitForUsers';
-            driver.config.emit('mainLoopStage',stage);
-            return usersQueue.whenAllDone();
-        })
-        .then(() => {
-            stage = 'getRooms';
-            driver.config.emit('mainLoopStage',stage);
-            return driver.getAllRooms();
-        })
-        .then((rooms) => {
-            stage = 'addRoomsToQueue';
-            driver.config.emit('mainLoopStage',stage, rooms);
-            return roomsQueue.addMulti(_.map(rooms, (room) => room._id.toString()))
+
+            return roomsUsersTracker.start(rooms, users)
+                .then(() => q.all([
+                    usersQueue.addMulti(_.map(users, (user) => user._id.toString())),
+                    roomsUsersTracker.wait()
+                ]));
         })
         .then(() => {
             stage = 'waitForRooms';
@@ -55,6 +51,7 @@ function loop() {
             return roomsQueue.whenAllDone();
         })
         .then(() => {
+            roomsUsersTracker.stop();
             stage = 'commit1';
             driver.config.emit('mainLoopStage',stage);
             return driver.commitDbBulk();
@@ -129,6 +126,7 @@ driver.connect('main')
     .then((data) => {
         usersQueue = data[0];
         roomsQueue = data[1];
+        roomsUsersTracker.setRoomsQueue(roomsQueue);
         loop();
     })
     .catch((error) => console.log('Error connecting to driver:', error));

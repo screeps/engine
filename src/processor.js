@@ -22,7 +22,8 @@ function processRoom(roomId, intents, objects, terrain, gameTime, roomInfo, flag
         stats = driver.getRoomStatsUpdater(roomId),
         objectsToHistory = {},
         roomSpawns = [], roomExtensions = [],
-        oldRoomInfo = _.clone(roomInfo);
+        oldRoomInfo = _.clone(roomInfo),
+        usersInRoom = {};
 
         roomInfo.active = false;
 
@@ -314,6 +315,11 @@ function processRoom(roomId, intents, objects, terrain, gameTime, roomInfo, flag
             if (object.user) {
                 //userVisibility[object.user] = true;
 
+                if(objects[object._id]) {
+                    // still in list, not removed on this tick
+                    usersInRoom[object.user] = true;
+                }
+
                 if(object.type != 'constructionSite' && !object.newbieWall &&
                    (object.type != 'rampart' || !object.isPublic)) {
                     mapView[object.user] = mapView[object.user] || [];
@@ -361,6 +367,7 @@ function processRoom(roomId, intents, objects, terrain, gameTime, roomInfo, flag
         resultPromises.push(bulk.execute());
         resultPromises.push(userBulk.execute());
         resultPromises.push(flagsBulk.execute());
+        resultPromises.push(driver.setUsersInRoomPresence(roomId, Object.keys(usersInRoom)));
 
         if(!_.isEqual(roomInfo, oldRoomInfo)) {
             resultPromises.push(driver.saveRoomInfo(roomId, roomInfo));

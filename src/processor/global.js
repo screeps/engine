@@ -29,6 +29,8 @@ module.exports = () => {
             }
             activateRooms[creep.interRoom.room] = true;
 
+            driver.addUserInRoomPresence(creep.interRoom.room, creep.user);
+
             bulk.update(creep, {room: creep.interRoom.room, x: creep.interRoom.x, y: creep.interRoom.y, interRoom: null});
         });
 

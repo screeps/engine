@@ -81,10 +81,13 @@ driver.connect('runner')
                     onlyInRoom = m[1];
                 }
 
-                return runUser(userId, onlyInRoom);
+                return runUser(userId, onlyInRoom)
+                    .catch((error) => driver.sendConsoleError(userId, error))
+                    .then(() => q.all([
+                        driver.notifyUserDoneTick(userId, onlyInRoom),
+                        usersQueue.markDone(fetchedUserId)
+                    ]));
             })
-            .catch((error) => driver.sendConsoleError(userId, error))
-            .then(() => usersQueue.markDone(fetchedUserId))
             .catch((error) => console.error('Error in runner loop:', _.isObject(error) && error.stack || error))
             .finally(() => {
                 driver.config.emit('runnerLoopStage','finish', userId);
