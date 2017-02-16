@@ -262,6 +262,10 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                 targetTerminal = terminalsByRoom[deal.targetRoomName],
                 buyer, seller;
 
+            if(!orderTerminal || !targetTerminal) {
+                return;
+            }
+
             if(order.type == C.ORDER_SELL) {
                 buyer = targetTerminal;
                 seller = orderTerminal;
