@@ -48,6 +48,7 @@ function loop() {
         .then(() => {
             stage = 'waitForRooms';
             driver.config.emit('mainLoopStage',stage);
+            usersQueue.whenAllDone();
             return roomsQueue.whenAllDone();
         })
         .then(() => {
