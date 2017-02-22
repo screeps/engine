@@ -6,7 +6,7 @@ var _ = require('lodash'),
 exports.makeConsole = function(id, sandboxedFunctionWrapper) {
     messages[id] = [];
     commandResults[id] = [];
-    visual[id] = [];
+    visual[id] = {};
     return Object.create(null, {
         log: {
             writable: true,
@@ -35,6 +35,7 @@ exports.makeConsole = function(id, sandboxedFunctionWrapper) {
         },
         addVisual: {
             value: sandboxedFunctionWrapper(function(roomName, data) {
+                roomName = roomName || "";
                 visual[id][roomName] = visual[id][roomName] || "";
                 if(visual[id][roomName].length > 500*1024) {
                     throw new Error(`RoomVisual size in room ${roomName} has exceeded 500 KB limit`);
@@ -44,6 +45,7 @@ exports.makeConsole = function(id, sandboxedFunctionWrapper) {
         },
         getVisualSize: {
             value: sandboxedFunctionWrapper(function(roomName) {
+                roomName = roomName || "";
                 if(!visual[id][roomName]) {
                     return 0;
                 }
@@ -52,6 +54,7 @@ exports.makeConsole = function(id, sandboxedFunctionWrapper) {
         },
         clearVisual: {
             value: sandboxedFunctionWrapper(function(roomName) {
+                roomName = roomName || "";
                 visual[id][roomName] = "";
             })
         }
