@@ -1210,7 +1210,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
-        if(runtimeData.rooms[this.room.name].novice > Date.now()) {
+        if(runtimeData.rooms[this.room.name].novice > Date.now() || runtimeData.rooms[this.room.name].respawnArea > Date.now()) {
             return C.ERR_INVALID_TARGET;
         }
         if(!(pos instanceof globals.RoomPosition)) {
