@@ -260,7 +260,12 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         safeMode: o => o.safeMode && o.safeMode > runtimeData.time ? o.safeMode - runtimeData.time : undefined,
         safeModeCooldown: o => o.safeModeCooldown && o.safeModeCooldown > runtimeData.time ? o.safeModeCooldown - runtimeData.time : undefined,
         safeModeAvailable: o => o.safeModeAvailable || 0,
-        sign: o => o.sign ? {
+        sign: o => o.hardSign ? {
+                username: 'Screeps',
+                text: o.hardSign.text,
+                time: o.hardSign.time,
+                datetime: new Date(o.hardSign.datetime)
+            } : o.sign ? {
                 username: runtimeData.users[o.sign.user].username,
                 text: o.sign.text,
                 time: o.sign.time,
