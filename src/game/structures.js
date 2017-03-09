@@ -261,7 +261,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         safeModeCooldown: o => o.safeModeCooldown && o.safeModeCooldown > runtimeData.time ? o.safeModeCooldown - runtimeData.time : undefined,
         safeModeAvailable: o => o.safeModeAvailable || 0,
         sign: o => o.hardSign ? {
-                username: 'Screeps',
+                username: C.SYSTEM_USERNAME,
                 text: o.hardSign.text,
                 time: o.hardSign.time,
                 datetime: new Date(o.hardSign.datetime)
