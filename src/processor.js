@@ -384,8 +384,8 @@ function saveRoomHistory(roomId, objects, gameTime) {
     return currentHistoryPromise.then(() => {
         var promise = q.when();
 
-        if (!(gameTime % 20)) {
-            var baseTime = Math.floor((gameTime - 1) / 20) * 20;
+        if (!(gameTime % driver.config.historyChunkSize)) {
+            var baseTime = Math.floor((gameTime - 1) / driver.config.historyChunkSize) * driver.config.historyChunkSize;
             promise = driver.history.upload(roomId, baseTime);
         }
 
