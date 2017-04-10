@@ -22,7 +22,6 @@ module.exports = function(spawn, roomObjects, cost, bulk, roomController) {
         i.energy -= neededEnergy;
         cost -= neededEnergy;
         bulk.update(i, {energy: i.energy});
-        
     });
     if(cost <= 0) {
         return;
