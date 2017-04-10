@@ -15,15 +15,20 @@ module.exports = function(spawn, roomObjects, cost, bulk, roomController) {
         return false;
     }
 
-    extensions.sort(utils.comparatorDistance(spawn));
+    spawns.sort(utils.comparatorDistance(spawn));
 
     spawns.forEach((i) => {
         var neededEnergy = Math.min(cost, i.energy);
         i.energy -= neededEnergy;
         cost -= neededEnergy;
         bulk.update(i, {energy: i.energy});
+        
     });
+    if(cost <= 0) {
+        return;
+    }
 
+    extensions.sort(utils.comparatorDistance(spawn));
     extensions.forEach((extension) => {
         if(cost <= 0) {
             return;
