@@ -737,7 +737,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     utils.defineGameObjectProperties(StructureTerminal.prototype, data, {
         store: _storeGetter,
-        storeCapacity: (o) => o.energyCapacity
+        storeCapacity: (o) => o.energyCapacity,
+        cooldown: o => o.cooldownTime && o.cooldownTime > runtimeData.time ? o.cooldownTime - runtimeData.time : 0
     });
 
     StructureTerminal.prototype.transfer = register.wrapFn(_transfer);
@@ -760,6 +761,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
         if(!data(this.id)[resourceType] || data(this.id)[resourceType] < amount) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
+        }
+        if(data(this.id).cooldownTime > runtimeData.time) {
+            return C.ERR_TIRED;
         }
         var range = utils.calcRoomsDistance(data(this.id).room, targetRoomName, true);
         var cost = Math.max(0, Math.ceil(amount * (Math.log((range+9) * 0.1) + 0.1)));

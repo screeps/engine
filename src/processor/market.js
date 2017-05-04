@@ -73,13 +73,18 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
 
         bulkObjects.update(terminal, {send: null});
 
+        if(terminal.cooldownTime > gameTime) {
+            return;
+        }
         if(!terminalsByRoom[intent.targetRoomName] || !terminalsByRoom[intent.targetRoomName].user) {
             return;
         }
 
-        executeTransfer(terminal, terminalsByRoom[intent.targetRoomName], intent.resourceType, intent.amount, terminal, {
+        if(executeTransfer(terminal, terminalsByRoom[intent.targetRoomName], intent.resourceType, intent.amount, terminal, {
             description: intent.description ? intent.description.replace(/</g, '&lt;') : undefined
-        });
+        })) {
+            bulkObjects.update(terminal, {cooldownTime: gameTime + C.TERMINAL_COOLDOWN});
+        }
     });
 
     if(market) {
@@ -265,6 +270,9 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
             if(!orderTerminal || !targetTerminal) {
                 return;
             }
+            if(targetTerminal.cooldownTime > gameTime) {
+                return;
+            }
 
             if(order.type == C.ORDER_SELL) {
                 buyer = targetTerminal;
@@ -347,6 +355,7 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                     amount: order.amount - amount,
                     remainingAmount: order.remainingAmount - amount
                 });
+                bulkObjects.update(targetTerminal, {cooldownTime: gameTime + C.TERMINAL_COOLDOWN});
             }
         });
 

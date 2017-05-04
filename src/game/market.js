@@ -105,6 +105,9 @@ exports.make = function(runtimeData, intents, register) {
                 if(terminal[C.RESOURCE_ENERGY] < transferCost) {
                     return C.ERR_NOT_ENOUGH_RESOURCES;
                 }
+                if(terminal.cooldownTime > runtimeData.time) {
+                    return C.ERR_TIRED;
+                }
                 if(order.type == C.ORDER_BUY) {
                     if(order.resourceType != C.RESOURCE_ENERGY && (!terminal[order.resourceType] || terminal[order.resourceType] < amount) ||
                          order.resourceType == C.RESOURCE_ENERGY && terminal[C.RESOURCE_ENERGY] < amount + transferCost) {
