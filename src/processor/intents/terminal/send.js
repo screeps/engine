@@ -17,8 +17,7 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk) {
     }
 
     var range = utils.calcRoomsDistance(object.room, intent.targetRoomName, true);
-
-    var cost = Math.ceil(intent.amount * (Math.log((range+9) * 0.1) + 0.1));
+    var cost = utils.calcTerminalEnergyCost(intent.amount, range);
 
     if(intent.resourceType != C.RESOURCE_ENERGY && object.energy < cost ||
         intent.resourceType == C.RESOURCE_ENERGY && object.energy < intent.amount + cost) {

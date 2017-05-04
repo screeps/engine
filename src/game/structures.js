@@ -766,7 +766,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_TIRED;
         }
         var range = utils.calcRoomsDistance(data(this.id).room, targetRoomName, true);
-        var cost = Math.max(0, Math.ceil(amount * (Math.log((range+9) * 0.1) + 0.1)));
+        var cost = utils.calcTerminalEnergyCost(amount,range);
         if(resourceType != C.RESOURCE_ENERGY && data(this.id).energy < cost ||
         resourceType == C.RESOURCE_ENERGY && data(this.id).energy < amount + cost) {
             return C.ERR_NOT_ENOUGH_RESOURCES;

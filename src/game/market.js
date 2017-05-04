@@ -27,7 +27,7 @@ exports.make = function(runtimeData, intents, register) {
 
         calcTransactionCost: register.wrapFn(function(amount, roomName1, roomName2) {
             var distance = utils.calcRoomsDistance(roomName1, roomName2, true);
-            return Math.max(0, Math.ceil(amount * (Math.log((distance+9) * 0.1) + 0.1)));
+            return utils.calcTerminalEnergyCost(amount, distance);
         }),
 
         getAllOrders: register.wrapFn(function(filter) {

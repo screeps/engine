@@ -1010,3 +1010,7 @@ exports.calcRoomsDistance = function(room1, room2, continuous) {
     }
     return Math.max(dx, dy);
 };
+
+exports.calcTerminalEnergyCost = function(amount, range) {
+    return Math.ceil(amount * (1 - Math.exp(-range / 30)))
+};

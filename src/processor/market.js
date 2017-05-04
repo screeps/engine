@@ -36,7 +36,7 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
         }
 
         var range = utils.calcRoomsDistance(fromTerminal.room, toTerminal.room, true);
-        var transferCost = Math.max(0, Math.ceil(amount * (Math.log((range+9) * 0.1) + 0.1)));
+        var transferCost = utils.calcTerminalEnergyCost(amount,range);
 
         if(transferFeeTerminal === fromTerminal &&
             (resourceType != C.RESOURCE_ENERGY && fromTerminal.energy < transferCost ||
