@@ -13,7 +13,7 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
     }
 
     var target = roomObjects[intent.id];
-    if(!target || target.type != 'creep' || target.user != object.user) {
+    if(!target || target.type != 'creep' || target.user != object.user || target.spawning) {
         return;
     }
     if(Math.abs(target.x - object.x) > 1 || Math.abs(target.y - object.y) > 1) {

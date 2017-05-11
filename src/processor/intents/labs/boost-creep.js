@@ -28,7 +28,7 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk) {
     }
 
     if(intent.bodyPartsCount) {
-        nonBoostedParts.slice(0,intent.bodyPartsCount);
+        nonBoostedParts = nonBoostedParts.slice(0,intent.bodyPartsCount);
     }
 
     while(object.mineralAmount >= C.LAB_BOOST_MINERAL && object.energy >= C.LAB_BOOST_ENERGY && nonBoostedParts.length) {
