@@ -890,17 +890,18 @@ exports.checkStructureAgainstController = function(object, roomObjects, roomCont
 exports.defineGameObjectProperties = function(obj, dataFn, properties) {
     var propertiesInfo = {};
 
-    for(var name in properties) {
-        eval(`
-            propertiesInfo['${name}'] = {
+   for(var name in properties) {
+        propertiesInfo[name] = (function(name){
+            return {
                 enumerable: true,
                 get() {
-                    if(!this['_${name}']) {
-                        this['_${name}'] = properties['${name}'](dataFn(this.id));
+                    if(!this['_'+name]) {
+                        this['_'+name] = properties[name](dataFn(this.id));
                     }
-                    return this['_${name}'];
+                    return this['_'+name];
                 }
-            }`);
+            }
+        })(name);
     }
     Object.defineProperties(obj, propertiesInfo);
 
