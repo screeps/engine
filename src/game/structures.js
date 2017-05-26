@@ -1161,6 +1161,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!target.pos.isNearTo(this.pos)) {
             return C.ERR_NOT_IN_RANGE;
         }
+        if(target.spawning) {
+            return C.ERR_INVALID_TARGET;
+        }
         if(this.spawning) {
             return C.ERR_BUSY;
         }
