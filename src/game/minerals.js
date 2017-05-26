@@ -27,6 +27,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         var _data = data(id);
         globals.RoomObject.call(this, _data.x, _data.y, _data.room);
         this.id = id;
+        
+        register.rooms[_data.room].mineral = this;
     });
 
     Mineral.prototype = Object.create(globals.RoomObject.prototype);
