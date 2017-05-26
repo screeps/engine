@@ -301,7 +301,7 @@
             if (object.type == 'energy') {
                 register._objects[i] = new globals.Energy(i);
                 addObjectToRegister(register, 'energy', register._objects[i], object);
-                addObjectToFindCache(register, C.FIND_DROPPED_ENERGY, register.energy[i], object);
+                addObjectToFindCache(register, C.FIND_DROPPED_RESOURCES, register.energy[i], object);
             }
             if (object.type == 'nuke') {
                 register._objects[i] = new globals.Nuke(i);
