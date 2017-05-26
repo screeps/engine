@@ -27,6 +27,8 @@ function _storeGetter(o) {
 
 function _transfer(target, resourceType, amount) {
 
+    register.deprecated('`Structure*.transfer` is considered deprecated and will be removed soon. Please use `Creep.withdraw` instead.');
+
     if (!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
         register.assertTargetObject(target);
         return C.ERR_INVALID_TARGET;
@@ -61,6 +63,8 @@ function _transfer(target, resourceType, amount) {
 }
 
 function _transferEnergy(target, amount) {
+
+    register.deprecated('`Structure*.transferEnergy` is considered deprecated and will be removed soon. Please use `Creep.withdraw` instead.');
 
     if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
         register.assertTargetObject(target);
@@ -1074,6 +1078,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     StructureSpawn.prototype.transferEnergy = register.wrapFn(function(target, amount) {
 
+        register.deprecated('`StructureSpawn.transferEnergy` is considered deprecated and will be removed soon. Please use `Creep.withdraw` instead.')
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }

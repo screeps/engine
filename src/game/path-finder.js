@@ -54,6 +54,9 @@ exports.make = function(runtimeData, intents, register, globals) {
         }),
 
         use: register.wrapFn(function(isActive) {
+            if(!isActive) {
+                register.deprecated('`PathFinder.use` is considered deprecated and will be removed soon.');
+            }
             register._useNewPathFinder = !!isActive;
         })
     };
