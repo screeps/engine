@@ -94,7 +94,7 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
         bulk.update(object._id, {fatigue: object.fatigue});
     }
 
-    if(_.isNaN(object.hits)) {
+    if(_.isNaN(object.hits) || object.hits <= 0) {
         require('./_die')(object, roomObjects, bulk, stats);
     }
 
@@ -102,4 +102,31 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
         require('./_die')(object, roomObjects, bulk, stats);
     }
 
+    if (object._healToApply) {
+        object.hits += object._healToApply;
+        if (object.hits > object.hitsMax) {
+            object.hits = object.hitsMax;
+        }
+
+        require('./_recalc-body')(object);
+
+        bulk.update(object, {
+            hits: object.hits,
+            body: object.body,
+            energyCapacity: object.energyCapacity,
+        });
+
+        delete object._healToApply;
+    }
+
+    if (object._damageToApply) {
+        require('./_damage-body')(object, object._damageToApply, roomObjects, roomTerrain, bulk);
+        delete object._damageToApply;
+
+        bulk.update(object, {
+            hits: object.hits,
+            body: object.body,
+            energyCapacity: object.energyCapacity
+        });
+    }
 };

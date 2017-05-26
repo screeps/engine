@@ -25,26 +25,8 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
 
     var healPower = utils.calcBodyEffectiveness(object.body, C.HEAL, 'heal', C.HEAL_POWER);
 
-    target.hits += healPower;
+    target._healToApply = (target._healToApply || 0) + healPower;
 
-    if(target.hits > target.hitsMax) {
-        target.hits = target.hitsMax;
-    }
-
-
-    recalcBody(target);
     object.actionLog.heal = {x: target.x, y: target.y};
     target.actionLog.healed = {x: object.x, y: object.y};
-
-    bulk.update(target, {
-        hits: target.hits,
-        body: target.body,
-        energyCapacity: target.energyCapacity
-    });
-
-    function recalcBody(object) {
-        require('./_recalc-body')(object);
-    }
-
-
 };
