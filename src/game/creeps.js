@@ -624,7 +624,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             if(!amount) {
                 amount = Math.min( data(target.id)[resourceType], emptySpace );
             }
-            if(data(target.id)[resourceType] || data(target.id)[resourceType] < amount) {
+            if(!data(target.id)[resourceType] || data(target.id)[resourceType] < amount) {
                 return C.ERR_NOT_ENOUGH_RESOURCES;
             }
             if(amount > emptySpace) {
