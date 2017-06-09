@@ -171,11 +171,11 @@ exports.execute = function(object, bulk, roomController, gameTime) {
         bulk.update(road, {nextDecayTime: road.nextDecayTime});
     }
 
-    if(!roomController || !(roomController.safeMode > gameTime)) {
-        var constructionSite = _.find(ceilObjects, (i) => i.type == 'constructionSite' && i.user != object.user);
-        if (constructionSite) {
-            require('./construction-sites/remove')(constructionSite, roomObjects, bulk);
-        }
+    var isInSafeMode = roomController && roomController.safeMode > gameTime;
+    
+    var constructionSite = _.find(ceilObjects, (i) => i.type == 'constructionSite' && i.user != object.user && !isInSafeMode || (roomController && roomController.user != i.user));
+    if (constructionSite) {
+        require('./construction-sites/remove')(constructionSite, roomObjects, bulk);
     }
 
     var fatigue = _(object.body).filter((i) => i.type != C.MOVE && i.type != C.CARRY).size();
