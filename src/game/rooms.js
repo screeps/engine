@@ -331,7 +331,10 @@ function _findClosestByPath2(fromPos, objects, opts) {
                 var costMatrix = getPathfindingGrid2(roomName, opts);
                 if(typeof opts.costCallback == 'function') {
                     costMatrix = costMatrix.clone();
-                    opts.costCallback(roomName, costMatrix);
+                    var resultMatrix = opts.costCallback(roomName, costMatrix);
+                    if(resultMatrix instanceof globals.PathFinder.CostMatrix) {
+                        costMatrix = resultMatrix;
+                    }
                 }
                 return costMatrix;
             }
