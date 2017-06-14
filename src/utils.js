@@ -850,6 +850,10 @@ exports.checkStructureAgainstController = function(object, roomObjects, roomCont
     }
 
     let allowedRemaining = C.CONTROLLER_STRUCTURES[object.type][roomController.level];
+
+    if(allowedRemaining === 0) {
+        return false;
+    }
     
     // if only one object ever allowed, this is it
     if(C.CONTROLLER_STRUCTURES[object.type][8] === 1) {
@@ -883,7 +887,7 @@ exports.checkStructureAgainstController = function(object, roomObjects, roomCont
             }
         }
     }
-    
+
     return true;
 };
 
