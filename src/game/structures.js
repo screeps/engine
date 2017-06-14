@@ -540,8 +540,14 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 return C.ERR_RCL_NOT_ENOUGH;
             }
         }
-        if ((target instanceof globals.Creep) && !this.pos.isNearTo(target)) {
-            return C.ERR_NOT_IN_RANGE;
+        if (target instanceof globals.Creep) {
+
+            register.deprecated('`StructureLink.transferEnergy` applied to creeps is considered deprecated and will be ' +
+                'removed soon. Please use `Creep.withdraw` instead.');
+
+            if (!this.pos.isNearTo(target)) {
+                return C.ERR_NOT_IN_RANGE;
+            }
         }
         if (!data(this.id).energy) {
             return C.ERR_NOT_ENOUGH_ENERGY;
