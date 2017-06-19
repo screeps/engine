@@ -4,7 +4,7 @@ var _ = require('lodash'),
     C = driver.constants;
 
 
-module.exports = function(spawn, roomObjects, cost, bulk, roomController) {
+module.exports = function(spawn, roomObjects, cost, bulk) {
 
     var spawns = _.filter(roomObjects, i => i.type == 'spawn' && i.user == spawn.user && !i.off);
     var extensions = _.filter(roomObjects, i => i.type == 'extension' && i.user == spawn.user && !i.off);
