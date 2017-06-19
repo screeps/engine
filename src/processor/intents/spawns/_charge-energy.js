@@ -4,10 +4,15 @@ var _ = require('lodash'),
     C = driver.constants;
 
 
-module.exports = function(spawn, roomObjects, cost, bulk) {
+module.exports = function(spawn, roomObjects, cost, bulk, structureIds) {
 
     var spawns = _.filter(roomObjects, i => i.type == 'spawn' && i.user == spawn.user && !i.off);
     var extensions = _.filter(roomObjects, i => i.type == 'extension' && i.user == spawn.user && !i.off);
+
+    if(structureIds) {
+		spawns = _.filter(spawns, spawn => _.includes(structureIds, spawn.id));
+		extensions = _.filter(extensions, extension => _.includes(structureIds, extension.id));
+    }
 
     var availableEnergy = _.sum(extensions, 'energy') + _.sum(spawns, 'energy');
 
@@ -23,13 +28,13 @@ module.exports = function(spawn, roomObjects, cost, bulk) {
         cost -= neededEnergy;
         bulk.update(i, {energy: i.energy});
     });
-    
+
     if(cost <= 0) {
         return true;
     }
 
     extensions.sort(utils.comparatorDistance(spawn));
-    
+
     extensions.forEach((extension) => {
         if(cost <= 0) {
             return;
