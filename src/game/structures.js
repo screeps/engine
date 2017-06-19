@@ -938,7 +938,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return `[spawn ${data(this.id).user == runtimeData.user._id ? data(this.id).name : '#'+this.id}]`;
     });
 
-    StructureSpawn.prototype.canCreateCreep = register.wrapFn(function(body, name, structureIds) {
+    StructureSpawn.prototype.canCreateCreep = register.wrapFn(function(body, name, energyStructures) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
@@ -953,7 +953,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 return C.ERR_INVALID_ARGS;
         }
 
-        let energyAvailable = structureIds ? utils.calcEnergyAvailable(runtimeData.roomObjects, structureIds) : this.room.energyAvailable;
+        let energyAvailable = energyStructures ? utils.calcEnergyAvailable(runtimeData.roomObjects, energyStructures) : this.room.energyAvailable;
         if(energyAvailable < utils.calcCreepCost(body)) {
             return C.ERR_NOT_ENOUGH_ENERGY;
         }

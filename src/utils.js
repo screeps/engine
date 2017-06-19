@@ -100,10 +100,10 @@ exports.getOffsetsByDirection = function(direction) {
     return offsetsByDirection[direction];
 };
 
-exports.calcEnergyAvailable = function(structures, ids){
-	return _.sum(ids, id => {
-	    if (structures[id] && !structures[id].off && (structures[id].type === 'spawn' || structures[id].type === 'extension')) {
-			return structures[id].energy;
+exports.calcEnergyAvailable = function(roomObjects, energyStructures){
+	return _.sum(energyStructures, ({id}) => {
+	    if (roomObjects[id] && !roomObjects[id].off && (roomObjects[id].type === 'spawn' || roomObjects[id].type === 'extension')) {
+			return roomObjects[id].energy;
 		} else {
 			return 0;
 		}
