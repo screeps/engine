@@ -1185,7 +1185,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             }
         });
 
-        intents.set(this.id, 'createCreep', {name, body, energyStructures: options.energyStructures});
+        intents.set(this.id, 'spawnCreep', {name, body, energyStructures: options.energyStructures});
 
         return C.OK;
     });
