@@ -101,13 +101,13 @@ exports.getOffsetsByDirection = function(direction) {
 };
 
 exports.calcEnergyAvailable = function(roomObjects, energyStructures){
-	return _.sum(energyStructures, ({id}) => {
-	    if (roomObjects[id] && !roomObjects[id].off && (roomObjects[id].type === 'spawn' || roomObjects[id].type === 'extension')) {
-			return roomObjects[id].energy;
-		} else {
-			return 0;
-		}
-	});
+    return _.sum(energyStructures, ({id}) => {
+        if (roomObjects[id] && !roomObjects[id].off && (roomObjects[id].type === 'spawn' || roomObjects[id].type === 'extension')) {
+            return roomObjects[id].energy;
+        } else {
+            return 0;
+        }
+    });
 };
 
 exports.calcCreepCost = function(body) {
@@ -658,18 +658,18 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                 id: ""+objectIntentsResult.pickup.id
             };
         }
-		if(objectIntentsResult.createCreep) {
-			objectIntents.createCreep = {
-				name: ""+objectIntentsResult.createCreep.name,
-				body: _.filter(objectIntentsResult.createCreep.body, (i) => _.contains(C.BODYPARTS_ALL, i))
-			};
-		}
-		if(objectIntentsResult.spawnCreep) {
-			objectIntents.spawnCreep = {
-				name: ""+objectIntentsResult.spawnCreep.name,
-				body: _.filter(objectIntentsResult.spawnCreep.body, (i) => _.contains(C.BODYPARTS_ALL, i))
-			};
-		}
+        if(objectIntentsResult.createCreep) {
+            objectIntents.createCreep = {
+                name: ""+objectIntentsResult.createCreep.name,
+                body: _.filter(objectIntentsResult.createCreep.body, (i) => _.contains(C.BODYPARTS_ALL, i))
+            };
+        }
+        if(objectIntentsResult.spawnCreep) {
+            objectIntents.spawnCreep = {
+			    name: ""+objectIntentsResult.spawnCreep.name,
+                body: _.filter(objectIntentsResult.spawnCreep.body, (i) => _.contains(C.BODYPARTS_ALL, i))
+            };
+        }
         if(objectIntentsResult.renewCreep) {
             objectIntents.renewCreep = {
                 id: ""+objectIntentsResult.renewCreep.id

@@ -11,20 +11,20 @@ module.exports = function(spawn, roomObjects, cost, bulk, energyStructures) {
 
     if(energyStructures) {
         _.forEach(energyStructures, ({id}) => {
-			let energyStructure = roomObjects[id];
-			if(!energyStructure || energyStructure.off || energyStructure.user !== spawn.user) {
-			    return;
-			}
+            let energyStructure = roomObjects[id];
+            if(!energyStructure || energyStructure.off || energyStructure.user !== spawn.user) {
+                return;
+            }
 
-			if(energyStructure.type === 'spawn'){
-				spawns.push(energyStructure);
+            if(energyStructure.type === 'spawn'){
+                spawns.push(energyStructure);
             } else if(energyStructure.type === 'extension'){
-				extensions.push(energyStructure);
-			}
+                extensions.push(energyStructure);
+            }
         });
     } else {
-		spawns = _.filter(roomObjects, i => i.type == 'spawn' && i.user == spawn.user && !i.off);
-		extensions = _.filter(roomObjects, i => i.type == 'extension' && i.user == spawn.user && !i.off);
+        spawns = _.filter(roomObjects, i => i.type == 'spawn' && i.user == spawn.user && !i.off);
+        extensions = _.filter(roomObjects, i => i.type == 'extension' && i.user == spawn.user && !i.off);
     }
 
     var availableEnergy = _.sum(extensions, 'energy') + _.sum(spawns, 'energy');
