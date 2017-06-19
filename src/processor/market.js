@@ -182,7 +182,7 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                         });
                     }
 
-                    bulkMarketOrders.update(order, {price: intent.newPrice});
+                    bulkMarketOrders.update(order._id, {price: intent.newPrice});
                 });
             }
 
