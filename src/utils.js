@@ -100,6 +100,16 @@ exports.getOffsetsByDirection = function(direction) {
     return offsetsByDirection[direction];
 };
 
+exports.calcEnergyAvailable = function(structures, ids){
+	return _.sum(ids, id => {
+	    if (structures[id] && !structures[id].off && (structures[id].type === 'spawn' || structures[id].type === 'extension')) {
+			return structures[id].energy;
+		} else {
+			return 0;
+		}
+	});
+};
+
 exports.calcCreepCost = function(body) {
     var result = 0;
 
@@ -854,13 +864,13 @@ exports.checkStructureAgainstController = function(object, roomObjects, roomCont
     if(allowedRemaining === 0) {
         return false;
     }
-    
+
     // if only one object ever allowed, this is it
     if(C.CONTROLLER_STRUCTURES[object.type][8] === 1) {
         return allowedRemaining !== 0;
     }
 
-    // Scan through the room objects of the same type and count how many are closer. 
+    // Scan through the room objects of the same type and count how many are closer.
     let foundSelf = false;
     let objectDist = Math.max(Math.abs(object.x - roomController.x), Math.abs(object.y - roomController.y));
     let objectIds = _.keys(roomObjects);
@@ -868,7 +878,7 @@ exports.checkStructureAgainstController = function(object, roomObjects, roomCont
         let compareObj = roomObjects[objectIds[i]];
         if(compareObj.type === object.type && compareObj.user === object.user) {
             let compareDist = Math.max(Math.abs(compareObj.x - roomController.x), Math.abs(compareObj.y - roomController.y));
-            
+
             if(compareDist < objectDist) {
                 allowedRemaining--;
                 if (allowedRemaining === 0) {
