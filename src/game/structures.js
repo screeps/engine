@@ -938,7 +938,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return `[spawn ${data(this.id).user == runtimeData.user._id ? data(this.id).name : '#'+this.id}]`;
     });
 
-    StructureSpawn.prototype.canCreateCreep = register.wrapFn(function(body, name, energyStructures) {
+    StructureSpawn.prototype.canCreateCreep = register.wrapFn(function(body, name) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
@@ -953,8 +953,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 return C.ERR_INVALID_ARGS;
         }
 
-        let energyAvailable = energyStructures ? utils.calcEnergyAvailable(runtimeData.roomObjects, energyStructures) : this.room.energyAvailable;
-        if(energyAvailable < utils.calcCreepCost(body)) {
+        if( this.room.energyAvailable < utils.calcCreepCost(body)) {
             return C.ERR_NOT_ENOUGH_ENERGY;
         }
 
@@ -1089,8 +1088,13 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_INVALID_ARGS;
         }
 
-        var canResult = this.canCreateCreep(body, name, options.energyStructures);
-        if(canResult != C.OK) {
+        if(globals.Game.creeps[name] || createdCreepNames.indexOf(name) != -1) {
+            return C.ERR_NAME_EXISTS;
+        }
+
+        let energyStructures = _.map(options.energyStructures, 'id');
+        let canResult = utils.canCreateCreep(runtimeData.roomObjects, this, {body, energyStructures});
+        if(options.dryRun || canResult !== C.OK) {
             return canResult;
         }
 
@@ -1150,7 +1154,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             carryCapacity: {
                 enumerable: true,
                 get() {
-                    return _.reduce(body, (result, type) => result += type == C.CARRY ? C.CARRY_CAPACITY : 0, 0);
+                    return _.reduce(body, (result, type) => result += type === C.CARRY ? C.CARRY_CAPACITY : 0, 0);
                 }
             },
             carry: {
@@ -1185,7 +1189,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             }
         });
 
-        intents.set(this.id, 'spawnCreep', {name, body, energyStructures: options.energyStructures});
+        intents.set(this.id, 'createCreep', {name, body, energyStructures});
 
         return C.OK;
     });

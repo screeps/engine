@@ -100,14 +100,52 @@ exports.getOffsetsByDirection = function(direction) {
     return offsetsByDirection[direction];
 };
 
-exports.calcEnergyAvailable = function(roomObjects, energyStructures){
-    return _.sum(energyStructures, ({id}) => {
+function calcEnergyAvailable(roomObjects, energyStructures){
+    return _.sum(energyStructures, id => {
         if (roomObjects[id] && !roomObjects[id].off && (roomObjects[id].type === 'spawn' || roomObjects[id].type === 'extension')) {
             return roomObjects[id].energy;
         } else {
             return 0;
         }
     });
+}
+
+function data(roomObjects, id) {
+    if(!runtimeData.roomObjects[id]) {
+        throw new Error("Could not find an object with ID "+id);
+    }
+    return runtimeData.roomObjects[id];
+}
+
+exports.canCreateCreep = function canCreateCreep(roomObjects, spawn, spawnArgs){
+    if(!spawn.my) {
+        return C.ERR_NOT_OWNER;
+    }
+
+    if(data(roomObjects, spawn.id).spawning) {
+        return C.ERR_BUSY;
+    }
+
+    if(data(roomObjects, spawn.id).off) {
+        return C.ERR_RCL_NOT_ENOUGH;
+    }
+
+    const {body, energyStructures} = spawnArgs;
+    if(!body || !_.isArray(body) || body.length === 0 || body.length > C.MAX_CREEP_SIZE) {
+        return C.ERR_INVALID_ARGS;
+    }
+
+    for(let i=0; i<body.length; i++) {
+        if(!_.contains(C.BODYPARTS_ALL, body[i]))
+            return C.ERR_INVALID_ARGS;
+    }
+
+    let energyAvailable = energyStructures ? calcEnergyAvailable(roomObjects, energyStructures) : spawn.room.energyAvailable;
+    if(energyAvailable < utils.calcCreepCost(body)) {
+        return C.ERR_NOT_ENOUGH_ENERGY;
+    }
+
+    return C.OK;
 };
 
 exports.calcCreepCost = function(body) {
@@ -661,13 +699,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
         if(objectIntentsResult.createCreep) {
             objectIntents.createCreep = {
                 name: ""+objectIntentsResult.createCreep.name,
-                body: _.filter(objectIntentsResult.createCreep.body, (i) => _.contains(C.BODYPARTS_ALL, i))
-            };
-        }
-        if(objectIntentsResult.spawnCreep) {
-            objectIntents.spawnCreep = {
-			    name: ""+objectIntentsResult.spawnCreep.name,
-                body: _.filter(objectIntentsResult.spawnCreep.body, (i) => _.contains(C.BODYPARTS_ALL, i)),
+                body: _.filter(objectIntentsResult.createCreep.body, (i) => _.contains(C.BODYPARTS_ALL, i)),
                 energyStructures: objectIntentsResult.spawnCreep.energyStructures
             };
         }

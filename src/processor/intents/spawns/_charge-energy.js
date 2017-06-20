@@ -10,7 +10,7 @@ module.exports = function(spawn, roomObjects, cost, bulk, energyStructures) {
     var extensions = [];
 
     if(energyStructures) {
-        _.forEach(energyStructures, ({id}) => {
+        _.forEach(energyStructures, id => {
             let energyStructure = roomObjects[id];
             if(!energyStructure || energyStructure.off || energyStructure.user !== spawn.user) {
                 return;
