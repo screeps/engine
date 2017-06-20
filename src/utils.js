@@ -111,10 +111,10 @@ function calcEnergyAvailable(roomObjects, energyStructures){
 }
 
 function data(roomObjects, id) {
-    if(!runtimeData.roomObjects[id]) {
+    if(!roomObjects[id]) {
         throw new Error("Could not find an object with ID "+id);
     }
-    return runtimeData.roomObjects[id];
+    return roomObjects[id];
 }
 
 exports.canCreateCreep = function canCreateCreep(roomObjects, spawn, spawnArgs){
