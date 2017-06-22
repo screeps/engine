@@ -283,7 +283,7 @@
                 }
 
             }
-            if (!object.off && (object.type == 'extension' || object.type == 'spawn')) {
+            if (!object.off && object.owner == object.room.controller.owner && (object.type == 'extension' || object.type == 'spawn')) {
                 register.rooms[object.room].energyAvailable += object.energy;
                 register.rooms[object.room].energyCapacityAvailable += object.energyCapacity;
             }
