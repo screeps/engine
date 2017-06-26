@@ -4,7 +4,7 @@ var utils = require('./../utils'),
     C = driver.constants,
     _ = require('lodash');
 
-var runtimeData, intents, register, globals, createdCreepNames;
+var runtimeData, intents, register, globals, createdCreepNames, lastActivateSafeMode;
 
 function data(id) {
     if(!runtimeData.roomObjects[id]) {
@@ -109,6 +109,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     globals = _globals;
 
     createdCreepNames = [];
+    lastActivateSafeMode = null;
 
     if(globals.Structure) {
         return;
@@ -301,6 +302,11 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(_.any(register.structures, i => i.structureType == 'controller' && i.my && i.safeMode)) {
             return C.ERR_BUSY;
         }
+
+        if(lastActivateSafeMode) {
+            intents.remove(lastActivateSafeMode, 'activateSafeMode');
+        }
+        lastActivateSafeMode = this.id;
 
         intents.set(this.id, 'activateSafeMode', {});
         return C.OK;
