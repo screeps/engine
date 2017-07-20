@@ -1260,7 +1260,17 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     StructurePortal.prototype.constructor = StructurePortal;
 
     utils.defineGameObjectProperties(StructurePortal.prototype, data, {
-        destination: o => new globals.RoomPosition(o.destination.x, o.destination.y, o.destination.room),
+        destination: o => {
+            if(o.destination.shard) {
+                return {
+                    shard: o.destination.shard,
+                    room: o.destination.room
+                };
+            }
+            else {
+                new globals.RoomPosition(o.destination.x, o.destination.y, o.destination.room);
+            }
+        },
         ticksToDecay: (o) => o.decayTime ? o.decayTime - runtimeData.time : undefined
     });
 
