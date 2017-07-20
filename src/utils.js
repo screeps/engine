@@ -511,7 +511,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                     intents.market.createOrder.push({
                         type: ""+iCreateOrder.type,
                         resourceType: ""+iCreateOrder.resourceType,
-                        price: exports.roundCredits(iCreateOrder.price),
+                        price: exports.roundCredits3(iCreateOrder.price),
                         totalAmount: parseInt(iCreateOrder.totalAmount),
                         roomName: iCreateOrder.roomName ? ""+iCreateOrder.roomName : undefined
                     })
@@ -530,7 +530,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                     intents.market.changeOrderPrice = intents.market.changeOrderPrice || [];
                     intents.market.changeOrderPrice.push({
                         orderId: ""+iChangeOrderPrice.orderId,
-                        newPrice: exports.roundCredits(iChangeOrderPrice.newPrice),
+                        newPrice: exports.roundCredits3(iChangeOrderPrice.newPrice),
                     });
                 });
             }
@@ -850,6 +850,10 @@ exports.checkStructureAgainstController = function(object, roomObjects, roomCont
     }
 
     let allowedRemaining = C.CONTROLLER_STRUCTURES[object.type][roomController.level];
+
+    if(allowedRemaining === 0) {
+        return false;
+    }
     
     // if only one object ever allowed, this is it
     if(C.CONTROLLER_STRUCTURES[object.type][8] === 1) {
@@ -883,7 +887,7 @@ exports.checkStructureAgainstController = function(object, roomObjects, roomCont
             }
         }
     }
-    
+
     return true;
 };
 
@@ -997,6 +1001,10 @@ exports.calcBodyEffectiveness = function(body, bodyPartType, methodName, basePow
 
 exports.roundCredits = function(value) {
     return Math.ceil(((+value)*100).toFixed(0))/100;
+};
+
+exports.roundCredits3 = function(value) {
+    return Math.ceil(((+value)*1000).toFixed(0))/1000;
 };
 
 exports.calcRoomsDistance = function(room1, room2, continuous) {

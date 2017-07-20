@@ -624,7 +624,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             if(!amount) {
                 amount = Math.min( data(target.id)[resourceType], emptySpace );
             }
-            if(data(target.id)[resourceType] || data(target.id)[resourceType] < amount) {
+            if(!data(target.id)[resourceType] || data(target.id)[resourceType] < amount) {
                 return C.ERR_NOT_ENOUGH_RESOURCES;
             }
             if(amount > emptySpace) {
@@ -873,7 +873,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.pos.inRangeTo(target, 3)) {
             return C.ERR_NOT_IN_RANGE;
         }
-        if(_.contains(['spawn','extension','constructedWall'], target.structureType) &&
+        if(_.contains(C.OBSTACLE_OBJECT_TYPES, target.structureType) &&
             _.any(register.objectsByRoom[data(this.id).room], (i) => i.x == target.pos.x && i.y == target.pos.y && _.contains(C.OBSTACLE_OBJECT_TYPES, i.type))) {
             return C.ERR_INVALID_TARGET;
         }

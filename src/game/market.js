@@ -85,7 +85,7 @@ exports.make = function(runtimeData, intents, register) {
                 return C.ERR_INVALID_ARGS;
             }
             amount = parseInt(amount);
-            if(!amount || amount < 0) {
+            if(!amount || amount < 0 || !utils.roundCredits(amount * order.price)) {
                 return C.ERR_INVALID_ARGS;
             }
             if(order.resourceType == C.SUBSCRIPTION_TOKEN) {

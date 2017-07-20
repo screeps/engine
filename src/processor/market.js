@@ -182,7 +182,7 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                         });
                     }
 
-                    bulkMarketOrders.update(order, {price: intent.newPrice});
+                    bulkMarketOrders.update(order._id, {price: intent.newPrice});
                 });
             }
 
@@ -296,12 +296,12 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                 return;
             }
 
-            var dealCost = utils.roundCredits(amount * order.price);
+            var dealCost = utils.roundCredits(Math.ceil(amount * order.price * 100) / 100);
 
             if(buyer.user) {
                 dealCost = Math.min(dealCost, usersById[buyer.user].money || 0);
                 amount = Math.floor(dealCost/order.price);
-                dealCost = utils.roundCredits(amount * order.price);
+                dealCost = utils.roundCredits(Math.ceil(amount * order.price * 100) / 100);
                 if(!amount) {
                     return;
                 }

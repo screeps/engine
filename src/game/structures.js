@@ -4,7 +4,7 @@ var utils = require('./../utils'),
     C = driver.constants,
     _ = require('lodash');
 
-var runtimeData, intents, register, globals, createdCreepNames;
+var runtimeData, intents, register, globals, createdCreepNames, lastActivateSafeMode;
 
 function data(id) {
     if(!runtimeData.roomObjects[id]) {
@@ -26,6 +26,8 @@ function _storeGetter(o) {
 }
 
 function _transfer(target, resourceType, amount) {
+
+    register.deprecated('`Structure*.transfer` is considered deprecated and will be removed soon. Please use `Creep.withdraw` instead.');
 
     if (!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
         register.assertTargetObject(target);
@@ -61,6 +63,8 @@ function _transfer(target, resourceType, amount) {
 }
 
 function _transferEnergy(target, amount) {
+
+    register.deprecated('`Structure*.transferEnergy` is considered deprecated and will be removed soon. Please use `Creep.withdraw` instead.');
 
     if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
         register.assertTargetObject(target);
@@ -105,6 +109,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     globals = _globals;
 
     createdCreepNames = [];
+    lastActivateSafeMode = null;
 
     if(globals.Structure) {
         return;
@@ -297,6 +302,11 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(_.any(register.structures, i => i.structureType == 'controller' && i.my && i.safeMode)) {
             return C.ERR_BUSY;
         }
+
+        if(lastActivateSafeMode) {
+            intents.remove(lastActivateSafeMode, 'activateSafeMode');
+        }
+        lastActivateSafeMode = this.id;
 
         intents.set(this.id, 'activateSafeMode', {});
         return C.OK;
@@ -536,8 +546,14 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 return C.ERR_RCL_NOT_ENOUGH;
             }
         }
-        if ((target instanceof globals.Creep) && !this.pos.isNearTo(target)) {
-            return C.ERR_NOT_IN_RANGE;
+        if (target instanceof globals.Creep) {
+
+            register.deprecated('`StructureLink.transferEnergy` applied to creeps is considered deprecated and will be ' +
+                'removed soon. Please use `Creep.withdraw` instead.');
+
+            if (!this.pos.isNearTo(target)) {
+                return C.ERR_NOT_IN_RANGE;
+            }
         }
         if (!data(this.id).energy) {
             return C.ERR_NOT_ENOUGH_ENERGY;
@@ -1074,6 +1090,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     StructureSpawn.prototype.transferEnergy = register.wrapFn(function(target, amount) {
 
+        register.deprecated('`StructureSpawn.transferEnergy` is considered deprecated and will be removed soon. Please use `Creep.withdraw` instead.')
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
@@ -1140,24 +1157,21 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     StructureSpawn.prototype.renewCreep = register.wrapFn(function(target) {
 
-        if(!this.my) {
-            return C.ERR_NOT_OWNER;
+        if(this.spawning) {
+            return C.ERR_BUSY;
         }
-        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
+        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
+        }
+        if(!this.my || !target.my) {
+            return C.ERR_NOT_OWNER;
         }
         if(runtimeData.roomObjects[this.id].off) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
-        if(!target.my) {
-            return C.ERR_NOT_OWNER;
-        }
         if(!target.pos.isNearTo(this.pos)) {
             return C.ERR_NOT_IN_RANGE;
-        }
-        if(this.spawning) {
-            return C.ERR_BUSY;
         }
         if(this.room.energyAvailable < Math.ceil(C.SPAWN_RENEW_RATIO * utils.calcCreepCost(target.body) / C.CREEP_SPAWN_TIME / target.body.length)) {
             return C.ERR_NOT_ENOUGH_ENERGY;
