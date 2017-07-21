@@ -485,7 +485,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
         bodyPartsCount = bodyPartsCount || 0;
-        var nonBoostedParts = _(target.body).filter(i => !i.boost && C.BOOSTS[i.type][data(this.id).mineralType]).size();
+        var nonBoostedParts = _(target.body).filter(i => !i.boost && C.BOOSTS[i.type] && C.BOOSTS[i.type][data(this.id).mineralType]).size();
 
         if(!nonBoostedParts || bodyPartsCount && bodyPartsCount > nonBoostedParts) {
             return C.ERR_NOT_FOUND;
