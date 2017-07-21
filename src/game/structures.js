@@ -1282,7 +1282,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 };
             }
             else {
-                new globals.RoomPosition(o.destination.x, o.destination.y, o.destination.room);
+                return new globals.RoomPosition(o.destination.x, o.destination.y, o.destination.room);
             }
         },
         ticksToDecay: (o) => o.decayTime ? o.decayTime - runtimeData.time : undefined
