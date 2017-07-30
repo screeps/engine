@@ -1013,8 +1013,9 @@ exports.calcRoomsDistance = function(room1, room2, continuous) {
     var dx = Math.abs(x2-x1);
     var dy = Math.abs(y2-y1);
     if(continuous) {
-        dx = Math.min(C.WORLD_WIDTH - dx, dx);
-        dy = Math.min(C.WORLD_HEIGHT - dy, dy);
+        var worldSize = driver.getWorldSize();
+        dx = Math.min(worldSize - dx, dx);
+        dy = Math.min(worldSize - dy, dy);
     }
     return Math.max(dx, dy);
 };
