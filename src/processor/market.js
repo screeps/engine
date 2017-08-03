@@ -296,12 +296,12 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                 return;
             }
 
-            var dealCost = utils.roundCredits(Math.ceil(amount * order.price * 100) / 100);
+            var dealCost = utils.roundCredits(amount * order.price);
 
             if(buyer.user) {
                 dealCost = Math.min(dealCost, usersById[buyer.user].money || 0);
                 amount = Math.floor(dealCost/order.price);
-                dealCost = utils.roundCredits(Math.ceil(amount * order.price * 100) / 100);
+                dealCost = utils.roundCredits(amount * order.price);
                 if(!amount) {
                     return;
                 }

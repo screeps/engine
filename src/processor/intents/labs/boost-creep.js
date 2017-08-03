@@ -17,7 +17,7 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk) {
         return;
     }
 
-    var nonBoostedParts = _.filter(target.body, i => !i.boost && C.BOOSTS[i.type][object.mineralType]);
+    var nonBoostedParts = _.filter(target.body, i => !i.boost && C.BOOSTS[i.type] && C.BOOSTS[i.type][object.mineralType]);
 
     if(!nonBoostedParts.length) {
         return;
