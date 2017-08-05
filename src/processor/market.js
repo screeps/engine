@@ -299,9 +299,11 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
             var dealCost = utils.roundCredits(amount * order.price);
 
             if(buyer.user) {
-                dealCost = Math.min(dealCost, usersById[buyer.user].money || 0);
-                amount = Math.floor(dealCost/order.price);
-                dealCost = utils.roundCredits(amount * order.price);
+                var money = usersById[buyer.user].money || 0;
+                if (dealCost > money) {
+                    amount = Math.floor(money/order.price);
+                    dealCost = utils.roundCredits(amount * order.price);
+                }
                 if(!amount) {
                     return;
                 }
