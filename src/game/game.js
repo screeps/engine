@@ -388,13 +388,14 @@
         
         var runCodeCache = {};
 
-        exports.runCode = function (_globals, _sandboxedFunctionWrapper, _codeModules, _runtimeData, _intents, _memory, _fakeConsole, _consoleCommands, _timeout, _getUsedCpu, _resetUsedCpu, _markStats, _scriptCachedData) {
+        exports.runCode = function (_globals, _sandboxedFunctionWrapper, _sandboxedEval, _codeModules, _runtimeData, _intents, _memory, _fakeConsole, _consoleCommands, _timeout, _getUsedCpu, _resetUsedCpu, _markStats, _scriptCachedData) {
 
             var userId = _runtimeData.user._id;
-
+            
             runCodeCache[userId] = runCodeCache[userId] || {};
             runCodeCache[userId].globals = _globals;
             runCodeCache[userId].sandboxedFunctionWrapper = _sandboxedFunctionWrapper;
+            runCodeCache[userId].sandboxedEval = _sandboxedEval;
             runCodeCache[userId].codeModules = _codeModules;
             runCodeCache[userId].runtimeData = _runtimeData;
             runCodeCache[userId].intents = _intents;
@@ -422,8 +423,7 @@
                 get() {
 
                     try {
-                        runCodeCache[userId].memory._parsed = JSON.parse(runCodeCache[userId].memory.get() || "{}");
-                        runCodeCache[userId].memory._parsed.__proto__ = null;
+                        runCodeCache[userId].memory._parsed = runCodeCache[userId].sandboxedEval('JSON.parse')(runCodeCache[userId].memory.get() || "{}");
                     }
                     catch(e) {
                         runCodeCache[userId].memory._parsed = null;
