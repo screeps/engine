@@ -155,10 +155,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     });
 
     Structure.prototype.destroy = register.wrapFn(function() {
-        if(!this.room.controller || !this.room.controller.my) {
-            return C.ERR_NOT_OWNER;
-        }
-
         if(this.room.find(C.FIND_HOSTILE_CREEPS).length > 0) {
             return C.ERR_BUSY;
         }
