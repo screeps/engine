@@ -283,7 +283,7 @@
                 }
 
             }
-            if (!object.off && (object.type == 'extension' || object.type == 'spawn')) {
+            if (!object.off && (object.type == 'extension' || object.type == 'spawn') && (object.user == runtimeData.user._id)) {
                 register.rooms[object.room].energyAvailable += object.energy;
                 register.rooms[object.room].energyCapacityAvailable += object.energyCapacity;
             }
