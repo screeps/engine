@@ -434,8 +434,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                         name: ""+iCreateFlag.name,
                         color: +iCreateFlag.color,
                         secondaryColor: +iCreateFlag.secondaryColor,
-                        roomName: iCreateFlag.roomName,
-                        user: userId
+                        roomName: iCreateFlag.roomName
                     })
                 });
             }
@@ -455,8 +454,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                         y: parseInt(iCreateConstructionSite.y),
                         structureType: ""+iCreateConstructionSite.structureType,
                         name: ""+iCreateConstructionSite.name,
-                        roomName: ""+iCreateConstructionSite.roomName,
-                        user: userId
+                        roomName: ""+iCreateConstructionSite.roomName
                     });
                 });
             }
@@ -473,8 +471,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
 
                     roomIntents.destroyStructure.push({
                         roomName: ""+iDestroyStructure.roomName,
-                        id: ""+iDestroyStructure.id,
-                        user: userId
+                        id: ""+iDestroyStructure.id
                     });
                 });
             }
@@ -492,8 +489,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
 
                     roomIntents.removeFlag.push({
                         roomName: ""+iRemoveFlag.roomName,
-                        name: ""+iRemoveFlag.name,
-                        user: userId
+                        name: ""+iRemoveFlag.name
                     });
                 });
             }

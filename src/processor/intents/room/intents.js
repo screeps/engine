@@ -1,6 +1,6 @@
 var _ = require('lodash');
 
-module.exports = function(objectIntents, roomObjects, roomTerrain, bulk, bulkUsers, roomController, flags, flagsBulk) {
+module.exports = function(userId, objectIntents, roomObjects, roomTerrain, bulk, bulkUsers, roomController, flags, flagsBulk) {
 
     flags.forEach(i => {
         i._parsed = i.data.split("|");
@@ -9,27 +9,27 @@ module.exports = function(objectIntents, roomObjects, roomTerrain, bulk, bulkUse
 
     if(objectIntents.removeFlag) {
         _.forEach(objectIntents.removeFlag, (i) => {
-            require('./remove-flag')(i, flags);
+            require('./remove-flag')(i, flags, userId);
         });
     }
     if(objectIntents.createFlag) {
         _.forEach(objectIntents.createFlag, (i) => {
-            require('./create-flag')(i, flags);
+            require('./create-flag')(i, flags, userId);
         });
     }
     if(objectIntents.createConstructionSite) {
         _.forEach(objectIntents.createConstructionSite, (i) => {
-            require('./create-construction-site')(i, roomObjects, roomTerrain, bulk, bulkUsers, roomController);
+            require('./create-construction-site')(i, userId, roomObjects, roomTerrain, bulk, bulkUsers, roomController);
         });
     }
     if(objectIntents.destroyStructure) {
         _.forEach(objectIntents.destroyStructure, (i) => {
-            require('./destroy-structure')(i, roomObjects, roomTerrain, bulk, bulkUsers, roomController);
+            require('./destroy-structure')(i, userId, roomObjects, roomTerrain, bulk, bulkUsers, roomController);
         });
     }
 
     if(objectIntents.genEnergy) {
-        require('./gen-energy')(objectIntents.genEnergy, roomObjects, roomTerrain, bulk, bulkUsers, roomController);
+        require('./gen-energy')(objectIntents.genEnergy, userId, roomObjects, roomTerrain, bulk, bulkUsers, roomController);
     }
 
     flags.forEach(i => {

@@ -132,7 +132,7 @@ function processRoom(roomId, intents, objects, terrain, gameTime, roomInfo, flag
                     object = objects[objectId];
 
                     if (objectId == 'room') {
-                        require('./processor/intents/room/intents')(objectIntents, objects, terrain, bulk, userBulk, roomController, flags, flagsBulk);
+                        require('./processor/intents/room/intents')(userId, objectIntents, objects, terrain, bulk, userBulk, roomController, flags, flagsBulk);
                         continue;
                     }
 

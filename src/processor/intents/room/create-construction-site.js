@@ -6,7 +6,7 @@ var _ = require('lodash'),
 
 var createdConstructionSiteCounter = 0;
 
-module.exports = function(intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController) {
+module.exports = function(intent, userId, roomObjects, roomTerrain, bulk, bulkUsers, roomController) {
 
     if(intent.x <= 0 || intent.x >= 49 || intent.y <= 0 || intent.y >= 49) {
         return;
@@ -18,7 +18,7 @@ module.exports = function(intent, roomObjects, roomTerrain, bulk, bulkUsers, roo
 
     if(/^(W|E)/.test(intent.roomName)) {
 
-        if (roomController && (roomController.user && roomController.user != intent.user || roomController.reservation && roomController.reservation.user != intent.user)) {
+        if (roomController && (roomController.user && roomController.user != userId || roomController.reservation && roomController.reservation.user != userId)) {
             return;
         }
 
@@ -54,7 +54,7 @@ module.exports = function(intent, roomObjects, roomTerrain, bulk, bulkUsers, roo
         y: intent.y,
         type: 'constructionSite',
         room: intent.roomName,
-        user: intent.user,
+        user: userId,
         progress: 0,
         progressTotal
     };

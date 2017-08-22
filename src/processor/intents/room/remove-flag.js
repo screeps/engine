@@ -3,9 +3,9 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(intent, flags) {
+module.exports = function(intent, flags, userId) {
 
-    var flagItem = _.find(flags, {user: intent.user});
+    var flagItem = _.find(flags, {userId});
     if(!flagItem) {
         return;
     }
