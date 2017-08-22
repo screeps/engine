@@ -5,7 +5,7 @@ var _ = require('lodash'),
 
 module.exports = function(intent, flags, userId) {
 
-    var flagItem = _.find(flags, {userId});
+    var flagItem = _.find(flags, {user: userId});
     if(!flagItem) {
         return;
     }
