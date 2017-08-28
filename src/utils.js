@@ -100,6 +100,21 @@ exports.getOffsetsByDirection = function(direction) {
     return offsetsByDirection[direction];
 };
 
+exports.calcCreepCost = function(body) {
+    var result = 0;
+
+    body.forEach((i) => {
+        if(_.isObject(i)) {
+            result += C.BODYPART_COST[i.type];
+        }
+        else {
+            result += C.BODYPART_COST[i];
+        }
+    });
+
+    return result;
+};
+
 function calcEnergyAvailable(roomObjects, energyStructures){
     return _.sum(energyStructures, id => {
         if (roomObjects[id] && !roomObjects[id].off && (roomObjects[id].type === 'spawn' || roomObjects[id].type === 'extension')) {
@@ -141,26 +156,11 @@ exports.canCreateCreep = function canCreateCreep(roomObjects, spawn, spawnArgs){
     }
 
     let energyAvailable = energyStructures ? calcEnergyAvailable(roomObjects, energyStructures) : spawn.room.energyAvailable;
-    if(energyAvailable < utils.calcCreepCost(body)) {
+    if(energyAvailable < exports.calcCreepCost(body)) {
         return C.ERR_NOT_ENOUGH_ENERGY;
     }
 
     return C.OK;
-};
-
-exports.calcCreepCost = function(body) {
-    var result = 0;
-
-    body.forEach((i) => {
-        if(_.isObject(i)) {
-            result += C.BODYPART_COST[i.type];
-        }
-        else {
-            result += C.BODYPART_COST[i];
-        }
-    });
-
-    return result;
 };
 
 exports.checkConstructionSite = function(objects, structureType, x, y) {
@@ -696,7 +696,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
             objectIntents.createCreep = {
                 name: ""+objectIntentsResult.createCreep.name,
                 body: _.filter(objectIntentsResult.createCreep.body, (i) => _.contains(C.BODYPARTS_ALL, i)),
-                energyStructures: objectIntentsResult.spawnCreep.energyStructures
+                energyStructures: _.get(objectIntentsResult, 'spawnCreep.energyStructures')
             };
         }
         if(objectIntentsResult.renewCreep) {

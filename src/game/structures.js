@@ -959,7 +959,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 return C.ERR_INVALID_ARGS;
         }
 
-        if( this.room.energyAvailable < utils.calcCreepCost(body)) {
+        if(this.room.energyAvailable < utils.calcCreepCost(body)) {
             return C.ERR_NOT_ENOUGH_ENERGY;
         }
 
@@ -1098,7 +1098,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NAME_EXISTS;
         }
 
-        let energyStructures = _.map(options.energyStructures, 'id');
+        let energyStructures = options.energyStructures && _.map(options.energyStructures, 'id');
         let canResult = utils.canCreateCreep(runtimeData.roomObjects, this, {body, energyStructures});
         if(options.dryRun || canResult !== C.OK) {
             return canResult;
