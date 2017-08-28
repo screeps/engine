@@ -482,8 +482,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                         name: ""+iCreateFlag.name,
                         color: +iCreateFlag.color,
                         secondaryColor: +iCreateFlag.secondaryColor,
-                        roomName: iCreateFlag.roomName,
-                        user: userId
+                        roomName: iCreateFlag.roomName
                     })
                 });
             }
@@ -503,8 +502,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                         y: parseInt(iCreateConstructionSite.y),
                         structureType: ""+iCreateConstructionSite.structureType,
                         name: ""+iCreateConstructionSite.name,
-                        roomName: ""+iCreateConstructionSite.roomName,
-                        user: userId
+                        roomName: ""+iCreateConstructionSite.roomName
                     });
                 });
             }
@@ -521,8 +519,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
 
                     roomIntents.destroyStructure.push({
                         roomName: ""+iDestroyStructure.roomName,
-                        id: ""+iDestroyStructure.id,
-                        user: userId
+                        id: ""+iDestroyStructure.id
                     });
                 });
             }
@@ -540,8 +537,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
 
                     roomIntents.removeFlag.push({
                         roomName: ""+iRemoveFlag.roomName,
-                        name: ""+iRemoveFlag.name,
-                        user: userId
+                        name: ""+iRemoveFlag.name
                     });
                 });
             }
@@ -1062,8 +1058,9 @@ exports.calcRoomsDistance = function(room1, room2, continuous) {
     var dx = Math.abs(x2-x1);
     var dy = Math.abs(y2-y1);
     if(continuous) {
-        dx = Math.min(C.WORLD_WIDTH - dx, dx);
-        dy = Math.min(C.WORLD_HEIGHT - dy, dy);
+        var worldSize = driver.getWorldSize();
+        dx = Math.min(worldSize - dx, dx);
+        dy = Math.min(worldSize - dy, dy);
     }
     return Math.max(dx, dy);
 };

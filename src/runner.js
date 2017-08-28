@@ -43,6 +43,9 @@ function runUser(userId, onlyInRoom) {
         if(runResult.memorySegments) {
             promises.push(driver.saveUserMemorySegments(userId, runResult.memorySegments));
         }
+        if(runResult.interShardSegment) {
+            promises.push(driver.saveUserMemoryInterShardSegment(userId, runResult.interShardSegment));
+        }
         if(runResult.intents) {
             promises.push(driver.saveUserIntents(userId, runResult.intents));
         }

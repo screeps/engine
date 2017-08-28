@@ -3,12 +3,12 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(intent, flags) {
+module.exports = function(intent, flags, userId) {
 
     var name = intent.name.replace(/\|/g,"$VLINE$").replace(/~/g,"$TILDE$");
 
     if(_.any(flags, i => {
-        return i.user == intent.user && _.any(i._parsed, j => j[0] == name);
+        return i.user == userId && _.any(i._parsed, j => j[0] == name);
     })) {
         return;
     }
@@ -23,9 +23,9 @@ module.exports = function(intent, flags) {
         return;
     }
 
-    var flagItem = _.find(flags, {user: intent.user});
+    var flagItem = _.find(flags, {user: userId});
     if(!flagItem) {
-        flagItem = {user: intent.user, room: intent.roomName, _parsed: []};
+        flagItem = {user: userId, room: intent.roomName, _parsed: []};
         flags.push(flagItem);
     }
 

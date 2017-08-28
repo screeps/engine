@@ -3,9 +3,9 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(intent, roomObjects, roomTerrain, bulk) {
+module.exports = function(intent, userId, roomObjects, roomTerrain, bulk) {
 
-    if(intent.user != '3') {
+    if(userId != '3') {
         return;
     }
 

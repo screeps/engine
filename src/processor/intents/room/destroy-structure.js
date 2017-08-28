@@ -3,17 +3,17 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController) {
+module.exports = function(intent, userId, roomObjects, roomTerrain, bulk, bulkUsers, roomController) {
 
     var object = roomObjects[intent.id];
 
     if(!object || !C.CONSTRUCTION_COST[object.type]) return;
 
-    if(!roomController || roomController.user != intent.user) return;
+    if(!roomController || roomController.user != userId) return;
 
     if(object.type == C.STRUCTURE_WALL && object.decayTime && !object.user) return;
 
-    if(_.any(roomObjects, i => i.type == 'creep' && i.user != intent.user)) return;
+    if(_.any(roomObjects, i => i.type == 'creep' && i.user != userId)) return;
 
     bulk.remove(object._id);
 

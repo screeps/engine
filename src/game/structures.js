@@ -485,7 +485,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
         bodyPartsCount = bodyPartsCount || 0;
-        var nonBoostedParts = _(target.body).filter(i => !i.boost && C.BOOSTS[i.type][data(this.id).mineralType]).size();
+        var nonBoostedParts = _(target.body).filter(i => !i.boost && C.BOOSTS[i.type] && C.BOOSTS[i.type][data(this.id).mineralType]).size();
 
         if(!nonBoostedParts || bodyPartsCount && bodyPartsCount > nonBoostedParts) {
             return C.ERR_NOT_FOUND;
@@ -1386,7 +1386,17 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     StructurePortal.prototype.constructor = StructurePortal;
 
     utils.defineGameObjectProperties(StructurePortal.prototype, data, {
-        destination: o => new globals.RoomPosition(o.destination.x, o.destination.y, o.destination.room),
+        destination: o => {
+            if(o.destination.shard) {
+                return {
+                    shard: o.destination.shard,
+                    room: o.destination.room
+                };
+            }
+            else {
+                return new globals.RoomPosition(o.destination.x, o.destination.y, o.destination.room);
+            }
+        },
         ticksToDecay: (o) => o.decayTime ? o.decayTime - runtimeData.time : undefined
     });
 

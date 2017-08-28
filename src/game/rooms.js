@@ -409,11 +409,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
         this.name = id;
 
-        this.mode = id == 'sim' ? C.MODE_SIMULATION :
-            /^arena/.test(id) ? C.MODE_ARENA :
-            /^survival/.test(id) ? C.MODE_SURVIVAL :
-            C.MODE_WORLD;
-
         this.energyAvailable = 0;
         this.energyCapacityAvailable = 0;
 
@@ -981,9 +976,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
         if(!utils.checkConstructionSite(register.objectsByRoom[this.name], structureType, x, y) ||
             !utils.checkConstructionSite(runtimeData.staticTerrainData[this.name], structureType, x, y)) {
-            return C.ERR_INVALID_TARGET;
-        }
-        if(this.mode == C.MODE_ARENA) {
             return C.ERR_INVALID_TARGET;
         }
 
