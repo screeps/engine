@@ -1171,8 +1171,16 @@ exports.makePos = function(_register) {
     });
 
     RoomPosition.prototype.getDirectionTo = register.wrapFn(function(firstArg, secondArg) {
-        var [x,y] = utils.fetchXYArguments(firstArg, secondArg, globals);
-        return utils.getDirection(x - this.x, y - this.y);
+        var [x,y,roomName] = utils.fetchXYArguments(firstArg, secondArg, globals);
+
+        if(roomName == this.roomName) {
+            return utils.getDirection(x - this.x, y - this.y);
+        }
+
+        var [thisRoomX, thisRoomY] = utils.roomNameToXY(this.roomName);
+        var [thatRoomX, thatRoomY] = utils.roomNameToXY(roomName);
+
+	return utils.getDirection(thatRoomX*50 + x - thisRoomX*50 - this.x, thatRoomY*50 + y - thisRoomY*50 - this.y);
     });
 
     RoomPosition.prototype.findPathTo = register.wrapFn(function(firstArg, secondArg, opts) {
