@@ -1090,7 +1090,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     StructureSpawn.prototype.spawnCreep = register.wrapFn(function spawnCreep(body, name, options = {}) {
 
-        if(!name) {
+        if(!name || !_.isObject(options)) {
             return C.ERR_INVALID_ARGS;
         }
 
