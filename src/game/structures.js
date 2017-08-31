@@ -1147,11 +1147,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
 
         if(_.isObject(globals.Memory.creeps)) {
-            if(_.isUndefined(options.memory)) {
-                globals.Memory.creeps[name] = globals.Memory.creeps[name] || {};
-            } else {
-                globals.Memory.creeps[name] = options.memory || globals.Memory.creeps[name] || {};
-            }
+            globals.Memory.creeps[name] = options.memory || globals.Memory.creeps[name] || {};
         }
 
         globals.Game.creeps[name] = new globals.Creep();
