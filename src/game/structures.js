@@ -1088,6 +1088,16 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return name;
     });
 
+    function calcEnergyAvailable(roomObjects, energyStructures){
+        return _.sum(energyStructures, id => {
+            if (roomObjects[id] && !roomObjects[id].off && (roomObjects[id].type === 'spawn' || roomObjects[id].type === 'extension')) {
+                return roomObjects[id].energy;
+            } else {
+                return 0;
+            }
+        });
+    }
+
     StructureSpawn.prototype.spawnCreep = register.wrapFn(function spawnCreep(body, name, options = {}) {
 
         if(!name || !_.isObject(options)) {
@@ -1099,9 +1109,35 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
 
         let energyStructures = options.energyStructures && _.map(options.energyStructures, 'id');
-        let canResult = utils.canCreateCreep(runtimeData.roomObjects, this, {body, energyStructures});
-        if(options.dryRun || canResult !== C.OK) {
-            return canResult;
+
+        if(!this.my) {
+            return C.ERR_NOT_OWNER;
+        }
+
+        if(data(runtimeData.roomObjects, this.id).spawning) {
+            return C.ERR_BUSY;
+        }
+
+        if(data(runtimeData.roomObjects, this.id).off) {
+            return C.ERR_RCL_NOT_ENOUGH;
+        }
+
+        if(!body || !_.isArray(body) || body.length === 0 || body.length > C.MAX_CREEP_SIZE) {
+            return C.ERR_INVALID_ARGS;
+        }
+
+        for(let i=0; i<body.length; i++) {
+            if(!_.contains(C.BODYPARTS_ALL, body[i]))
+                return C.ERR_INVALID_ARGS;
+        }
+
+        let energyAvailable = energyStructures ? calcEnergyAvailable(roomObjects, energyStructures) : spawn.room.energyAvailable;
+        if(energyAvailable < utils.calcCreepCost(body)) {
+            return C.ERR_NOT_ENOUGH_ENERGY;
+        }
+
+        if(options.dryRun) {
+            return C.OK;
         }
 
         createdCreepNames.push(name);
