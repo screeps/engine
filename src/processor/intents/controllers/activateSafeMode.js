@@ -17,6 +17,9 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
     if(object.upgradeBlocked > gameTime) {
         return;
     }
+    if(object.downgradeTime < gameTime + C.CONTROLLER_DOWNGRADE[object.level] - C.CONTROLLER_DOWNGRADE_SAFEMODE_THRESHOLD) {
+        return;
+    }
 
     bulk.update(object, {
         safeModeAvailable: object.safeModeAvailable - 1,

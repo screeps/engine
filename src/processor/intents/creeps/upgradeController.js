@@ -58,7 +58,9 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
         if(target.tutorial && target.level == 1) {
             nextLevelProgress = 4;
         }
-        if (target.progress + boostedEffect >= nextLevelProgress) {
+        if (target.progress + boostedEffect >= nextLevelProgress &&
+            target.downgradeTime >= gameTime + C.CONTROLLER_DOWNGRADE[target.level]) {
+
             target.progress = target.progress + boostedEffect - nextLevelProgress;
             target.level++;
             driver.sendNotification(target.user, `Your Controller in room ${target.room} has been upgraded to level ${target.level}.`);

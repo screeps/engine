@@ -974,7 +974,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
-        if(_getActiveBodyparts(this.body, C.CLAIM) < 5) {
+        if(!_getActiveBodyparts(this.body, C.CLAIM)) {
             return C.ERR_NO_BODYPART;
         }
         if(!target.pos.isNearTo(this.pos)) {
@@ -982,6 +982,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
         if(!target.owner && !target.reservation) {
             return C.ERR_INVALID_TARGET;
+        }
+        if(data(target.id).upgradeBlocked > runtimeData.time) {
+            return C.ERR_TIRED;
         }
         if(this.room.controller && !this.room.controller.my && this.room.controller.safeMode) {
             return C.ERR_NO_BODYPART;

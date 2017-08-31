@@ -15,8 +15,20 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
         return;
     }
 
-    if(object._upgraded || !object.downgradeTime || object.tutorial) {
+    if(object._upgradeBlocked) {
+        bulk.update(object, {upgradeBlocked: object._upgradeBlocked});
+        delete object._upgradeBlocked;
+    }
+
+    if(!object.downgradeTime || object.tutorial) {
         bulk.update(object, {downgradeTime: gameTime + C.CONTROLLER_DOWNGRADE[object.level] + 1});
+        return;
+    }
+
+    if(object._upgraded) {
+        bulk.update(object, {downgradeTime: Math.min(
+            object.downgradeTime + C.CONTROLLER_DOWNGRADE_RESTORE + 1,
+            gameTime + C.CONTROLLER_DOWNGRADE[object.level] + 1)});
         return;
     }
 
