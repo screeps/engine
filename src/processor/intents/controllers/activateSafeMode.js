@@ -8,7 +8,7 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
     if(!object.user || !object.level) {
         return;
     }
-    if(!(object.safeModeAvailable >= 0)) {
+    if(object.safeModeAvailable <= 0) {
         return;
     }
     if(object.safeModeCooldown >= gameTime) {
