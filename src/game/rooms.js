@@ -968,7 +968,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!C.CONSTRUCTION_COST[structureType]) {
             return C.ERR_INVALID_ARGS;
         }
-        if(structureType == 'spawn' && !_.isUndefined(name) && createdSpawnNames.indexOf(name) != -1) {
+        if(structureType == 'spawn' && typeof name == 'string' && createdSpawnNames.indexOf(name) != -1) {
             return C.ERR_INVALID_ARGS;
         }
         if(this.controller && this.controller.level > 0 && !this.controller.my) {
@@ -989,7 +989,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         var intent = {roomName: this.name, x, y, structureType};
 
         if(structureType == 'spawn') {
-            if(_.isUndefined(name)) {
+            if(typeof name !== 'string') {
                 var cnt = 1;
                 do {
                     name = "Spawn" + cnt;
