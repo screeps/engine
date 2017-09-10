@@ -995,10 +995,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 while (_.any(register.spawns, {name}) ||
                 _.any(register.constructionSites, {structureType: 'spawn', name}) ||
                 createdSpawnNames.indexOf(name) != -1);
-
-                createdSpawnNames.push(name);
             }
-
+            createdSpawnNames.push(name);
             intent.name = name;
         }
 
