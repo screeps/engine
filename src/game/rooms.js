@@ -956,7 +956,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return name;
     });
 
-    Room.prototype.createConstructionSite = register.wrapFn(function(firstArg, secondArg, structureType) {
+    Room.prototype.createConstructionSite = register.wrapFn(function(firstArg, secondArg, structureType, name) {
         var [x,y] = utils.fetchXYArguments(firstArg, secondArg, globals);
 
         if(_.isUndefined(x) || _.isUndefined(y) || x < 0 || x > 49 || y < 0 || y > 49) {
@@ -986,16 +986,18 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         var intent = {roomName: this.name, x, y, structureType};
 
         if(structureType == 'spawn') {
-            var cnt = 1, name;
-            do {
-                name = "Spawn" + cnt;
-                cnt++;
-            }
-            while (_.any(register.spawns, {name}) ||
-            _.any(register.constructionSites, {structureType: 'spawn', name}) ||
-            createdSpawnNames.indexOf(name) != -1);
+            if(_.isUndefined(name)) {
+                var cnt = 1;
+                do {
+                    name = "Spawn" + cnt;
+                    cnt++;
+                }
+                while (_.any(register.spawns, {name}) ||
+                _.any(register.constructionSites, {structureType: 'spawn', name}) ||
+                createdSpawnNames.indexOf(name) != -1);
 
-            createdSpawnNames.push(name);
+                createdSpawnNames.push(name);
+            }
 
             intent.name = name;
         }
