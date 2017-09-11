@@ -968,8 +968,13 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!C.CONSTRUCTION_COST[structureType]) {
             return C.ERR_INVALID_ARGS;
         }
-        if(structureType == 'spawn' && typeof name == 'string' && createdSpawnNames.indexOf(name) != -1) {
-            return C.ERR_INVALID_ARGS;
+        if(structureType == 'spawn' && typeof name == 'string') {
+            if(createdSpawnNames.indexOf(name) != -1) {
+                return C.ERR_INVALID_ARGS;
+            }
+            if(_.any(register.spawns, {name}) || _.any(register.constructionSites, {structureType: 'spawn', name})) {
+                return C.ERR_INVALID_ARGS;
+            }
         }
         if(this.controller && this.controller.level > 0 && !this.controller.my) {
             return C.ERR_RCL_NOT_ENOUGH;
