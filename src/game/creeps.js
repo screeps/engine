@@ -928,7 +928,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
 
         var controllersClaimed = _.filter(runtimeData.userObjects, {type: 'controller'}).length + controllersClaimedInTick;
-        if (controllersClaimed && (!runtimeData.user.gcl || runtimeData.user.gcl < C.GCL_MULTIPLY * Math.pow(controllersClaimed, C.GCL_POW))) {
+        if (controllersClaimed &&
+            (!runtimeData.user.gcl || runtimeData.user.gcl < utils.calcNeededGcl(controllersClaimed + 1))) {
             return C.ERR_GCL_NOT_ENOUGH;
         }
         if (controllersClaimed >= C.GCL_NOVICE && runtimeData.rooms[this.room.name].novice > Date.now()) {

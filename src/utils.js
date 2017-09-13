@@ -1019,3 +1019,7 @@ exports.calcRoomsDistance = function(room1, room2, continuous) {
 exports.calcTerminalEnergyCost = function(amount, range) {
     return Math.ceil(amount * (1 - Math.exp(-range / 30)))
 };
+
+exports.calcNeededGcl = function(gclLevel) {
+    return C.GCL_MULTIPLY * Math.pow(gclLevel-1, C.GCL_POW);
+};
