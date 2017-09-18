@@ -33,7 +33,9 @@ module.exports = function(spawn, roomObjects, cost, bulk, energyStructures) {
         return false;
     }
 
-    spawns.sort(utils.comparatorDistance(spawn));
+    if(energyStructures === undefined) {
+        spawns.sort(utils.comparatorDistance(spawn));
+    }
 
     spawns.forEach((i) => {
         var neededEnergy = Math.min(cost, i.energy);
@@ -46,7 +48,9 @@ module.exports = function(spawn, roomObjects, cost, bulk, energyStructures) {
         return true;
     }
 
-    extensions.sort(utils.comparatorDistance(spawn));
+    if(energyStructures === undefined) {
+        extensions.sort(utils.comparatorDistance(spawn));
+    }
 
     extensions.forEach((extension) => {
         if(cost <= 0) {
