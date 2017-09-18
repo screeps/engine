@@ -927,7 +927,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_BUSY;
         }
 
-        var controllersClaimed = _.filter(runtimeData.userObjects, {type: 'controller'}).length + controllersClaimedInTick;
+        var controllersClaimed = runtimeData.user.rooms.length + controllersClaimedInTick;
         if (controllersClaimed &&
             (!runtimeData.user.gcl || runtimeData.user.gcl < utils.calcNeededGcl(controllersClaimed + 1))) {
             return C.ERR_GCL_NOT_ENOUGH;
