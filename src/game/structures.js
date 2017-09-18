@@ -1114,11 +1114,11 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NOT_OWNER;
         }
 
-        if(data(runtimeData.roomObjects, this.id).spawning) {
+        if(data(this.id).spawning) {
             return C.ERR_BUSY;
         }
 
-        if(data(runtimeData.roomObjects, this.id).off) {
+        if(data(this.id).off) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
 
