@@ -927,8 +927,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_BUSY;
         }
 
-        var controllersClaimed = _.filter(runtimeData.userObjects, {type: 'controller'}).length + controllersClaimedInTick;
-        if (controllersClaimed && (!runtimeData.user.gcl || runtimeData.user.gcl < C.GCL_MULTIPLY * Math.pow(controllersClaimed, C.GCL_POW))) {
+        var controllersClaimed = runtimeData.user.rooms.length + controllersClaimedInTick;
+        if (controllersClaimed &&
+            (!runtimeData.user.gcl || runtimeData.user.gcl < utils.calcNeededGcl(controllersClaimed + 1))) {
             return C.ERR_GCL_NOT_ENOUGH;
         }
         if (controllersClaimed >= C.GCL_NOVICE && runtimeData.rooms[this.room.name].novice > Date.now()) {
@@ -974,7 +975,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
-        if(_getActiveBodyparts(this.body, C.CLAIM) < 5) {
+        if(!_getActiveBodyparts(this.body, C.CLAIM)) {
             return C.ERR_NO_BODYPART;
         }
         if(!target.pos.isNearTo(this.pos)) {
@@ -982,6 +983,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
         if(!target.owner && !target.reservation) {
             return C.ERR_INVALID_TARGET;
+        }
+        if(data(target.id).upgradeBlocked > runtimeData.time) {
+            return C.ERR_TIRED;
         }
         if(this.room.controller && !this.room.controller.my && this.room.controller.safeMode) {
             return C.ERR_NO_BODYPART;

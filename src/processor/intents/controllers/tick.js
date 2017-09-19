@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roomController, gameTime, roomInfo) {
+module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roomController, gameTime, roomInfo, users) {
 
     if(!object || object.type != 'controller') return;
 
@@ -15,8 +15,22 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
         return;
     }
 
-    if(object._upgraded || !object.downgradeTime || object.tutorial) {
+    driver.addRoomToUser(object.room, users[object.user], bulkUsers);
+
+    if(object._upgradeBlocked) {
+        bulk.update(object, {upgradeBlocked: object._upgradeBlocked});
+        delete object._upgradeBlocked;
+    }
+
+    if(!object.downgradeTime || object.tutorial) {
         bulk.update(object, {downgradeTime: gameTime + C.CONTROLLER_DOWNGRADE[object.level] + 1});
+        return;
+    }
+
+    if(object._upgraded) {
+        bulk.update(object, {downgradeTime: Math.min(
+            object.downgradeTime + C.CONTROLLER_DOWNGRADE_RESTORE + 1,
+            gameTime + C.CONTROLLER_DOWNGRADE[object.level] + 1)});
         return;
     }
 
@@ -30,6 +44,8 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
         object.level--;
         driver.sendNotification(object.user, `Your Controller in room ${object.room} has been downgraded to level ${object.level} due to absence of upgrading activity!`);
         if(object.level == 0) {
+            driver.removeRoomFromUser(object.room, users[object.user], bulkUsers);
+
             object.progress = 0;
             object.user = null;
             object.downgradeTime = null;

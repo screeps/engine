@@ -21,10 +21,10 @@ function checkPriorities(intents, name) {
     return intents[name] && (!priorities[name] || !_.any(priorities[name], i => !!intents[i]));
 }
 
-module.exports = function(object, objectIntents, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime, roomInfo) {
+module.exports = function(object, objectIntents, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime, roomInfo, users) {
     creepActions.forEach(name => {
         if(checkPriorities(objectIntents, name)) {
-            modules[name](object, objectIntents[name], roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime, roomInfo);
+            modules[name](object, objectIntents[name], roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime, roomInfo, users);
         }
     });
 };

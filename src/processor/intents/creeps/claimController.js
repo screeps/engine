@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime) {
+module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime, roomInfo, users) {
 
     if(object.type != 'creep') {
         return;
@@ -31,6 +31,12 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
     if(target.reservation && target.reservation.user != object.user) {
         return;
     }
+    let user = users[object.user],
+        claimedRooms = user.rooms ? user.rooms.length : 0;
+
+    if(user.gcl < utils.calcNeededGcl(claimedRooms + 1)) {
+        return;
+    }
 
     var level = 1;
 
@@ -41,4 +47,6 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
         downgradeTime: null,
         reservation: null
     });
+
+    driver.addRoomToUser(object.room, users[object.user], bulkUsers);
 };

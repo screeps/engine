@@ -22,7 +22,8 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
     if(!target.user && !target.reservation) {
         return;
     }
-    if(roomController && roomController.user != object.user && roomController.safeMode > gameTime) {
+    if(roomController && roomController.user != object.user && roomController.safeMode > gameTime ||
+        roomController.upgradeBlocked > gameTime) {
         return;
     }
 
@@ -37,10 +38,8 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
     }
     if(target.user) {
         var downgradeTime = target.downgradeTime - effect;
-        bulk.update(target, {
-            downgradeTime,
-            upgradeBlocked: gameTime + C.CONTROLLER_ATTACK_BLOCKED_UPGRADE
-        });
+        bulk.update(target, {downgradeTime});
+        target._upgradeBlocked = gameTime + C.CONTROLLER_ATTACK_BLOCKED_UPGRADE;
     }
     object.actionLog.attack = {x: target.x, y: target.y};
 };

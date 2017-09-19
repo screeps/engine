@@ -296,7 +296,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.safeModeAvailable <= 0) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
-        if(this.safeModeCooldown || this.upgradeBlocked > 0) {
+        if(this.safeModeCooldown || this.upgradeBlocked > 0 ||
+            this.ticksToDowngrade < C.CONTROLLER_DOWNGRADE[this.level] - C.CONTROLLER_DOWNGRADE_SAFEMODE_THRESHOLD) {
             return C.ERR_TIRED;
         }
         if(_.any(register.structures, i => i.structureType == 'controller' && i.my && i.safeMode)) {
