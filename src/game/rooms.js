@@ -1173,7 +1173,7 @@ exports.makePos = function(_register) {
     RoomPosition.prototype.getDirectionTo = register.wrapFn(function(firstArg, secondArg) {
         var [x,y,roomName] = utils.fetchXYArguments(firstArg, secondArg, globals);
 
-        if(roomName == this.roomName) {
+        if(!roomName || roomName == this.roomName) {
             return utils.getDirection(x - this.x, y - this.y);
         }
 
