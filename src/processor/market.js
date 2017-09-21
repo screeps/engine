@@ -114,13 +114,14 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                         return;
                     }
 
-                    var fee = utils.roundCredits(intent.price * intent.totalAmount * C.MARKET_FEE);
+                    var fee = Math.ceil(intent.price * intent.totalAmount * C.MARKET_FEE);
 
                     if (user.money < fee) {
                         return;
                     }
 
-                    bulkUsers.update(user, {money: user.money - fee});
+
+                    bulkUsers.inc(user, 'money', -fee);
 
                     bulkMarketOrders.insert(_.extend({
                         created: gameTime,
@@ -131,13 +132,15 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                         remainingAmount: intent.totalAmount
                     }, intent));
 
+                    intent.price /= 1000;
+
                     bulkUsersMoney.insert({
                         date: new Date(),
                         tick: gameTime,
                         user: userIntents.user,
                         type: 'market.fee',
-                        balance: user.money,
-                        change: -fee,
+                        balance: user.money/1000,
+                        change: -fee/1000,
                         market: {
                             order: intent
                         }
@@ -157,26 +160,26 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
 
                     if(intent.newPrice > order.price) {
 
-                        var fee = utils.roundCredits((intent.newPrice - order.price) * order.remainingAmount * C.MARKET_FEE);
+                        var fee = Math.ceil((intent.newPrice - order.price) * order.remainingAmount * C.MARKET_FEE);
 
                         if (user.money < fee) {
                             return;
                         }
 
-                        bulkUsers.update(user, {money: user.money - fee});
+                        bulkUsers.inc(user, 'money', -fee);
 
                         bulkUsersMoney.insert({
                             date: new Date(),
                             tick: gameTime,
                             user: userIntents.user,
                             type: 'market.fee',
-                            balance: user.money,
-                            change: -fee,
+                            balance: user.money/1000,
+                            change: -fee/1000,
                             market: {
                                 changeOrderPrice: {
                                     orderId: intent.orderId,
-                                    oldPrice: order.price,
-                                    newPrice: intent.newPrice
+                                    oldPrice: order.price/1000,
+                                    newPrice: intent.newPrice/1000
                                 }
                             }
                         });
@@ -196,21 +199,21 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                         return;
                     }
 
-                    var fee = utils.roundCredits(order.price * intent.addAmount * C.MARKET_FEE);
+                    var fee = Math.ceil(order.price * intent.addAmount * C.MARKET_FEE);
 
                     if (user.money < fee) {
                         return;
                     }
 
-                    bulkUsers.update(user, {money: user.money - fee});
+                    bulkUsers.inc(user, 'money', -fee);
 
                     bulkUsersMoney.insert({
                         date: new Date(),
                         tick: gameTime,
                         user: userIntents.user,
                         type: 'market.fee',
-                        balance: user.money,
-                        change: -fee,
+                        balance: user.money/1000,
+                        change: -fee/1000,
                         market: {
                             extendOrder: {
                                 orderId: intent.orderId,
@@ -254,6 +257,7 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                     if(!terminalsByRoom[intent.targetRoomName] || terminalsByRoom[intent.targetRoomName].user != userIntents.user) {
                         return;
                     }
+
                     terminalDeals.push(intent);
                 });
             }
@@ -296,12 +300,12 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                 return;
             }
 
-            var dealCost = utils.roundCredits(amount * order.price);
+            var dealCost = amount * order.price;
 
             if(buyer.user) {
                 dealCost = Math.min(dealCost, usersById[buyer.user].money || 0);
                 amount = Math.floor(dealCost/order.price);
-                dealCost = utils.roundCredits(amount * order.price);
+                dealCost = amount * order.price;
                 if(!amount) {
                     return;
                 }
@@ -310,42 +314,42 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
             if(executeTransfer(seller, buyer, order.resourceType, amount, targetTerminal, {order: {
                     id: ""+order._id,
                     type: order.type,
-                    price: order.price
+                    price: order.price/1000
                 }})) {
 
                 if(seller.user) {
-                    bulkUsers.update(usersById[seller.user], {money: (usersById[seller.user].money||0) + dealCost});
+                    bulkUsers.inc(usersById[seller.user], 'money', dealCost);
                     bulkUsersMoney.insert({
                         date: new Date(),
                         tick: gameTime,
                         user: seller.user,
                         type: 'market.sell',
-                        balance: usersById[seller.user].money,
-                        change: dealCost,
+                        balance: usersById[seller.user].money/1000,
+                        change: dealCost/1000,
                         market: {
                             resourceType: order.resourceType,
                             roomName: order.roomName,
                             targetRoomName: deal.targetRoomName,
-                            price: order.price,
+                            price: order.price/1000,
                             npc: !buyer.user,
                             amount
                         }
                     });
                 }
                 if(buyer.user) {
-                    bulkUsers.update(usersById[buyer.user], {money: (usersById[buyer.user].money||0) - dealCost});
+                    bulkUsers.inc(usersById[buyer.user], 'money', -dealCost);
                     bulkUsersMoney.insert({
                         date: new Date(),
                         tick: gameTime,
                         user: buyer.user,
                         type: 'market.buy',
-                        balance: usersById[buyer.user].money,
-                        change: -dealCost,
+                        balance: usersById[buyer.user].money/1000,
+                        change: -dealCost/1000,
                         market: {
                             resourceType: order.resourceType,
                             roomName: order.roomName,
                             targetRoomName: deal.targetRoomName,
-                            price: order.price,
+                            price: order.price/1000,
                             npc: !seller.user,
                             amount
                         }
@@ -387,29 +391,25 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                 return;
             }
 
-            var dealCost = utils.roundCredits(amount * order.price);
+            var dealCost = amount * order.price;
 
             if(buyer.user && (!buyer.money || buyer.money < dealCost)) {
                 return;
             }
 
+            bulkUsers.inc(seller, 'money', dealCost);
+            bulkUsers.inc(seller, userFieldName, -amount);
 
-
-
-            bulkUsers.update(seller, {
-                money: (seller.money||0) + dealCost,
-                [userFieldName]: (seller[userFieldName]||0) - amount
-            });
             bulkUsersMoney.insert({
                 date: new Date(),
                 tick: gameTime,
                 user: ""+seller._id,
                 type: 'market.sell',
-                balance: seller.money,
-                change: dealCost,
+                balance: seller.money/1000,
+                change: dealCost/1000,
                 market: {
                     resourceType: order.resourceType,
-                    price: order.price,
+                    price: order.price/1000,
                     amount
                 }
             });
@@ -426,20 +426,19 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                 }
             });
 
-            bulkUsers.update(buyer, {
-                money: (buyer.money||0) - dealCost,
-                [userFieldName]: (buyer[userFieldName]||0) + amount
-            });
+            bulkUsers.inc(buyer, 'money', -dealCost);
+            bulkUsers.inc(buyer, userFieldName, amount);
+
             bulkUsersMoney.insert({
                 date: new Date(),
                 tick: gameTime,
                 user: ""+buyer._id,
                 type: 'market.buy',
-                balance: buyer.money,
-                change: -dealCost,
+                balance: buyer.money/1000,
+                change: -dealCost/1000,
                 market: {
                     resourceType: order.resourceType,
-                    price: order.price,
+                    price: order.price/1000,
                     amount
                 }
             });

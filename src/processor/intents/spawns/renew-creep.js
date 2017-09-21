@@ -37,7 +37,6 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
 
     stats.inc('energyCreeps', object.user, cost);
 
-    target.ageTime += effect;
     target.actionLog.healed = {x: object.x, y: object.y};
     bulk.inc(target, 'ageTime', effect);
 

@@ -19,6 +19,9 @@ exports.make = function(runtimeData, intents, register) {
                 return {};
             }
             cachedOrders[resourceType] = JSON.parse(JSON.stringify(runtimeData.market.orders[resourceType] || '{}'));
+            for(var i in cachedOrders[resourceType]) {
+                cachedOrders[resourceType][i].price /= 1000;
+            }
         }
         return cachedOrders[resourceType];
     }
@@ -85,7 +88,7 @@ exports.make = function(runtimeData, intents, register) {
                 return C.ERR_INVALID_ARGS;
             }
             amount = parseInt(amount);
-            if(!amount || amount < 0 || !utils.roundCredits(amount * order.price)) {
+            if(!amount || amount < 0) {
                 return C.ERR_INVALID_ARGS;
             }
             if(order.resourceType == C.SUBSCRIPTION_TOKEN) {
@@ -170,7 +173,7 @@ exports.make = function(runtimeData, intents, register) {
         credits: {
             enumerable: true,
             get() {
-                return runtimeData.user.money || 0;
+                return (runtimeData.user.money || 0)/1000;
             }
         },
 
@@ -214,6 +217,7 @@ exports.make = function(runtimeData, intents, register) {
                         i.id = ""+i._id;
                         delete i._id;
                         delete i.user;
+                        i.price /= 1000;
                         return i;
                     }).indexBy('id').value();
                 }
