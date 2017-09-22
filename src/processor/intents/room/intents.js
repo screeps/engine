@@ -22,6 +22,11 @@ module.exports = function(userId, objectIntents, roomObjects, roomTerrain, bulk,
             require('./create-construction-site')(i, userId, roomObjects, roomTerrain, bulk, bulkUsers, roomController);
         });
     }
+    if(objectIntents.removeConstructionSite) {
+        _.forEach(objectIntents.removeConstructionSite, (i) => {
+            require('./remove-construction-site')(i, userId, roomObjects, roomTerrain, bulk, bulkUsers, roomController);
+        });
+    }
     if(objectIntents.destroyStructure) {
         _.forEach(objectIntents.destroyStructure, (i) => {
             require('./destroy-structure')(i, userId, roomObjects, roomTerrain, bulk, bulkUsers, roomController);
