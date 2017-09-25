@@ -67,7 +67,7 @@ function newEnergyHandling(spawn, roomObjects, cost, bulk, energyStructures){
     return true;
 }
 
-module.exports = function(spawn, roomObjects, cost, bulk, energyStructures) {
+module.exports = function chargeEnergy(spawn, roomObjects, cost, bulk, energyStructures) {
     if(energyStructures === undefined) {
         return oldEnergyHandling(spawn, roomObjects, cost, bulk);
     } else {
