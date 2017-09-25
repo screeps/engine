@@ -530,28 +530,33 @@
                 throw new Error(`Unknown module '${moduleName}'`);
             }
 
-            this.globals.require.cache[moduleName] = -1;
-
-            var moduleObject = {
-                exports: {},
-                user: this.runtimeData.user._id,
-                timestamp: this.runtimeData.userCodeTimestamp,
-                name: moduleName,
-                code: this.codeModules[moduleName]
-            };
-
-            try {
-                driver.evalCode(moduleObject, this.globals, false, this.timeout, this.scriptCachedData);
+            if(_.isObject(this.codeModules[moduleName]) && this.codeModules[moduleName].binary) {
+                this.globals.require.cache[moduleName] = driver.bufferFromBase64(this.codeModules[moduleName].binary);
             }
-            catch(e) {
-                delete this.globals.require.cache[moduleName];
-                throw e;
-            }
+            else {
+                this.globals.require.cache[moduleName] = -1;
 
-            this.globals.require.cache[moduleName] = moduleObject.exports;
-            if(moduleObject.__initGlobals) {
-                this.globals.require.initGlobals = this.globals.require.initGlobals || {};
-                this.globals.require.initGlobals[moduleName] = moduleObject.__initGlobals;
+                var moduleObject = {
+                    exports: {},
+                    user: this.runtimeData.user._id,
+                    timestamp: this.runtimeData.userCodeTimestamp,
+                    name: moduleName,
+                    code: this.codeModules[moduleName]
+                };
+
+                try {
+                    driver.evalCode(moduleObject, this.globals, false, this.timeout, this.scriptCachedData);
+                }
+                catch (e) {
+                    delete this.globals.require.cache[moduleName];
+                    throw e;
+                }
+
+                this.globals.require.cache[moduleName] = moduleObject.exports;
+                if (moduleObject.__initGlobals) {
+                    this.globals.require.initGlobals = this.globals.require.initGlobals || {};
+                    this.globals.require.initGlobals[moduleName] = moduleObject.__initGlobals;
+                }
             }
         }
         else if (this.globals.require.cache[moduleName] === -1) {
