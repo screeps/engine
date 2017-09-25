@@ -458,6 +458,23 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                     });
                 });
             }
+            if(roomIntentsResult.removeConstructionSite) {
+                _.forEach(roomIntentsResult.removeConstructionSite, (iRemoveConstructionSite) => {
+
+                    intents[iRemoveConstructionSite.roomName] =
+                        intents[iRemoveConstructionSite.roomName] || {};
+
+                    var roomIntents = intents[iRemoveConstructionSite.roomName].room =
+                        intents[iRemoveConstructionSite.roomName].room || {};
+
+                    roomIntents.removeConstructionSite = roomIntents.removeConstructionSite || [];
+
+                    roomIntents.removeConstructionSite.push({
+                        roomName: ""+iRemoveConstructionSite.roomName,
+                        id: ""+iRemoveConstructionSite.id
+                    });
+                });
+            }
             if(roomIntentsResult.destroyStructure) {
                 _.forEach(roomIntentsResult.destroyStructure, (iDestroyStructure) => {
 

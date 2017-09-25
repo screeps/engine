@@ -150,9 +150,6 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
                         require('./processor/intents/spawns/intents')(object, objectIntents, objects, terrain, bulk, userBulk, roomController, stats, gameTime);
 
                     if (object.type == 'constructionSite') {
-                        if (objectIntents.remove) {
-                            require('./processor/intents/construction-sites/remove')(object, objects, bulk);
-                        }
                     }
 
                     if (object.type == 'rampart') {
