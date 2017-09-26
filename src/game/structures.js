@@ -996,15 +996,12 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
         createdCreepNames.push(name);
 
-        if(_.isUndefined(globals.Memory.creeps)) {
-            globals.Memory.creeps = {};
-        }
-        if(_.isObject(globals.Memory.creeps)) {
-            if(!_.isUndefined(creepMemory)) {
-                globals.Memory.creeps[name] = creepMemory;
+        if(!_.isUndefined(creepMemory)) {
+            if(_.isUndefined(globals.Memory.creeps)) {
+                globals.Memory.creeps = {};
             }
-            else {
-                globals.Memory.creeps[name] = globals.Memory.creeps[name] || {};
+            if(_.isObject(globals.Memory.creeps)) {
+                globals.Memory.creeps[name] = creepMemory;
             }
         }
 
