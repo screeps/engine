@@ -1089,6 +1089,150 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return name;
     });
 
+    function calcEnergyAvailable(roomObjects, energyStructures){
+        return _.sum(energyStructures, id => {
+            if (roomObjects[id] && !roomObjects[id].off && (roomObjects[id].type === 'spawn' || roomObjects[id].type === 'extension')) {
+                return roomObjects[id].energy;
+            } else {
+                return 0;
+            }
+        });
+    }
+
+    StructureSpawn.prototype.spawnCreep = register.wrapFn(function spawnCreep(body, name, options = {}) {
+
+        if(!name || !_.isObject(options)) {
+            return C.ERR_INVALID_ARGS;
+        }
+
+        if(globals.Game.creeps[name] || createdCreepNames.indexOf(name) != -1) {
+            return C.ERR_NAME_EXISTS;
+        }
+
+        let energyStructures = options.energyStructures && _.map(options.energyStructures, 'id');
+
+        if(!this.my) {
+            return C.ERR_NOT_OWNER;
+        }
+
+        if(data(this.id).spawning) {
+            return C.ERR_BUSY;
+        }
+
+        if(data(this.id).off) {
+            return C.ERR_RCL_NOT_ENOUGH;
+        }
+
+        if(!body || !_.isArray(body) || body.length === 0 || body.length > C.MAX_CREEP_SIZE) {
+            return C.ERR_INVALID_ARGS;
+        }
+
+        for(let i=0; i<body.length; i++) {
+            if(!_.contains(C.BODYPARTS_ALL, body[i]))
+                return C.ERR_INVALID_ARGS;
+        }
+
+        let energyAvailable = energyStructures ? calcEnergyAvailable(roomObjects, energyStructures) : this.room.energyAvailable;
+        if(energyAvailable < utils.calcCreepCost(body)) {
+            return C.ERR_NOT_ENOUGH_ENERGY;
+        }
+
+        if(options.dryRun) {
+            return C.OK;
+        }
+
+        createdCreepNames.push(name);
+
+        if(_.isUndefined(globals.Memory.creeps)) {
+            globals.Memory.creeps = {};
+        }
+
+        if(_.isObject(globals.Memory.creeps)) {
+            globals.Memory.creeps[name] = options.memory || globals.Memory.creeps[name] || {};
+        }
+
+        globals.Game.creeps[name] = new globals.Creep();
+        globals.RoomObject.call(globals.Game.creeps[name], this.pos.x, this.pos.y, this.pos.roomName);
+        Object.defineProperties(globals.Game.creeps[name], {
+            name: {
+                enumerable: true,
+                get() {
+                    return name;
+                }
+            },
+            spawning: {
+                enumerable: true,
+                get() {
+                    return true;
+                }
+            },
+            my: {
+                enumerable: true,
+                get() {
+                    return true;
+                }
+            },
+            body: {
+                enumerable: true,
+                get() {
+                    return _.map(body, type => ({type, hits: 100}))
+                }
+            },
+            owner: {
+                enumerable: true,
+                get() {
+                    return new Object({username: runtimeData.user.username});
+                }
+            },
+            ticksToLive: {
+                enumerable: true,
+                get() {
+                    return C.CREEP_LIFE_TIME;
+                }
+            },
+            carryCapacity: {
+                enumerable: true,
+                get() {
+                    return _.reduce(body, (result, type) => result += type === C.CARRY ? C.CARRY_CAPACITY : 0, 0);
+                }
+            },
+            carry: {
+                enumerable: true,
+                get() {
+                    return {energy: 0};
+                }
+            },
+            fatigue: {
+                enumerable: true,
+                get() {
+                    return 0;
+                }
+            },
+            hits: {
+                enumerable: true,
+                get() {
+                    return body.length * 100;
+                }
+            },
+            hitsMax: {
+                enumerable: true,
+                get() {
+                    return body.length * 100;
+                }
+            },
+            saying: {
+                enumerable: true,
+                get() {
+                    return undefined;
+                }
+            }
+        });
+
+        intents.set(this.id, 'createCreep', {name, body, energyStructures});
+
+        return C.OK;
+    });
+
     StructureSpawn.prototype.transferEnergy = register.wrapFn(function(target, amount) {
 
         register.deprecated('`StructureSpawn.transferEnergy` is considered deprecated and will be removed soon. Please use `Creep.withdraw` instead.')
