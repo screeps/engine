@@ -19,7 +19,7 @@ module.exports = function(spawn, intent, roomObjects, roomTerrain, bulk, bulkUse
     intent.body = intent.body.slice(0, C.MAX_CREEP_SIZE);
 
     var cost = utils.calcCreepCost(intent.body);
-    var result = require('./_charge-energy')(spawn, roomObjects, cost, bulk, roomController);
+    var result = require('./_charge-energy')(spawn, roomObjects, cost, bulk, intent.energyStructures);
 
     if(!result) {
         return;

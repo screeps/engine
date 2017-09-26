@@ -29,7 +29,7 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
     }
 
     var cost = Math.ceil(C.SPAWN_RENEW_RATIO * utils.calcCreepCost(target.body) / C.CREEP_SPAWN_TIME / target.body.length);
-    var result = require('./_charge-energy')(object, roomObjects, cost, bulk, roomController);
+    var result = require('./_charge-energy')(object, roomObjects, cost, bulk);
 
     if(!result) {
         return;
