@@ -55,19 +55,19 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
                 y = object.y,
                 room = object.room;
 
-            if (object.x == 0) {
+            if (x == 0) {
                 x = 49;
                 roomX = roomX - 1;
             }
-            else if (object.x == 49) {
+            else if (x == 49) {
                 x = 0;
                 roomX = roomX + 1;
             }
-            if (object.y == 0) {
+            if (y == 0) {
                 y = 49;
                 roomY = roomY - 1;
             }
-            else if (object.y == 49) {
+            else if (y == 49) {
                 y = 0;
                 roomY = roomY + 1;
             }
