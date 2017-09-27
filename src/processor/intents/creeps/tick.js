@@ -57,20 +57,21 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
 
             if (object.x == 0) {
                 x = 49;
-                room = utils.getRoomNameFromXY(roomX-1, roomY);
-            }
-            else if (object.y == 0) {
-                y = 49;
-                room = utils.getRoomNameFromXY(roomX, roomY-1);
+                roomX = roomX - 1;
             }
             else if (object.x == 49) {
                 x = 0;
-                room = utils.getRoomNameFromXY(roomX+1, roomY);
+                roomX = roomX + 1;
+            }
+            if (object.y == 0) {
+                y = 49;
+                roomY = roomY - 1;
             }
             else if (object.y == 49) {
                 y = 0;
-                room = utils.getRoomNameFromXY(roomX, roomY+1);
+                roomY = roomY + 1;
             }
+            room = utils.getRoomNameFromXY(roomX, roomY);
 
             bulk.update(object, {interRoom: {room, x, y}});
         }
