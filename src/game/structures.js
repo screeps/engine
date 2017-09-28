@@ -1109,7 +1109,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NAME_EXISTS;
         }
 
-        let energyStructures = options.energyStructures && _.map(options.energyStructures, 'id');
+        let energyStructures = options.energyStructures && _.uniq(_.map(options.energyStructures, 'id'));
 
         if(!this.my) {
             return C.ERR_NOT_OWNER;
