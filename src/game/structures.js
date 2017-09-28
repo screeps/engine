@@ -1132,7 +1132,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 return C.ERR_INVALID_ARGS;
         }
 
-        let energyAvailable = energyStructures ? calcEnergyAvailable(roomObjects, energyStructures) : this.room.energyAvailable;
+        let energyAvailable = energyStructures ? calcEnergyAvailable(runtimeData.roomObjects, energyStructures) : this.room.energyAvailable;
         if(energyAvailable < utils.calcCreepCost(body)) {
             return C.ERR_NOT_ENOUGH_ENERGY;
         }

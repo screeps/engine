@@ -46,7 +46,7 @@ function newEnergyHandling(spawn, roomObjects, cost, bulk, energyStructures){
             (energyStructure.type === 'spawn' || energyStructure.type === 'extension');
     });
 
-    let availableEnergy = _.sum(energyStructures, 'energy');
+    let availableEnergy = _.sum(energyStructures, id => roomObjects[id].energy);
     if(availableEnergy < cost) {
         return false;
     }
