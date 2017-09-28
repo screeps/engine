@@ -912,48 +912,15 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(_.isUndefined(x) || _.isUndefined(y) || x < 0 || x > 49 || y < 0 || y > 49) {
             return C.ERR_INVALID_ARGS;
         }
-        if(_.size(globals.Game.flags) >= C.FLAGS_LIMIT) {
-            return C.ERR_FULL;
-        }
         if(_.isObject(firstArg)) {
             secondaryColor = color;
             color = name;
             name = secondArg;
         }
-        if(!color) {
-            color = C.COLOR_WHITE;
-        }
-        if(!secondaryColor) {
-            secondaryColor = color;
-        }
-        if(!_.contains(C.COLORS_ALL, color)) {
-            return C.ERR_INVALID_ARGS;
-        }
-        if(!_.contains(C.COLORS_ALL, secondaryColor)) {
-            return C.ERR_INVALID_ARGS;
-        }
-        if(!name) {
-            var cnt = 1;
-            do {
-                name = 'Flag'+cnt;
-                cnt++;
-            }
-            while(_.any(register.flags, {name}) || createdFlagNames.indexOf(name) != -1);
-        }
-        if(_.any(register.flags, {name}) || createdFlagNames.indexOf(name) != -1) {
-            return C.ERR_NAME_EXISTS;
-        }
-        if(name.length > 60) {
-            return C.ERR_INVALID_ARGS;
-        }
 
-        createdFlagNames.push(name);
+        var pos = new globals.RoomPosition(x, y, this.name);
 
-        globals.Game.flags[name] = new globals.Flag(name, color, secondaryColor, this.name, x, y);
-
-        intents.pushByName('room', 'createFlag', {roomName: this.name, x, y, name, color, secondaryColor});
-
-        return name;
+        return pos.createFlag(name, color, secondaryColor);
     });
 
     Room.prototype.createConstructionSite = register.wrapFn(function(firstArg, secondArg, structureType) {
@@ -1398,11 +1365,45 @@ exports.makePos = function(_register) {
     });
 
     RoomPosition.prototype.createFlag = register.wrapFn(function(name, color, secondaryColor) {
-        var room = register.rooms[this.roomName];
-        if(!room) {
-            throw new Error(`Could not access room ${this.roomName}`);
+        if(_.size(globals.Game.flags) >= C.FLAGS_LIMIT) {
+            return C.ERR_FULL;
         }
-        return room.createFlag(this, name, color, secondaryColor);
+        if(!color) {
+            color = C.COLOR_WHITE;
+        }
+        else if(!_.contains(C.COLORS_ALL, color)) {
+            return C.ERR_INVALID_ARGS;
+        }
+        if(!secondaryColor) {
+            secondaryColor = color;
+        }
+        else if(!_.contains(C.COLORS_ALL, secondaryColor)) {
+            return C.ERR_INVALID_ARGS;
+        }
+        if(!name) {
+            var cnt = 1;
+            do {
+                name = 'Flag'+cnt;
+                cnt++;
+            }
+            while(_.any(register.flags, {name}) || createdFlagNames.indexOf(name) != -1);
+        }
+        else {
+            if(_.any(register.flags, {name}) || createdFlagNames.indexOf(name) != -1) {
+                return C.ERR_NAME_EXISTS;
+            }
+            if(name.length > 60) {
+                return C.ERR_INVALID_ARGS;
+            }
+        }
+
+        createdFlagNames.push(name);
+
+        globals.Game.flags[name] = new globals.Flag(name, color, secondaryColor, this.roomName, this.x, this.y);
+
+        intents.pushByName('room', 'createFlag', {roomName: this.roomName, x: this.x, y: this.y, name, color, secondaryColor});
+
+        return name;
     });
 
     RoomPosition.prototype.createConstructionSite = register.wrapFn(function(structureType) {
