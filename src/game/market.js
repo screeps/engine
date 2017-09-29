@@ -18,7 +18,7 @@ exports.make = function(runtimeData, intents, register) {
             if(resourceType != 'all' && !_.contains(C.RESOURCES_ALL, resourceType) && resourceType != C.SUBSCRIPTION_TOKEN) {
                 return {};
             }
-            cachedOrders[resourceType] = JSON.parse(JSON.stringify(runtimeData.market.orders[resourceType] || '{}'));
+            cachedOrders[resourceType] = JSON.parse(JSON.stringify(runtimeData.market.orders[resourceType]) || '{}');
             for(var i in cachedOrders[resourceType]) {
                 cachedOrders[resourceType][i].price /= 1000;
             }
