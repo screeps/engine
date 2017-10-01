@@ -75,9 +75,11 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
             bulk.update(object, {interRoom: {room, x, y}});
         }
 
-        var portal = _.find(roomObjects, i => i.type == 'portal' && i.x == object.x && i.y == object.y);
-        if(portal) {
-            bulk.update(object, {interRoom: portal.destination});
+        if(object.ageTime) { // since NPC creeps may appear right on portals without `ageTime` defined at the first tick
+            var portal = _.find(roomObjects, i => i.type == 'portal' && i.x == object.x && i.y == object.y);
+            if (portal) {
+                bulk.update(object, {interRoom: portal.destination});
+            }
         }
 
         if(!object.tutorial) {
