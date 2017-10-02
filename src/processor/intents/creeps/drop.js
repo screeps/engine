@@ -17,7 +17,8 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk) {
 
     if(intent.amount > 0) {
         object[intent.resourceType] -= intent.amount;
-        require('./_create-energy')(object.x, object.y, object.room, intent.amount, roomObjects, bulk, intent.resourceType);
+        require('./_create-energy')(object.x, object.y, object.room, intent.amount, roomObjects, bulk,
+            intent.resourceType, object.dropToContainer);
     }
 
     bulk.update(object, {[intent.resourceType]: object[intent.resourceType]});

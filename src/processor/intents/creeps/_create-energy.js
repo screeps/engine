@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(x, y, room, amount, roomObjects, bulk, resourceType) {
+module.exports = function(x, y, room, amount, roomObjects, bulk, resourceType, dropToContainer) {
 
     resourceType = resourceType || 'energy';
 
@@ -15,13 +15,31 @@ module.exports = function(x, y, room, amount, roomObjects, bulk, resourceType) {
 
     var container = _.find(roomObjects, {type: 'container', x, y});
 
+    if(!container && dropToContainer) {
+        container = {
+            room,
+            x,
+            y,
+            type: 'container',
+            energyCapacity: 0,
+            hits: C.CONTAINER_HITS,
+            hitsMax: 0
+        };
+        roomObjects['_dropContainer'+Date.now()] = container;
+    }
+
     if(container && container.hits > 0) {
         var targetTotal = utils.calcResources(container);
         var toContainerAmount = Math.min(amount, container.energyCapacity - targetTotal);
+        if(dropToContainer) {
+            toContainerAmount = amount;
+        }
         if(toContainerAmount > 0) {
             container[resourceType] = container[resourceType] || 0;
             container[resourceType] += toContainerAmount;
-            bulk.update(container, {[resourceType]: container[resourceType]});
+            if(container._id) {
+                bulk.update(container, {[resourceType]: container[resourceType]});
+            }
             amount -= toContainerAmount;
         }
     }
