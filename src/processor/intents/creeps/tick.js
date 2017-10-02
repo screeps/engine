@@ -93,7 +93,7 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
                 C.RESOURCES_ALL.forEach(resourceType => {
                     var amount = object[resourceType];
                     if (amount) {
-                        require('./_create-energy')(object.x, object.y, object.room, amount, roomObjects, bulk, resourceType);
+                        require('./_create-energy')(object.x, object.y, object.room, amount, roomObjects, bulk, resourceType, object.dropToContainer);
                     }
                 });
 

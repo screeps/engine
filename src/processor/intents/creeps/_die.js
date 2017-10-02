@@ -26,14 +26,15 @@ module.exports = function(object, roomObjects, bulk, stats, dropRate) {
 
         _.forEach(bodyResources, (amount, resourceType) => {
             if(amount > 0) {
-                require('./_create-energy')(object.x, object.y, object.room, Math.floor(amount), roomObjects, bulk, resourceType);
+                require('./_create-energy')(object.x, object.y, object.room, Math.floor(amount), roomObjects, bulk,
+                    resourceType, object.dropToContainer);
             }
         });
 
         C.RESOURCES_ALL.forEach(resourceType => {
             if (object[resourceType] > 0) {
                 require('./_create-energy')(object.x, object.y, object.room,
-                object[resourceType], roomObjects, bulk, resourceType);
+                    object[resourceType], roomObjects, bulk, resourceType, object.dropToContainer);
             }
         });
     }
