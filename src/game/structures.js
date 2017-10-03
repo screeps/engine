@@ -914,6 +914,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     });
 
     Object.defineProperty(StructureSpawn.prototype, 'memory', {
+        configurable: true,
         get: function() {
             if(!this.my) {
                 return undefined;
