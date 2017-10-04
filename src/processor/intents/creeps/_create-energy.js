@@ -25,7 +25,8 @@ module.exports = function(x, y, room, amount, roomObjects, bulk, resourceType, d
             hits: C.CONTAINER_HITS,
             hitsMax: 0
         };
-        roomObjects['_dropContainer'+Date.now()] = container;
+        container._id = bulk.insert(container);
+        roomObjects[container._id] = container;
     }
 
     if(container && container.hits > 0) {
@@ -37,9 +38,7 @@ module.exports = function(x, y, room, amount, roomObjects, bulk, resourceType, d
         if(toContainerAmount > 0) {
             container[resourceType] = container[resourceType] || 0;
             container[resourceType] += toContainerAmount;
-            if(container._id) {
-                bulk.update(container, {[resourceType]: container[resourceType]});
-            }
+            bulk.update(container, {[resourceType]: container[resourceType]});
             amount -= toContainerAmount;
         }
     }
