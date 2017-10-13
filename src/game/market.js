@@ -42,7 +42,9 @@ exports.make = function(runtimeData, intents, register) {
             if(!runtimeData.market.orders.all[id]) {
                 return null;
             }
-            return JSON.parse(JSON.stringify(runtimeData.market.orders.all[id]));
+            var result = JSON.parse(JSON.stringify(runtimeData.market.orders.all[id]));
+            result.price /= 1000;
+            return result;
         }),
 
         createOrder: register.wrapFn(function(type, resourceType, price, totalAmount, roomName) {
