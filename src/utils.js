@@ -805,6 +805,11 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                 sign: (""+objectIntentsResult.signController.sign).substring(0,100)
             };
         }
+        if(objectIntentsResult.setSpawnDirections) {
+            objectIntents.setSpawnDirections = {
+                spawnDirections: objectIntentsResult.setSpawnDirections.spawnDirections
+            };
+        }
 
 
         for(var iCustomType in driver.config.customIntentTypes) {

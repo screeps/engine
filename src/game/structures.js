@@ -910,7 +910,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         name: (o) => o.user == runtimeData.user._id ? o.name : undefined,
         energy: (o) => o.energy,
         energyCapacity: (o) => o.energyCapacity,
-        spawning: (o) => o.spawning || null
+        spawning: (o) => o.spawning || null,
+        spawnDirections: (o) => o.user == runtimeData.user._id ? o.spawnDirections : undefined
     });
 
     Object.defineProperty(StructureSpawn.prototype, 'memory', {
@@ -1350,6 +1351,22 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
         intents.set(this.id, 'recycleCreep', {id: target.id});
         return C.OK;
+    });
+
+    StructureSpawn.prototype.setSpawnDirections = register.wrapFn(function(spawnDirections) {
+        if(!this.my) {
+            return C.ERR_NOT_OWNER;
+        }
+        if(_.isArray(spawnDirections) && spawnDirections.length > 0) {
+            // convert directions to numbers, eliminate duplicates
+            spawnDirections = _.uniq(_.map(spawnDirections, e => +e));
+            // bail if any numbers are out of bounds or non-integers
+            if(!_.any(spawnDirections, (direction)=>direction < 1 || direction > 8 || direction !== (direction | 0))) {
+                intents.set(this.id, 'setSpawnDirections', {spawnDirections});
+                return C.OK;
+            }
+        }
+        return C.ERR_INVALID_ARGS;
     });
 
     globals.StructureSpawn = StructureSpawn;
