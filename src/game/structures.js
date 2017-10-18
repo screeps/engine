@@ -910,7 +910,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         name: (o) => o.user == runtimeData.user._id ? o.name : undefined,
         energy: (o) => o.energy,
         energyCapacity: (o) => o.energyCapacity,
-        spawning: (o) => o.spawning || null,
+        spawning: (o) => (o.user == runtimeData.user._id ? o.spawning : _.omit(o.spawning, 'spawnDirections')) || null,
         spawnDirections: (o) => o.user == runtimeData.user._id ? o.spawnDirections : undefined
     });
 
@@ -1112,6 +1112,21 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
         let energyStructures = options.energyStructures && _.uniq(_.map(options.energyStructures, 'id'));
 
+        let spawnDirections = options.spawnDirections;
+        if(spawnDirections !== undefined) {
+            if(!_.isArray(spawnDirections)) {
+                return C.ERR_INVALID_ARGS;
+            }
+            // convert directions to numbers, eliminate duplicates
+            spawnDirections = _.uniq(_.map(spawnDirections, d => +d));
+            if(spawnDirections.length > 0) {
+                // bail if any numbers are out of bounds or non-integers
+                if(!_.all(spawnDirections, direction => direction >= 1 && direction <= 8 && direction === (direction | 0))) {
+                    return C.ERR_INVALID_ARGS;
+                }
+            }
+        }
+
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
@@ -1229,7 +1244,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             }
         });
 
-        intents.set(this.id, 'createCreep', {name, body, energyStructures});
+        intents.set(this.id, 'createCreep', {name, body, energyStructures, spawnDirections});
 
         return C.OK;
     });

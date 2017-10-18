@@ -665,7 +665,8 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
             objectIntents.createCreep = {
                 name: ""+objectIntentsResult.createCreep.name,
                 body: _.filter(objectIntentsResult.createCreep.body, (i) => _.contains(C.BODYPARTS_ALL, i)),
-                energyStructures: objectIntentsResult.createCreep.energyStructures
+                energyStructures: objectIntentsResult.createCreep.energyStructures,
+                spawnDirections: objectIntentsResult.createCreep.spawnDirections
             };
         }
         if(objectIntentsResult.renewCreep) {

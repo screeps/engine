@@ -16,6 +16,21 @@ module.exports = function(spawn, intent, roomObjects, roomTerrain, bulk, bulkUse
         return;
     }
 
+    let spawnDirections = intent.spawnDirections;
+    if(spawnDirections !== undefined) {
+        if(!_.isArray(spawnDirections)) {
+            return;
+        }
+        // convert directions to numbers, eliminate duplicates
+        spawnDirections = _.uniq(_.map(spawnDirections, e => +e));
+        if(spawnDirections.length > 0) {
+            // bail if any numbers are out of bounds or non-integers
+            if(!_.all(spawnDirections, direction => direction >= 1 && direction <= 8 && direction === (direction | 0))) {
+                return;
+            }
+        }
+    }
+
     intent.body = intent.body.slice(0, C.MAX_CREEP_SIZE);
 
     var cost = utils.calcCreepCost(intent.body);
@@ -33,7 +48,8 @@ module.exports = function(spawn, intent, roomObjects, roomTerrain, bulk, bulkUse
         spawning: {
             name: intent.name,
             needTime: C.CREEP_SPAWN_TIME * intent.body.length,
-            remainingTime: C.CREEP_SPAWN_TIME * intent.body.length
+            remainingTime: C.CREEP_SPAWN_TIME * intent.body.length,
+            spawnDirections
         }
     });
 
