@@ -255,10 +255,10 @@ function _findPath2(id, fromPos, toPos, opts) {
         searchOpts.plainCost = 2;
         searchOpts.swampCost = 10;
     }
-    if(!opts.plainCost) {
+    if(opts.plainCost) {
         searchOpts.plainCost = opts.plainCost;
     }
-    if(!opts.swampCost) {
+    if(opts.swampCost) {
         searchOpts.swampCost = opts.swampCost;
     }
 
