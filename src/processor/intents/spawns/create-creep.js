@@ -16,16 +16,16 @@ module.exports = function(spawn, intent, roomObjects, roomTerrain, bulk, bulkUse
         return;
     }
 
-    let spawnDirections = intent.spawnDirections;
-    if(spawnDirections !== undefined) {
-        if(!_.isArray(spawnDirections)) {
+    let directions = intent.directions;
+    if(directions !== undefined) {
+        if(!_.isArray(directions)) {
             return;
         }
         // convert directions to numbers, eliminate duplicates
-        spawnDirections = _.uniq(_.map(spawnDirections, e => +e));
-        if(spawnDirections.length > 0) {
+        directions = _.uniq(_.map(directions, e => +e));
+        if(directions.length > 0) {
             // bail if any numbers are out of bounds or non-integers
-            if(!_.all(spawnDirections, direction => direction >= 1 && direction <= 8 && direction === (direction | 0))) {
+            if(!_.all(directions, direction => direction >= 1 && direction <= 8 && direction === (direction | 0))) {
                 return;
             }
         }
@@ -46,10 +46,11 @@ module.exports = function(spawn, intent, roomObjects, roomTerrain, bulk, bulkUse
 
     bulk.update(spawn, {
         spawning: {
+            spawnId: spawn._id,
             name: intent.name,
             needTime: C.CREEP_SPAWN_TIME * intent.body.length,
             remainingTime: C.CREEP_SPAWN_TIME * intent.body.length,
-            spawnDirections
+            directions
         }
     });
 

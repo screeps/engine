@@ -666,7 +666,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                 name: ""+objectIntentsResult.createCreep.name,
                 body: _.filter(objectIntentsResult.createCreep.body, (i) => _.contains(C.BODYPARTS_ALL, i)),
                 energyStructures: objectIntentsResult.createCreep.energyStructures,
-                spawnDirections: objectIntentsResult.createCreep.spawnDirections
+                directions: objectIntentsResult.createCreep.directions
             };
         }
         if(objectIntentsResult.renewCreep) {
@@ -808,7 +808,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
         }
         if(objectIntentsResult.setSpawnDirections) {
             objectIntents.setSpawnDirections = {
-                spawnDirections: objectIntentsResult.setSpawnDirections.spawnDirections
+                directions: objectIntentsResult.setSpawnDirections.directions
             };
         }
 
