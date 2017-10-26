@@ -64,7 +64,8 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
             if (object.type == 'lab') {
                 object._actionLog = object.actionLog;
                 object.actionLog = {
-                    runReaction: null
+                    runReaction: null,
+                    reverseReaction: null
                 };
             }
             if (object.type == 'tower') {
