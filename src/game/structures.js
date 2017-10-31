@@ -1400,6 +1400,14 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.ERR_INVALID_ARGS;
     });
 
+    StructureSpawn.Spawning.prototype.cancel = register.wrapFn(function() {
+        if(!(new StructureSpawn(this.spawnId).my)) {
+            return C.ERR_NOT_OWNER;
+        }
+        intents.set(this.spawnId, 'cancelSpawning', {});
+        return C.OK;
+    });
+
     /**
      * StructureNuker
      * @param id
