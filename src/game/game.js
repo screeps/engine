@@ -530,7 +530,7 @@
                 throw new Error(`Unknown module '${moduleName}'`);
             }
 
-            if(_.isObject(this.codeModules[moduleName]) && this.codeModules[moduleName].binary) {
+            if(_.isObject(this.codeModules[moduleName]) && this.codeModules[moduleName].binary !== undefined) {
                 this.globals.require.cache[moduleName] = driver.bufferFromBase64(this.codeModules[moduleName].binary);
             }
             else {
