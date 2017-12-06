@@ -2,6 +2,7 @@ var _ = require('lodash');
 
 var priorities = {
     rangedHeal: ['heal'],
+    attackController: ['rangedHeal', 'heal'],
     dismantle: ['attackController','rangedHeal','heal'],
     repair: ['dismantle','attackController','rangedHeal','heal'],
     build: ['repair','dismantle','attackController','rangedHeal','heal'],
