@@ -665,7 +665,8 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
             objectIntents.createCreep = {
                 name: ""+objectIntentsResult.createCreep.name,
                 body: _.filter(objectIntentsResult.createCreep.body, (i) => _.contains(C.BODYPARTS_ALL, i)),
-                energyStructures: objectIntentsResult.createCreep.energyStructures
+                energyStructures: objectIntentsResult.createCreep.energyStructures,
+                directions: objectIntentsResult.createCreep.directions
             };
         }
         if(objectIntentsResult.renewCreep) {
@@ -803,6 +804,11 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
             objectIntents.signController = {
                 id: ""+objectIntentsResult.signController.id,
                 sign: (""+objectIntentsResult.signController.sign).substring(0,100)
+            };
+        }
+        if(objectIntentsResult.setSpawnDirections) {
+            objectIntents.setSpawnDirections = {
+                directions: objectIntentsResult.setSpawnDirections.directions
             };
         }
 
