@@ -1,5 +1,5 @@
 var utils = require('../utils'),
-    driver = utils.getDriver(),
+    driver = require('~runtime-driver'),
     C = driver.constants,
     _ = require('lodash'),
     util = require('util'),

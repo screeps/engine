@@ -2,10 +2,7 @@ var _ = require('lodash');
 
 var driver, C, offsetsByDirection;
 
-exports.getDriver = function getDriver() {
-    driver = typeof process != 'undefined' && process.env.DRIVER_MODULE ?
-        require(process.env.DRIVER_MODULE) :
-        require('./core/index');
+function loadDriver() {
     C = driver.constants;
     offsetsByDirection = {
         [C.TOP]: [0,-1],
@@ -17,6 +14,20 @@ exports.getDriver = function getDriver() {
         [C.LEFT]: [-1,0],
         [C.TOP_LEFT]: [-1,-1]
     };
+}
+
+try {
+    driver = require('~runtime-driver');
+    loadDriver();
+}
+catch(e) {}
+
+exports.getDriver = function getDriver() {
+    var driverPath = typeof process != 'undefined' && process.env.DRIVER_MODULE ?
+        process.env.DRIVER_MODULE :
+        './core/index';
+    driver = require(driverPath);
+    loadDriver();
     return driver;
 };
 
@@ -397,7 +408,6 @@ exports.comparatorDistance = function(target) {
 
 exports.storeIntents = function(userId, userIntents, userRuntimeData) {
     var intents = {};
-    var driver = exports.getDriver();
 
     for(var i in userIntents) {
 
@@ -807,27 +817,27 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
         }
 
 
-        for(var iCustomType in driver.config.customIntentTypes) {
-            if(objectIntentsResult[iCustomType]) {
-                objectIntents[iCustomType] = {};
-                for(var prop in driver.config.customIntentTypes[iCustomType]) {
-                    switch(driver.config.customIntentTypes[iCustomType][prop]) {
-                        case 'string': {
-                            objectIntents[iCustomType][prop] = "" + objectIntentsResult[iCustomType][prop];
-                            break;
-                        }
-                        case 'number': {
-                            objectIntents[iCustomType][prop] = +objectIntentsResult[iCustomType][prop];
-                            break;
-                        }
-                        case 'boolean': {
-                            objectIntents[iCustomType][prop] = !!objectIntentsResult[iCustomType][prop];
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+        // for(var iCustomType in driver.config.customIntentTypes) {
+        //     if(objectIntentsResult[iCustomType]) {
+        //         objectIntents[iCustomType] = {};
+        //         for(var prop in driver.config.customIntentTypes[iCustomType]) {
+        //             switch(driver.config.customIntentTypes[iCustomType][prop]) {
+        //                 case 'string': {
+        //                     objectIntents[iCustomType][prop] = "" + objectIntentsResult[iCustomType][prop];
+        //                     break;
+        //                 }
+        //                 case 'number': {
+        //                     objectIntents[iCustomType][prop] = +objectIntentsResult[iCustomType][prop];
+        //                     break;
+        //                 }
+        //                 case 'boolean': {
+        //                     objectIntents[iCustomType][prop] = !!objectIntentsResult[iCustomType][prop];
+        //                     break;
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
     }
 

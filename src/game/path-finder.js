@@ -2,12 +2,12 @@
 let _ = require('lodash');
 let kObstacle = Infinity;
 let utils = require('../utils');
-let driver = utils.getDriver();
+let driver = require('~runtime-driver');
 let C = driver.constants;
 
 exports.make = function(runtimeData, intents, register, globals) {
 
-    driver.pathFinder.make(runtimeData, intents, register, globals);
+    // driver.pathFinder.make(runtimeData, intents, register, globals);
 
     //
     // 2d array of costs for pathfinding
@@ -47,17 +47,21 @@ exports.make = function(runtimeData, intents, register, globals) {
         CostMatrix: CostMatrix,
 
         search: register.wrapFn(function(origin, goal, options) {
-            if(!goal || Array.isArray(goal) && !goal.length) {
-                return {path: [], ops: 0};
-            }
-            return driver.pathFinder.search(origin, goal, options);
+            throw new Error('PathFinder.search() is temporary disabled in isolated-vm implementation');
+            // if(!goal || Array.isArray(goal) && !goal.length) {
+            //     return {path: [], ops: 0};
+            // }
+            // return driver.pathFinder.search(origin, goal, options);
         }),
 
         use: register.wrapFn(function(isActive) {
-            if(!isActive) {
-                register.deprecated('`PathFinder.use` is considered deprecated and will be removed soon.');
+            if(isActive) {
+                throw new Error('PathFinder.use(true) is temporary disabled in isolated-vm implementation');
             }
-            register._useNewPathFinder = !!isActive;
+            // if(!isActive) {
+            //     register.deprecated('`PathFinder.use` is considered deprecated and will be removed soon.');
+            // }
+            // register._useNewPathFinder = !!isActive;
         })
     };
 }

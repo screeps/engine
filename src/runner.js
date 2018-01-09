@@ -61,7 +61,7 @@ function runUser(userId, onlyInRoom) {
 }
 
 driver.connect('runner')
-.then(() => driver.queue.create('users', 'read'))
+.then(() => driver.queue.create('usersIvm', 'read'))
 .then(_usersQueue => {
 
     var usersQueue = _usersQueue;
