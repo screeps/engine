@@ -2,7 +2,6 @@ var utils = require('../utils'),
     driver = require('~runtime-driver'),
     C = driver.constants,
     _ = require('lodash'),
-    util = require('util'),
     pathUtils = require('./path-utils'),
     Heap = pathUtils.Heap,
     OpenClosed = pathUtils.OpenClosed;

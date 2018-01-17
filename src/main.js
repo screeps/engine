@@ -40,7 +40,10 @@ function loop() {
         .then(() => {
             stage = 'waitForUsers';
             driver.config.emit('mainLoopStage',stage);
-            return usersQueue.whenAllDone();
+            return q.all([
+                usersQueue.whenAllDone(),
+                usersIvmQueue.whenAllDone()
+            ]);
         })
         .then(() => {
             stage = 'getRooms';
