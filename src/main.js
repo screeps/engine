@@ -33,8 +33,8 @@ function loop() {
             stage = 'addUsersToQueue';
             driver.config.emit('mainLoopStage',stage, users);
             return q.all([
-                usersQueue.addMulti(users.filter(user => !user.ivm).map(user => user._id.toString())),
-                usersIvmQueue.addMulti(users.filter(user => !!user.ivm).map(user => user._id.toString())),
+                usersQueue.addMulti(users.filter(user => !user.runtime || !user.runtime.ivm).map(user => user._id.toString())),
+                usersIvmQueue.addMulti(users.filter(user => user.runtime && user.runtime.ivm).map(user => user._id.toString())),
             ]);
         })
         .then(() => {
