@@ -450,7 +450,9 @@
             }
 
             // driver.config.emit('playerSandbox',runCodeCache[userId].globals, userId, runCodeCache[userId]);
-        }
+
+            return runCodeCache[userId];
+        };
 
         exports.run = function(userId) {
 
