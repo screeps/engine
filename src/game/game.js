@@ -79,7 +79,7 @@
         // }
 
         var register = {
-            _useNewPathFinder: false,
+            _useNewPathFinder: true,
             _objects: {},
             byRoom: {},
             findCache: {},
