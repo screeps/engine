@@ -121,11 +121,11 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
     }
 
     if(_.isNaN(object.hits) || object.hits <= 0) {
-        require('./_die')(object, roomObjects, bulk, stats);
+        require('./_die')(object, roomObjects, bulk, stats, undefined, gameTime);
     }
 
     if(object.userSummoned && _.any(roomObjects, i => i.type == 'creep' && i.user != '2' && i.user != roomController.user)) {
-        require('./_die')(object, roomObjects, bulk, stats);
+        require('./_die')(object, roomObjects, bulk, stats, undefined, gameTime);
     }
 
     let oldHits = object.hits;
@@ -145,7 +145,7 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
     }
 
     if(object.hits <= 0) {
-        require('./_die')(object, roomObjects, bulk, stats);
+        require('./_die')(object, roomObjects, bulk, stats, undefined, gameTime);
     }
     else if(object.hits != oldHits) {
 

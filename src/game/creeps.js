@@ -563,7 +563,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!_.contains(C.RESOURCES_ALL, resourceType)) {
             return C.ERR_INVALID_ARGS;
         }
-        if(!target || !target.id || !register.structures[target.id] || !(target instanceof globals.Structure)) {
+        if(!target || !target.id || ((!register.structures[target.id] || !(target instanceof globals.Structure) ) && !(target instanceof globals.Tombstone))) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }

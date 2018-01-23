@@ -31,18 +31,18 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
     }
 
     if(intent.resourceType == 'energy') {
-        if(!_.contains(['spawn','creep','extension','link','storage','tower','powerSpawn','lab','terminal','container'], target.type)) {
+        if(!_.contains(['spawn','creep','extension','link','storage','tower','powerSpawn','lab','terminal','container','tombstone'], target.type)) {
             return;
         }
     }
     else if(intent.resourceType == 'power') {
-        if(!_.contains(['creep','storage','powerSpawn','terminal','container'], target.type)) {
+        if(!_.contains(['creep','storage','powerSpawn','terminal','container','tombstone'], target.type)) {
             return;
         }
 
     }
     else {
-        if(!_.contains(['creep','storage','lab','terminal','container'], target.type)) {
+        if(!_.contains(['creep','storage','lab','terminal','container','tombstone'], target.type)) {
             return;
         }
     }
