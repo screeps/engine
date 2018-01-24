@@ -45,7 +45,7 @@ module.exports = function(object, roomObjects, bulk, stats, dropRate, gameTime) 
             if(amount > 0) {
                 if (container) {
                     require('./_create-energy')(object.x, object.y, object.room, Math.floor(amount), roomObjects, bulk,
-                        resourceType, true);
+                        resourceType);
                 } else {
                     tombstone[resourceType] = (tombstone[resourceType] || 0) + Math.floor(amount);
                 }
@@ -56,7 +56,7 @@ module.exports = function(object, roomObjects, bulk, stats, dropRate, gameTime) 
             if (object[resourceType] > 0) {
                 if (container) {
                     require('./_create-energy')(object.x, object.y, object.room,
-                        object[resourceType], roomObjects, bulk, resourceType, true);
+                        object[resourceType], roomObjects, bulk, resourceType);
                 } else {
                     tombstone[resourceType] = (tombstone[resourceType] || 0) + object[resourceType];
                 }
