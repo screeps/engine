@@ -84,7 +84,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 body: {
                     enumerable: true,
                     get() {
-                        return o.creepBody
+                        return _.map(o.creepBody, type => { type, hits: 0 })
                     }
                 },
                 owner: {
@@ -98,7 +98,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 ticksToLive: {
                     enumerable: true,
                     get() {
-                        return o.creepAgeTime ? o.creepAgeTime - runtimeData.time : undefined;
+                        return o.creepTicksToLive;
                     }
                 },
                 carryCapacity: {
@@ -122,7 +122,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 hits: {
                     enumerable: true,
                     get() {
-                        return o.creepHits;
+                        return 0;
                     }
                 },
                 hitsMax: {

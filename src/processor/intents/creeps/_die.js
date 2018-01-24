@@ -22,11 +22,8 @@ module.exports = function(object, roomObjects, bulk, stats, dropRate, gameTime) 
         decayTime: gameTime + (object.body.length * C.TOMBSTONE_DECAY_PER_PART),
         creepId: object._id,
         creepName: object.name,
-        creepBody: object.body,
-        creepAgeTime: object.ageTime,
-        creepBody: object.body,
-        creepHits: object.hits,
-        creepHitsMax: object.hitsMax,
+        creepTicksToLive: object.ageTime - gameTime,
+        creepBody: _.map(object.body, b => b.type),
         creepSaying: object.saying
     }
     
@@ -67,7 +64,6 @@ module.exports = function(object, roomObjects, bulk, stats, dropRate, gameTime) 
         });
     }
 
-    if(container) bulk.upda
     bulk.insert(tombstone)
 
     if (stats && object.user != '3' && object.user != '2') {
