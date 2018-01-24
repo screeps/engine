@@ -42,23 +42,39 @@ module.exports = function(object, roomObjects, bulk, stats, dropRate, gameTime) 
         });
 
         _.forEach(bodyResources, (amount, resourceType) => {
+            amount = Math.floor(amount)
             if(amount > 0) {
-                if (container) {
-                    require('./_create-energy')(object.x, object.y, object.room, Math.floor(amount), roomObjects, bulk,
-                        resourceType);
-                } else {
-                    tombstone[resourceType] = (tombstone[resourceType] || 0) + Math.floor(amount);
+                if(container && container.hits > 0) {
+                    let targetTotal = utils.calcResources(container);
+                    let toContainerAmount = Math.min(amount, container.energyCapacity - targetTotal);
+                    if(toContainerAmount > 0) {
+                        container[resourceType] = container[resourceType] || 0;
+                        container[resourceType] += toContainerAmount;
+                        bulk.update(container, {[resourceType]: container[resourceType]});
+                        amount -= toContainerAmount;
+                    }
+                }
+                if(amount > 0){
+                    tombstone[resourceType] = (tombstone[resourceType] || 0) + amount;
                 }
             }
         });
 
         C.RESOURCES_ALL.forEach(resourceType => {
             if (object[resourceType] > 0) {
-                if (container) {
-                    require('./_create-energy')(object.x, object.y, object.room,
-                        object[resourceType], roomObjects, bulk, resourceType);
-                } else {
-                    tombstone[resourceType] = (tombstone[resourceType] || 0) + object[resourceType];
+                let amount = object[resourceType]
+                if(container && container.hits > 0) {
+                    let targetTotal = utils.calcResources(container);
+                    let toContainerAmount = Math.min(amount, container.energyCapacity - targetTotal);
+                    if(toContainerAmount > 0) {
+                        container[resourceType] = container[resourceType] || 0;
+                        container[resourceType] += toContainerAmount;
+                        bulk.update(container, {[resourceType]: container[resourceType]});
+                        amount -= toContainerAmount;
+                    }
+                }
+                if(amount > 0){
+                    tombstone[resourceType] = (tombstone[resourceType] || 0) + amount;
                 }
             }
         });
