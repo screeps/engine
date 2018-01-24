@@ -18,9 +18,16 @@ module.exports = function(object, roomObjects, bulk, stats, dropRate, gameTime) 
         x: object.x,
         y: object.y,
         user: object.user,
-        creepId: object._id,
         deathTime: gameTime,
-        decayTime: gameTime + (object.body.length * C.TOMBSTONE_DECAY_PER_PART)
+        decayTime: gameTime + (object.body.length * C.TOMBSTONE_DECAY_PER_PART),
+        creepId: object._id,
+        creepName: object.name,
+        creepBody: object.body,
+        creepAgeTime: object.ageTime,
+        creepBody: object.body,
+        creepHits: object.hits,
+        creepHitsMax: object.hitsMax,
+        creepSaying: object.saying
     }
     
     let container = _.find(roomObjects, { type: 'container', x: object.x, y: object.y })
