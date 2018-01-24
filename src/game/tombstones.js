@@ -84,7 +84,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 body: {
                     enumerable: true,
                     get() {
-                        return _.map(o.creepBody, type => { type, hits: 0 })
+                        return _.map(o.creepBody, type => ({ type, hits: 0 }))
                     }
                 },
                 owner: {
@@ -128,7 +128,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 hitsMax: {
                     enumerable: true,
                     get() {
-                        return o.creepHitsMax;
+                        return o.creepBody.length * 100;
                     }
                 },
                 saying: {
