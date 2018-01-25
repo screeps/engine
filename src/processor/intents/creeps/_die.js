@@ -24,7 +24,7 @@ module.exports = function(object, roomObjects, bulk, stats, dropRate, gameTime) 
         creepName: object.name,
         creepTicksToLive: object.ageTime - gameTime,
         creepBody: _.map(object.body, b => b.type),
-        creepSaying: object.saying
+        creepSaying: object.actionLog && object.actionLog.say && object.actionLog.say.isPublic ? object.actionLog.say.message : undefined
     }
     
     let container = _.find(roomObjects, { type: 'container', x: object.x, y: object.y })
