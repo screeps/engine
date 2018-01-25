@@ -7,8 +7,21 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
     if(!object.decayTime || gameTime >= object.decayTime-1) {
         C.RESOURCES_ALL.forEach(resourceType => {
             if (object[resourceType] > 0) {
-                require('../creeps/_create-energy')(object.x, object.y, object.room,
-                    object[resourceType], roomObjects, bulk, resourceType);
+		var existingDrop = _.find(roomObjects, {type: 'energy', x: object.x, y: object.y, resourceType});
+                if (existingDrop) {
+                    bulk.update(existingDrop, {
+                        [resourceType]: existingDrop[resourceType] + object[resourceType]
+                    });
+                } else {
+                    bulk.insert({
+                        type: 'energy',
+                        x: object.x,
+			y: object.y,
+                        room: object.room,
+                        [resourceType]: object[resourceType],
+                        resourceType
+                    })
+                }
             }
         });
 
