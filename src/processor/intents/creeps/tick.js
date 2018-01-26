@@ -89,16 +89,7 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
             }
 
             if(gameTime >= object.ageTime-1) {
-
-                C.RESOURCES_ALL.forEach(resourceType => {
-                    var amount = object[resourceType];
-                    if (amount) {
-                        require('./_create-energy')(object.x, object.y, object.room, amount, roomObjects, bulk, resourceType, object.dropToContainer);
-                    }
-                });
-
-                bulk.remove(object._id);
-                delete roomObjects[object._id];
+                require('./_die')(object, roomObjects, bulk, stats, undefined, gameTime);
             }
         }
 
