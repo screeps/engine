@@ -469,6 +469,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 structure: register.byRoom[id].structures,
                 flag: register.byRoom[id].flags,
                 constructionSite: register.byRoom[id].constructionSites,
+                tombstone: register.byRoom[id].tombstones,
                 nuke: register.byRoom[id].nukes
             },
             lookTypeSpatialRegisters: {
@@ -480,6 +481,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 structure: register.byRoom[id].spatial.structures,
                 flag: register.byRoom[id].spatial.flags,
                 constructionSite: register.byRoom[id].spatial.constructionSites,
+                tombstone: register.byRoom[id].spatial.tombstones,
                 nuke: register.byRoom[id].spatial.nukes
             }
         };
@@ -734,6 +736,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         _lookSpatialRegister(this.name, C.LOOK_CONSTRUCTION_SITES, x,y, result);
         _lookSpatialRegister(this.name, C.LOOK_TERRAIN, x,y, result);
         _lookSpatialRegister(this.name, C.LOOK_NUKES, x,y, result);
+        _lookSpatialRegister(this.name, C.LOOK_TOMBSTONES, x,y, result);
 
         return result;
     });
@@ -771,6 +774,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         _lookAreaMixedRegister(this.name, C.LOOK_CONSTRUCTION_SITES, top, left, bottom, right, true, asArray, result);
         _lookAreaMixedRegister(this.name, C.LOOK_TERRAIN, top, left, bottom, right, true, asArray, result);
         _lookAreaMixedRegister(this.name, C.LOOK_NUKES, top, left, bottom, right, true, asArray, result);
+        _lookAreaMixedRegister(this.name, C.LOOK_TOMBSTONES, top, left, bottom, right, true, asArray, result);
 
         return result;
     });
