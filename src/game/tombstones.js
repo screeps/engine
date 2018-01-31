@@ -45,10 +45,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     Tombstone.prototype = Object.create(globals.RoomObject.prototype);
     Tombstone.prototype.constructor = Tombstone;
     utils.defineGameObjectProperties(Tombstone.prototype, data, {
-        owner: (o) => _.isUndefined(o.user) || o.user === null ? undefined : {
-                username: runtimeData.users[o.user].username
-            },
-        my: (o) => _.isUndefined(o.user) ? undefined : o.user == runtimeData.user._id,
         deathTime: (o) => o.deathTime,
         store: _storeGetter,
         ticksToDecay: (o) => o.decayTime - runtimeData.time,
