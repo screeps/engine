@@ -93,6 +93,9 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
             if(object.type == 'nuke') {
                 roomInfo.active = true;
             }
+            if(object.type == 'tombstone') {
+                roomInfo.active = true;
+            }
             if(object.type == 'portal') {
                 roomInfo.active = true;
             }
@@ -268,6 +271,8 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
                 require('./processor/intents/containers/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime);
             if (object.type == 'terminal')
                 require('./processor/intents/terminal/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime);
+            if (object.type == 'tombstone')
+                require('./processor/intents/tombstones/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime);
 
             if (object.type == 'nuke') {
                 require('./processor/intents/nukes/tick')(object, objects, terrain, bulk, userBulk, roomController, stats, gameTime, roomInfo);

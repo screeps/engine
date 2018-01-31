@@ -17,5 +17,5 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
         return;
     }
 
-    require('../creeps/_die')(target, roomObjects, bulk, undefined, 1.0);
+    require('../creeps/_die')(target, roomObjects, bulk, undefined, 1.0, gameTime);
 };
