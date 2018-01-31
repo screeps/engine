@@ -20,7 +20,7 @@ module.exports = function(object, roomObjects, bulk, stats, dropRate, gameTime) 
         user: object.user,
         deathTime: gameTime,
         decayTime: gameTime + (object.body.length * C.TOMBSTONE_DECAY_PER_PART),
-        creepId: object._id,
+        creepId: ""+object._id,
         creepName: object.name,
         creepTicksToLive: object.ageTime - gameTime,
         creepBody: _.map(object.body, b => b.type),

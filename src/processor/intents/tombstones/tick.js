@@ -3,11 +3,11 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roomController, gameTime) {
-    if(!object.decayTime || gameTime >= object.decayTime-1) {
+module.exports = function (object, roomObjects, roomTerrain, bulk, bulkUsers, roomController, gameTime) {
+    if (!object.decayTime || gameTime >= object.decayTime - 1) {
         C.RESOURCES_ALL.forEach(resourceType => {
             if (object[resourceType] > 0) {
-		var existingDrop = _.find(roomObjects, {type: 'energy', x: object.x, y: object.y, resourceType});
+                var existingDrop = _.find(roomObjects, {type: 'energy', x: object.x, y: object.y, resourceType});
                 if (existingDrop) {
                     bulk.update(existingDrop, {
                         [resourceType]: existingDrop[resourceType] + object[resourceType]
@@ -16,7 +16,7 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
                     bulk.insert({
                         type: 'energy',
                         x: object.x,
-			y: object.y,
+                        y: object.y,
                         room: object.room,
                         [resourceType]: object[resourceType],
                         resourceType

@@ -37,7 +37,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     };
 
     var Tombstone = register.wrapFn(function(id) {
-        let self = this
         var _data = data(id);
         globals.RoomObject.call(this, _data.x, _data.y, _data.room);
         this.id = id;
