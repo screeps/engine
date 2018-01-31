@@ -30,6 +30,7 @@
             flags: {},
             constructionSites: {},
             minerals: {},
+            tombstones: {},
             nukes: {}
         });
 
@@ -190,6 +191,7 @@
         require('./nukes').make(runtimeData, intents, register, globals);
         require('./resources').make(runtimeData, intents, register, globals);
         require('./flags').make(runtimeData, intents, register, globals);
+        require('./tombstones').make(runtimeData, intents, register, globals);
         require('./construction-sites').make(runtimeData, intents, register, globals);
         require('./path-finder').make(runtimeData, intents, register, globals);
 
@@ -307,6 +309,11 @@
                 register._objects[i] = new globals.Nuke(i);
                 addObjectToRegister(register, 'nukes', register._objects[i], object);
                 addObjectToFindCache(register, C.FIND_NUKES, register._objects[i], object);
+            }
+            if (object.type == 'tombstone') {
+                register._objects[i] = new globals.Tombstone(i);
+                addObjectToRegister(register, 'tombstones', register._objects[i], object);
+                addObjectToFindCache(register, C.FIND_TOMBSTONES, register._objects[i], object);
             }
 
             if (object.type == 'constructionSite') {
