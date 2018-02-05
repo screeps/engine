@@ -63,7 +63,7 @@
         register.byRoom[objectRaw.room].spatial[type][objectRaw.y][objectRaw.x].push(objectInstance);
     }
 
-    function makeGameObject (runtimeData, intents, memory, getUsedCpuFn, globals, getHeapStatisticsFn) {
+    function makeGameObject ({runtimeData, intents, memory, getUsedCpu, globals, getHeapStatistics}) {
 
         var customObjectsInfo = {};
 
@@ -119,13 +119,13 @@
             cpuLimit: runtimeData.cpu,
             cpu: {
                 getUsed(){
-                    return getUsedCpuFn();
+                    return getUsedCpu();
                 },
                 tickLimit: runtimeData.cpu,
                 limit: runtimeData.user.cpu,
                 bucket: runtimeData.cpuBucket,
                 getHeapStatistics() {
-                    return getHeapStatisticsFn();
+                    return getHeapStatistics();
                 }
             },
             map: {},
@@ -418,13 +418,7 @@
                 }
             });
 
-            runCodeCache[userId].globals.Game = makeGameObject(
-                runCodeCache[userId].runtimeData,
-                runCodeCache[userId].intents,
-                runCodeCache[userId].memory,
-                runCodeCache[userId].getUsedCpu,
-                runCodeCache[userId].globals,
-                runCodeCache[userId].getHeapStatistics);
+            runCodeCache[userId].globals.Game = makeGameObject(runCodeCache[userId]);
 
             if (runCodeCache[userId].runtimeData.user._id == '2') {
                 runCodeCache[userId].codeModules = {
