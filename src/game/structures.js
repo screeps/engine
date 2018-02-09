@@ -907,10 +907,10 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     StructureSpawn.prototype.constructor = StructureSpawn;
 
     utils.defineGameObjectProperties(StructureSpawn.prototype, data, {
-        name: (o) => o.user == runtimeData.user._id ? o.name : undefined,
+        name: (o) => o.name,
         energy: (o) => o.energy,
         energyCapacity: (o) => o.energyCapacity,
-        spawning: (o) => o.spawning ? new StructureSpawn.Spawning(o.spawning, o.user == runtimeData.user._id) : null,
+        spawning: (o, id) => o.spawning ? new StructureSpawn.Spawning(id) : null
     });
 
     Object.defineProperty(StructureSpawn.prototype, 'memory', {
@@ -1376,16 +1376,16 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
      * @param {Object} properties
      * @constructor
      */
-    StructureSpawn.Spawning = register.wrapFn(function(spawningObject, exposePrivate = false) {
-        this.spawnId = spawningObject.spawnId;
-        this.name = exposePrivate ? spawningObject.name : null;
-        this.needTime = spawningObject.needtime;
-        this.remainingTime = spawningObject.remainingTime;
-        this.directions = exposePrivate ? spawningObject.directions : null;
+    StructureSpawn.Spawning = register.wrapFn(function(spawnId) {
+        this.spawn = register._objects[spawnId];
+        this.name = data(spawnId).spawning.name;
+        this.needTime = data(spawnId).spawning.needTime;
+        this.remainingTime = data(spawnId).spawning.remainingTime;
+        this.directions = data(spawnId).spawning.directions;
     });
 
     StructureSpawn.Spawning.prototype.setDirections = register.wrapFn(function(directions) {
-        if(!(new StructureSpawn(this.spawnId).my)) {
+        if(!this.spawn.my) {
             return C.ERR_NOT_OWNER;
         }
         if(_.isArray(directions) && directions.length > 0) {
@@ -1393,7 +1393,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             directions = _.uniq(_.map(directions, e => +e));
             // bail if any numbers are out of bounds or non-integers
             if(!_.any(directions, (direction)=>direction < 1 || direction > 8 || direction !== (direction | 0))) {
-                intents.set(this.spawnId, 'setSpawnDirections', {directions});
+                intents.set(this.spawn.id, 'setSpawnDirections', {directions});
                 return C.OK;
             }
         }
@@ -1401,10 +1401,10 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     });
 
     StructureSpawn.Spawning.prototype.cancel = register.wrapFn(function() {
-        if(!(new StructureSpawn(this.spawnId).my)) {
+        if(!this.spawn.my) {
             return C.ERR_NOT_OWNER;
         }
-        intents.set(this.spawnId, 'cancelSpawning', {});
+        intents.set(this.spawn.id, 'cancelSpawning', {});
         return C.OK;
     });
 

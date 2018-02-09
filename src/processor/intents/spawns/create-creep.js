@@ -46,7 +46,6 @@ module.exports = function(spawn, intent, roomObjects, roomTerrain, bulk, bulkUse
 
     bulk.update(spawn, {
         spawning: {
-            spawnId: spawn._id,
             name: intent.name,
             needTime: C.CREEP_SPAWN_TIME * intent.body.length,
             remainingTime: C.CREEP_SPAWN_TIME * intent.body.length,

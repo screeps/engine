@@ -922,7 +922,7 @@ exports.defineGameObjectProperties = function(obj, dataFn, properties) {
                 enumerable: true,
                 get() {
                     if(!this['_${name}']) {
-                        this['_${name}'] = properties['${name}'](dataFn(this.id));
+                        this['_${name}'] = properties['${name}'](dataFn(this.id), this.id);
                     }
                     return this['_${name}'];
                 }
