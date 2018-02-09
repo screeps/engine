@@ -15,4 +15,6 @@ module.exports = function(object, objectIntents, roomObjects, roomTerrain, bulk,
     if(objectIntents.setSpawnDirections)
         require('./set-spawn-directions')(object, objectIntents.setSpawnDirections, roomObjects, roomTerrain, bulk);
 
+    if(objectIntents.cancelSpawning)
+        require('./cancel-spawning')(object, objectIntents.cancelSpawning, roomObjects, roomTerrain, bulk);
 };

@@ -58,7 +58,7 @@ module.exports = function(spawn, creep, roomObjects, roomTerrain, bulk, stats, g
             }
         }
 
-        require('../creeps/_die')(hostileOccupied, roomObjects, bulk, stats, undefined, gameTime);
+        require('../creeps/_die')(hostileOccupied, roomObjects, bulk, stats, undefined, gameTim);
         bulk.update(creep, {
             x: hostileOccupied.x,
             y: hostileOccupied.y,

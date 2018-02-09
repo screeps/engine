@@ -811,7 +811,9 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                 directions: objectIntentsResult.setSpawnDirections.directions
             };
         }
-
+        if(objectIntentsResult.cancelSpawning) {
+            objectIntents.cancelSpawning = {};
+        }
 
         for(var iCustomType in driver.config.customIntentTypes) {
             if(objectIntentsResult[iCustomType]) {
