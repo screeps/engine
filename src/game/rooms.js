@@ -966,7 +966,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return name;
     });
 
-    Room.prototype.createConstructionSite = register.wrapFn(function(firstArg, secondArg, structureType) {
+    Room.prototype.createConstructionSite = register.wrapFn(function(firstArg, secondArg, structureType, name) {
         var [x,y] = utils.fetchXYArguments(firstArg, secondArg, globals);
 
         if(_.isUndefined(x) || _.isUndefined(y) || x < 0 || x > 49 || y < 0 || y > 49) {
@@ -977,6 +977,14 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
         if(!C.CONSTRUCTION_COST[structureType]) {
             return C.ERR_INVALID_ARGS;
+        }
+        if(structureType == 'spawn' && typeof name == 'string') {
+            if(createdSpawnNames.indexOf(name) != -1) {
+                return C.ERR_INVALID_ARGS;
+            }
+            if(_.any(register.spawns, {name}) || _.any(register.constructionSites, {structureType: 'spawn', name})) {
+                return C.ERR_INVALID_ARGS;
+            }
         }
         if(this.controller && this.controller.level > 0 && !this.controller.my) {
             return C.ERR_RCL_NOT_ENOUGH;
@@ -996,17 +1004,17 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         var intent = {roomName: this.name, x, y, structureType};
 
         if(structureType == 'spawn') {
-            var cnt = 1, name;
-            do {
-                name = "Spawn" + cnt;
-                cnt++;
+            if(typeof name !== 'string') {
+                var cnt = 1;
+                do {
+                    name = "Spawn" + cnt;
+                    cnt++;
+                }
+                while (_.any(register.spawns, {name}) ||
+                _.any(register.constructionSites, {structureType: 'spawn', name}) ||
+                createdSpawnNames.indexOf(name) != -1);
             }
-            while (_.any(register.spawns, {name}) ||
-            _.any(register.constructionSites, {structureType: 'spawn', name}) ||
-            createdSpawnNames.indexOf(name) != -1);
-
             createdSpawnNames.push(name);
-
             intent.name = name;
         }
 
