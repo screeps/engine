@@ -12,4 +12,7 @@ module.exports = function(object, objectIntents, roomObjects, roomTerrain, bulk,
     if(objectIntents.recycleCreep)
         require('./recycle-creep')(object, objectIntents.recycleCreep, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime);
 
+    if(objectIntents.setSpawnDirections)
+        require('./set-spawn-directions')(object, objectIntents.setSpawnDirections, roomObjects, roomTerrain, bulk);
+
 };

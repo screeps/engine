@@ -910,7 +910,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         name: (o) => o.user == runtimeData.user._id ? o.name : undefined,
         energy: (o) => o.energy,
         energyCapacity: (o) => o.energyCapacity,
-        spawning: (o) => o.spawning || null
+        spawning: (o) => o.spawning ? new StructureSpawn.Spawning(o.spawning, o.user == runtimeData.user._id) : null,
     });
 
     Object.defineProperty(StructureSpawn.prototype, 'memory', {
@@ -1111,6 +1111,21 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
         let energyStructures = options.energyStructures && _.uniq(_.map(options.energyStructures, 'id'));
 
+        let directions = options.directions;
+        if(directions !== undefined) {
+            if(!_.isArray(directions)) {
+                return C.ERR_INVALID_ARGS;
+            }
+            // convert directions to numbers, eliminate duplicates
+            directions = _.uniq(_.map(directions, d => +d));
+            if(directions.length > 0) {
+                // bail if any numbers are out of bounds or non-integers
+                if(!_.all(directions, (direction) => direction >= 1 && direction <= 8 && direction === (direction | 0))) {
+                    return C.ERR_INVALID_ARGS;
+                }
+            }
+        }
+
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
@@ -1228,7 +1243,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             }
         });
 
-        intents.set(this.id, 'createCreep', {name, body, energyStructures});
+        intents.set(this.id, 'createCreep', {name, body, energyStructures, directions});
 
         return C.OK;
     });
@@ -1354,6 +1369,36 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     globals.StructureSpawn = StructureSpawn;
     globals.Spawn = StructureSpawn;
+
+    /**
+     * SpawnSpawning
+     * @param {Number} spawnId
+     * @param {Object} properties
+     * @constructor
+     */
+    StructureSpawn.Spawning = register.wrapFn(function(spawningObject, exposePrivate = false) {
+        this.spawnId = spawningObject.spawnId;
+        this.name = exposePrivate ? spawningObject.name : null;
+        this.needTime = spawningObject.needtime;
+        this.remainingTime = spawningObject.remainingTime;
+        this.directions = exposePrivate ? spawningObject.directions : null;
+    });
+
+    StructureSpawn.Spawning.prototype.setDirections = register.wrapFn(function(directions) {
+        if(!(new StructureSpawn(this.spawnId).my)) {
+            return C.ERR_NOT_OWNER;
+        }
+        if(_.isArray(directions) && directions.length > 0) {
+            // convert directions to numbers, eliminate duplicates
+            directions = _.uniq(_.map(directions, e => +e));
+            // bail if any numbers are out of bounds or non-integers
+            if(!_.any(directions, (direction)=>direction < 1 || direction > 8 || direction !== (direction | 0))) {
+                intents.set(this.spawnId, 'setSpawnDirections', {directions});
+                return C.OK;
+            }
+        }
+        return C.ERR_INVALID_ARGS;
+    });
 
     /**
      * StructureNuker
