@@ -1273,16 +1273,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    StructureSpawn.prototype.destroy = register.wrapFn(function() {
-
-        if(!this.my) {
-            return C.ERR_NOT_OWNER;
-        }
-
-        intents.pushByName('room', 'destroyStructure', {roomName: this.room.name, id: this.id});
-        return C.OK;
-    });
-
     StructureSpawn.prototype.notifyWhenAttacked = register.wrapFn(function(enabled) {
 
         if(!this.my) {
