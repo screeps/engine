@@ -1275,8 +1275,14 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     StructureSpawn.prototype.destroy = register.wrapFn(function() {
 
-        if(!this.my) {
-            return C.ERR_NOT_OWNER;
+        if((!this.my) &&
+           (!this.room.controller || !this.room.controller.my)) {
+                return C.ERR_NOT_OWNER;
+            }
+        }
+
+        if(this.room.find(C.FIND_HOSTILE_CREEPS).length > 0) {
+            return C.ERR_BUSY;
         }
 
         intents.pushByName('room', 'destroyStructure', {roomName: this.room.name, id: this.id});
