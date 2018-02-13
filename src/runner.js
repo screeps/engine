@@ -66,12 +66,12 @@ driver.connect('runner')
 
     var usersQueue = _usersQueue;
 
-    function loop() {
+    driver.startLoop('runner', function() {
         var userId, fetchedUserId;
 
         driver.config.emit('runnerLoopStage','start');
 
-        usersQueue.fetch()
+        return usersQueue.fetch()
             .then((_userId) => {
                 userId = fetchedUserId = _userId;
                 var onlyInRoom;
@@ -92,13 +92,8 @@ driver.connect('runner')
             .catch((error) => driver.sendConsoleError(userId, error))
             .then(() => usersQueue.markDone(fetchedUserId))
             .catch((error) => console.error('Error in runner loop:', _.isObject(error) && error.stack || error))
-            .finally(() => {
-                driver.config.emit('runnerLoopStage','finish', userId);
-                setTimeout(loop, 0);
-            });
-    }
-
-    loop();
+            .finally(() => driver.config.emit('runnerLoopStage','finish', userId));
+    });
 
 }).catch((error) => {
     console.log('Error connecting to driver:', error);
