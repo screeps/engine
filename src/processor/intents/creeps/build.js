@@ -50,11 +50,6 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
 
     var boostedEffect = Math.min(Math.floor(buildEffect + _.sum(boostedParts)), buildRemaining);
 
-
-    if(target.progress + boostedEffect >= target.progressTotal && !target.tutorial && !utils.checkControllerAvailability(target.structureType, roomObjects, roomController, 1)) {
-        return;
-    }
-
     target.progress += boostedEffect;
     object.energy -= buildEffect;
 
