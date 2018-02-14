@@ -882,12 +882,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             buildRemaining = target.progressTotal - target.progress,
             buildEffect = Math.min(buildPower, buildRemaining, this.carry.energy);
 
-        if (target.progress + buildEffect >= target.progressTotal &&
-            !utils.checkControllerAvailability(target.structureType, register.objectsByRoom[data(this.id).room], this.room.controller, 1)) {
-            return C.ERR_RCL_NOT_ENOUGH;
-        }
-
-
         intents.set(this.id, 'build', {id: target.id, x: target.pos.x, y: target.pos.y});
         return C.OK;
     });
