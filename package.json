@@ -1,6 +1,6 @@
 {
   "name": "@screeps/engine",
-  "version": "2.12.0",
+  "version": "3.0.0-beta.2",
   "bin": {
     "screeps-engine-main": "dist/main.js",
     "screeps-engine-runner": "dist/runner.js",
