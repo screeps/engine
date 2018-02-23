@@ -450,8 +450,6 @@
                 runCodeCache[userId].globals.require.timestamp = runCodeCache[userId].runtimeData.userCodeTimestamp;
             }
 
-            // driver.config.emit('playerSandbox',runCodeCache[userId].globals, userId, runCodeCache[userId]);
-
             return runCodeCache[userId];
         };
 
