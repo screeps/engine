@@ -29,16 +29,20 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk) {
         return;
     }
 
-    if(!C.REACTIONS[lab1.mineralType][lab2.mineralType] || object.mineralType && object.mineralType != C.REACTIONS[lab1.mineralType][lab2.mineralType]) {
+    let product = C.REACTIONS[lab1.mineralType][lab2.mineralType];
+
+    if(!product || object.mineralType && object.mineralType != product) {
         return;
     }
 
+    let cooldown = C.REACTION_TIME[product] ;
+
     bulk.update(object, {
         mineralAmount: object.mineralAmount + C.LAB_REACTION_AMOUNT,
-        cooldown: C.LAB_COOLDOWN
+        cooldown
     });
     if(!object.mineralType) {
-        bulk.update(object, {mineralType: C.REACTIONS[lab1.mineralType][lab2.mineralType]});
+        bulk.update(object, {mineralType: product});
     }
 
     bulk.update(lab1, {mineralAmount: lab1.mineralAmount - C.LAB_REACTION_AMOUNT});
