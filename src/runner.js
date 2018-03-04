@@ -75,13 +75,8 @@ driver.connect('runner')
             .then((_userId) => {
                 userId = fetchedUserId = _userId;
                 var onlyInRoom;
-                var m = userId.match(/^SourceKeeper:(.*)$/);
-                if(m) {
-                    userId = '3';
-                    onlyInRoom = m[1];
-                }
 
-                m = userId.match(/^Invader:(.*)$/);
+                var m = userId.match(/^Invader:(.*)$/);
                 if(m) {
                     userId = '2';
                     onlyInRoom = m[1];

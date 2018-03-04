@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-var q = require('q'),
+var pathfinding = require('@screeps/pathfinding'),
+    q = require('q'),
     _ = require('lodash'),
     movement = require('./processor/intents/movement'),
     utils = require('./utils'),
@@ -8,6 +9,9 @@ var q = require('q'),
     config = require('./config');
 
 var roomsQueue, usersQueue, lastRoomsStatsSaveTime = 0, currentHistoryPromise = q.when();
+
+const pathfindingGrids = {};
+const pathfinders = {};
 
 function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomInfo, flags}) {
 
@@ -117,8 +121,78 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
 
         movement.init(objects, terrain);
 
-        if (intents) {
+        if (users) {
+            _.forEach(users, (user, userId) => {
+                if (userId !== '3') {
+                    return;
+                }
+                if (roomId !== 'W6N4' && roomId !== 'W1N1') {
+                    return;
+                }
+                if (!pathfindingGrids[roomId]) {
+                    const rows = new Array(50);
+                    for (let y = 0; y < 50; y++) {
+                        rows[y] = new Array(50);
+                        for (let x = 0; x < 50; x++) {
+                            rows[y][x] = x === 0 || y === 0 || x === 49 || y === 49 ? 11 : 2;
+                            const terrainCode = terrain[y * 50 + x];
+                            if (terrainCode & C.TERRAIN_MASK_WALL) {
+                                rows[y][x] = 0;
+                            }
+                            if ((terrainCode & C.TERRAIN_MASK_SWAMP) && rows[y][x] === 2) {
+                                rows[y][x] = 10;
+                            }
+                        }
+                    }
+                    pathfindingGrids[roomId] = new pathfinding.Grid(50, 50, rows);
+                }
 
+                if (!pathfinders[roomId]) {
+                    pathfinders[roomId] = new pathfinding.AStarFinder({
+                        diagonalMovement: 1,
+                        maxOpsLimit: 2000,
+                        heuristic: pathfinding.Heuristic.chebyshev,
+                        weight: 1,
+                    });
+                }
+
+                const npcIntents = {
+                    set(id, name, data) {
+                        intents = _.defaultsDeep({
+                            users: {
+                                [userId]: {
+                                    objects: {
+                                        [id]: {
+                                            [name]: data,
+                                        },
+                                    },
+                                },
+                            },
+                        }, intents || {});
+                    }
+                };
+
+                if (userId === '3') {
+                    require('./processor/npc/source-keeper')(userId, {
+                        intents: npcIntents,
+                        roomObjects: objects,
+                        users,
+                        roomTerrain: terrain,
+                        gameTime,
+                        findPath(fromX, fromY, toX, toY) {
+                            const grid = pathfindingGrids[roomId].clone();
+                            grid.setWalkableAt(toX, toY, true);
+                            grid.setWalkableAt(fromX, fromY, true);
+                            const path = pathfinders[roomId].findPath(fromX, fromY, toX, toY, grid);
+                            // path.splice(0, 1);
+                            return path;
+                        },
+                    });
+                }
+            });
+        }
+
+        if (intents) {
             _.forEach(intents.users, (userIntents, userId) => {
 
                 if (userIntents.objectsManual) {
