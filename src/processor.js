@@ -126,9 +126,6 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
                 if (userId !== '3') {
                     return;
                 }
-                if (roomId !== 'W6N4' && roomId !== 'W1N1') {
-                    return;
-                }
                 if (!pathfindingGrids[roomId]) {
                     const rows = new Array(50);
                     for (let y = 0; y < 50; y++) {
