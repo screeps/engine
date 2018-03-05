@@ -25,9 +25,15 @@ module.exports = function(intent, userId, roomObjects, roomTerrain, bulk, bulkUs
     }
 
     C.RESOURCES_ALL.forEach(resourceType => {
+        // drop contents of anything with .energy or .store[]
         if (object[resourceType] > 0) {
             require('../creeps/_create-energy')(object.x, object.y, object.room,
             object[resourceType], roomObjects, bulk, resourceType);
+        }
+        // drop mineral from lab
+        if (object.mineralType === resourceType && object.mineralAmount > 0) {
+            require('../creeps/_create-energy')(object.x, object.y, object.room,
+            object.mineralAmount, roomObjects, bulk, resourceType);
         }
     });
 

@@ -665,7 +665,8 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
             objectIntents.createCreep = {
                 name: ""+objectIntentsResult.createCreep.name,
                 body: _.filter(objectIntentsResult.createCreep.body, (i) => _.contains(C.BODYPARTS_ALL, i)),
-                energyStructures: objectIntentsResult.createCreep.energyStructures
+                energyStructures: objectIntentsResult.createCreep.energyStructures,
+                directions: objectIntentsResult.createCreep.directions
             };
         }
         if(objectIntentsResult.renewCreep) {
@@ -805,7 +806,14 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                 sign: (""+objectIntentsResult.signController.sign).substring(0,100)
             };
         }
-
+        if(objectIntentsResult.setSpawnDirections) {
+            objectIntents.setSpawnDirections = {
+                directions: objectIntentsResult.setSpawnDirections.directions
+            };
+        }
+        if(objectIntentsResult.cancelSpawning) {
+            objectIntents.cancelSpawning = {};
+        }
 
         for(var iCustomType in driver.config.customIntentTypes) {
             if(objectIntentsResult[iCustomType]) {
@@ -914,7 +922,7 @@ exports.defineGameObjectProperties = function(obj, dataFn, properties) {
                 enumerable: true,
                 get() {
                     if(!this['_${name}']) {
-                        this['_${name}'] = properties['${name}'](dataFn(this.id));
+                        this['_${name}'] = properties['${name}'](dataFn(this.id), this.id);
                     }
                     return this['_${name}'];
                 }

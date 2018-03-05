@@ -62,7 +62,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     Creep.prototype.constructor = Creep;
 
     utils.defineGameObjectProperties(Creep.prototype, data, {
-        name: (o) => o.user == runtimeData.user._id ? o.name : undefined,
+        name: (o) => o.name,
         body: (o) => o.body,
         my: (o) => o.user == runtimeData.user._id,
         owner: (o) => new Object({username: runtimeData.users[o.user].username}),
@@ -563,7 +563,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!_.contains(C.RESOURCES_ALL, resourceType)) {
             return C.ERR_INVALID_ARGS;
         }
-        if(!target || !target.id || !register.structures[target.id] || !(target instanceof globals.Structure)) {
+        if(!target || !target.id || ((!register.structures[target.id] || !(target instanceof globals.Structure) ) && !(target instanceof globals.Tombstone))) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }

@@ -255,6 +255,12 @@ function _findPath2(id, fromPos, toPos, opts) {
         searchOpts.plainCost = 2;
         searchOpts.swampCost = 10;
     }
+    if(opts.plainCost) {
+        searchOpts.plainCost = opts.plainCost;
+    }
+    if(opts.swampCost) {
+        searchOpts.swampCost = opts.swampCost;
+    }
 
     var ret = globals.PathFinder.search(fromPos, {range: Math.max(1,opts.range || 0), pos: toPos}, searchOpts);
 
@@ -469,6 +475,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 structure: register.byRoom[id].structures,
                 flag: register.byRoom[id].flags,
                 constructionSite: register.byRoom[id].constructionSites,
+                tombstone: register.byRoom[id].tombstones,
                 nuke: register.byRoom[id].nukes
             },
             lookTypeSpatialRegisters: {
@@ -480,6 +487,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 structure: register.byRoom[id].spatial.structures,
                 flag: register.byRoom[id].spatial.flags,
                 constructionSite: register.byRoom[id].spatial.constructionSites,
+                tombstone: register.byRoom[id].spatial.tombstones,
                 nuke: register.byRoom[id].spatial.nukes
             }
         };
@@ -734,6 +742,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         _lookSpatialRegister(this.name, C.LOOK_CONSTRUCTION_SITES, x,y, result);
         _lookSpatialRegister(this.name, C.LOOK_TERRAIN, x,y, result);
         _lookSpatialRegister(this.name, C.LOOK_NUKES, x,y, result);
+        _lookSpatialRegister(this.name, C.LOOK_TOMBSTONES, x,y, result);
 
         return result;
     });
@@ -771,6 +780,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         _lookAreaMixedRegister(this.name, C.LOOK_CONSTRUCTION_SITES, top, left, bottom, right, true, asArray, result);
         _lookAreaMixedRegister(this.name, C.LOOK_TERRAIN, top, left, bottom, right, true, asArray, result);
         _lookAreaMixedRegister(this.name, C.LOOK_NUKES, top, left, bottom, right, true, asArray, result);
+        _lookAreaMixedRegister(this.name, C.LOOK_TOMBSTONES, top, left, bottom, right, true, asArray, result);
 
         return result;
     });
@@ -956,7 +966,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return name;
     });
 
-    Room.prototype.createConstructionSite = register.wrapFn(function(firstArg, secondArg, structureType) {
+    Room.prototype.createConstructionSite = register.wrapFn(function(firstArg, secondArg, structureType, name) {
         var [x,y] = utils.fetchXYArguments(firstArg, secondArg, globals);
 
         if(_.isUndefined(x) || _.isUndefined(y) || x < 0 || x > 49 || y < 0 || y > 49) {
@@ -967,6 +977,14 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
         if(!C.CONSTRUCTION_COST[structureType]) {
             return C.ERR_INVALID_ARGS;
+        }
+        if(structureType == 'spawn' && typeof name == 'string') {
+            if(createdSpawnNames.indexOf(name) != -1) {
+                return C.ERR_INVALID_ARGS;
+            }
+            if(_.any(register.spawns, {name}) || _.any(register.constructionSites, {structureType: 'spawn', name})) {
+                return C.ERR_INVALID_ARGS;
+            }
         }
         if(this.controller && this.controller.level > 0 && !this.controller.my) {
             return C.ERR_RCL_NOT_ENOUGH;
@@ -986,17 +1004,17 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         var intent = {roomName: this.name, x, y, structureType};
 
         if(structureType == 'spawn') {
-            var cnt = 1, name;
-            do {
-                name = "Spawn" + cnt;
-                cnt++;
+            if(typeof name !== 'string') {
+                var cnt = 1;
+                do {
+                    name = "Spawn" + cnt;
+                    cnt++;
+                }
+                while (_.any(register.spawns, {name}) ||
+                _.any(register.constructionSites, {structureType: 'spawn', name}) ||
+                createdSpawnNames.indexOf(name) != -1);
             }
-            while (_.any(register.spawns, {name}) ||
-            _.any(register.constructionSites, {structureType: 'spawn', name}) ||
-            createdSpawnNames.indexOf(name) != -1);
-
             createdSpawnNames.push(name);
-
             intent.name = name;
         }
 
