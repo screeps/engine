@@ -123,13 +123,15 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     });
 
     Creep.prototype.toString = register.wrapFn(function() {
-        return `[creep ${!this.id || data(this.id).user == runtimeData.user._id ? this.name : '#'+this.id}]`;
+        return `[creep ${!this.id || this.my ? this.name : '#'+this.id}]`;
     });
 
     Creep.prototype.move = register.wrapFn(function(direction) {
-
         if(!this.my) {
             return C.ERR_NOT_OWNER;
+        }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
         }
         if(this.spawning) {
             return C.ERR_BUSY;
@@ -154,6 +156,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
         if(!this.my) {
             return C.ERR_NOT_OWNER;
+        }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
         }
         if(this.spawning) {
             return C.ERR_BUSY;
@@ -330,6 +335,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
+        }
         if(this.spawning) {
             return C.ERR_BUSY;
         }
@@ -390,6 +398,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
+        }
         if(this.spawning) {
             return C.ERR_BUSY;
         }
@@ -413,6 +424,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     Creep.prototype.transfer = register.wrapFn(function(target, resourceType, amount) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
+        }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
         }
         if(this.spawning) {
             return C.ERR_BUSY;
@@ -554,6 +568,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
+        }
         if(this.spawning) {
             return C.ERR_BUSY;
         }
@@ -671,6 +688,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
+        }
         if(this.spawning) {
             return C.ERR_BUSY;
         }
@@ -698,6 +718,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
         if(!this.my) {
             return C.ERR_NOT_OWNER;
+        }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
         }
         if(this.spawning) {
             return C.ERR_BUSY;
@@ -727,6 +750,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
+        }
         if(this.spawning) {
             return C.ERR_BUSY;
         }
@@ -755,6 +781,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
+        }
         if(this.spawning) {
             return C.ERR_BUSY;
         }
@@ -774,6 +803,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
         if(!this.my) {
             return C.ERR_NOT_OWNER;
+        }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
         }
         if(this.spawning) {
             return C.ERR_BUSY;
@@ -802,6 +834,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
+        }
         if(this.spawning) {
             return C.ERR_BUSY;
         }
@@ -828,6 +863,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
         if(!this.my) {
             return C.ERR_NOT_OWNER;
+        }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
         }
         if(this.spawning) {
             return C.ERR_BUSY;
@@ -856,6 +894,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
         if(!this.my) {
             return C.ERR_NOT_OWNER;
+        }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
         }
         if(this.spawning) {
             return C.ERR_BUSY;
@@ -897,6 +938,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
+        }
         if(this.spawning) {
             return C.ERR_BUSY;
         }
@@ -910,6 +954,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
+        }
         if(this.spawning) {
             return C.ERR_BUSY;
         }
@@ -922,6 +969,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
         if(!this.my) {
             return C.ERR_NOT_OWNER;
+        }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
         }
         if(this.spawning) {
             return C.ERR_BUSY;
@@ -968,6 +1018,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
+        }
         if(this.spawning) {
             return C.ERR_BUSY;
         }
@@ -999,6 +1052,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
         if(!this.my) {
             return C.ERR_NOT_OWNER;
+        }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
         }
         if(this.spawning) {
             return C.ERR_BUSY;
@@ -1036,6 +1092,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
+        }
         if(this.spawning) {
             return C.ERR_BUSY;
         }
@@ -1069,6 +1128,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
+        }
         if(this.spawning) {
             return C.ERR_BUSY;
         }
@@ -1096,6 +1158,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
         if(!this.my) {
             return C.ERR_NOT_OWNER;
+        }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
         }
         if(this.spawning) {
             return C.ERR_BUSY;
@@ -1125,6 +1190,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
+        }
         if(this.spawning) {
             return C.ERR_BUSY;
         }
@@ -1145,6 +1213,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     Creep.prototype.signController = register.wrapFn(function(target, sign) {
 
+        if(this.hits === 0) {
+            return C.ERR_NO_BODYPART;
+        }
         if(this.spawning) {
             return C.ERR_BUSY;
         }
