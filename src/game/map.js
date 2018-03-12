@@ -232,7 +232,7 @@ exports.makeMap = function(runtimeData, register) {
         
         getTerrainOfRoom(roomName) {
             if(_.isObject(roomName))
-                roomName = roomName.roomName;
+                roomName = roomName.name;
             
             var array = (runtimeData.staticTerrainData || {})[roomName];
             if(!array)
