@@ -208,9 +208,8 @@ exports.makeMap = function(runtimeData, register) {
             }
             return _.contains(runtimeData.accessibleRooms, roomName);
         },
-		
-		getTerrainAt(x, y, roomName) {
-
+        
+        getTerrainAt(x, y, roomName) {
             if(_.isObject(x)) {
                 y = x.y;
                 roomName = x.roomName;
@@ -228,6 +227,17 @@ exports.makeMap = function(runtimeData, register) {
                 return 'swamp';
             }
             return 'plain';
+        },
+        
+        getTerrainOfRoom(roomName) {
+            if(_.isObject(roomName))
+                roomName = roomName.name;
+            
+            var array = (runtimeData.staticTerrainData || {})[roomName];
+            if(!array)
+                return undefined;
+            
+            return new Uint8Array(array);
         },
 
         getRoomLinearDistance(roomName1, roomName2, continuous) {
