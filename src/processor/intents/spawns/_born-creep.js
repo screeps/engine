@@ -7,7 +7,10 @@ var _ = require('lodash'),
 module.exports = function(spawn, creep, roomObjects, roomTerrain, bulk, stats, gameTime) {
 
     var newX, newY, isOccupied, hostileOccupied;
-    var checkObstacleFn = (i) => _.contains(C.OBSTACLE_OBJECT_TYPES, i.type) && i.x == newX && i.y == newY;
+    var checkObstacleFn = (i) => (i.x == newX && i.y == newY) && (
+        _.contains(C.OBSTACLE_OBJECT_TYPES, i.type) ||                                          // just unwalkable
+        (i.type == 'constructionSite' && _.contains(C.OBSTACLE_OBJECT_TYPES, i.structureType))  // unwalkable site
+    );
 
     const directions = spawn.spawning.directions || [1,2,3,4,5,6,7,8];
     const otherDirections = _.difference([1,2,3,4,5,6,7,8], directions);
