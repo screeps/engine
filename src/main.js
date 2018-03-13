@@ -41,8 +41,10 @@ function loop() {
             stage = 'waitForUsers';
             driver.config.emit('mainLoopStage',stage);
             return q.all([
-                usersQueue.whenAllDone(),
+                usersQueue.whenAllDone()
+                    .then(() => driver.config.emit('mainLoopStage', stage, 'nonIvmDone')),
                 usersIvmQueue.whenAllDone()
+                    .then(() => driver.config.emit('mainLoopStage', stage, 'ivmDone')),
             ]);
         })
         .then(() => {
