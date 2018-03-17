@@ -89,7 +89,7 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
             }
 
             if(gameTime >= object.ageTime-1) {
-                require('./_die')(object, roomObjects, bulk, stats, undefined, gameTime);
+                require('./_die')(object, roomObjects, bulk, undefined, undefined, gameTime);
             }
         }
 
@@ -136,7 +136,7 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
     }
 
     if(object.hits <= 0) {
-        require('./_die')(object, roomObjects, bulk, undefined, undefined, gameTime);
+        require('./_die')(object, roomObjects, bulk, stats, undefined, gameTime);
     }
     else if(object.hits != oldHits) {
 
