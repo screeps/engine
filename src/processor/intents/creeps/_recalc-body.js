@@ -17,5 +17,7 @@ module.exports = function recalcBody(object) {
         if(hits < 0) hits = 0;
     }
 
-    object.energyCapacity = utils.calcBodyEffectiveness(object.body, C.CARRY, 'capacity', C.CARRY_CAPACITY, true);
+    if(!object.noCapacityRecalc) {
+        object.energyCapacity = utils.calcBodyEffectiveness(object.body, C.CARRY, 'capacity', C.CARRY_CAPACITY, true);
+    }
 };
