@@ -4,7 +4,7 @@ var _ = require('lodash'),
     C = driver.constants;
 
 module.exports = function(spawn, intent, roomObjects, roomTerrain, bulk) {
-    if(spawn.type != 'spawn')
+    if(spawn.type != 'spawn' || !spawn.spawning)
         return;
     var directions = intent.directions;
     if(_.isArray(directions) && directions.length > 0) {
