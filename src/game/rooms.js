@@ -1060,7 +1060,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return register.map.findExit(this.name, room);
     });
 
-    globals.Room = Room;
+    Object.defineProperty(globals, 'Room', {enumerable: true, value: Room});
 
     /**
      * RoomVisual
@@ -1131,7 +1131,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return this;
     });
 
-    globals.RoomVisual = RoomVisual;
+    Object.defineProperty(globals, 'RoomVisual', {enumerable: true, value: RoomVisual});
 };
 
 exports.makePos = function(_register) {
@@ -1431,7 +1431,7 @@ exports.makePos = function(_register) {
         return room.createConstructionSite(this, structureType);
     });
 
-    globals.RoomPosition = RoomPosition;
+    Object.defineProperty(globals, 'RoomPosition', {enumerable: true, value: RoomPosition});
 
 
     /**
@@ -1446,5 +1446,5 @@ exports.makePos = function(_register) {
         this.pos = new globals.RoomPosition(x,y,room);
     });
 
-    globals.RoomObject = RoomObject;
+    Object.defineProperty(globals, 'RoomObject', {enumerable: true, value: RoomObject});
 };
