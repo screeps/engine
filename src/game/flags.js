@@ -90,5 +90,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    globals.Flag = Flag;
+    Object.defineProperty(globals, 'Flag', {
+        enumerable: true,
+        value: Flag
+    });
 };

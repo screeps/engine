@@ -43,5 +43,5 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return `[mineral (${this.mineralType}) #${this.id}]`;
     });
 
-    globals.Mineral = Mineral;
+    Object.defineProperty(globals, 'Mineral', {enumerable: true, value: Mineral});
 };

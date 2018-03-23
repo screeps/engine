@@ -56,5 +56,5 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    globals.ConstructionSite = ConstructionSite;
+    Object.defineProperty(globals, 'ConstructionSite', {enumerable: true, value: ConstructionSite});
 };

@@ -140,5 +140,5 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return `[Tombstone #${this.id}]`;
     });
 
-    globals.Tombstone = Tombstone;
+    Object.defineProperty(globals, 'Tombstone', {enumerable: true, value: Tombstone});
 };

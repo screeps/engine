@@ -42,6 +42,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return `[resource (${this.resourceType}) #${this.id}]`;
     });
 
-    globals.Resource  = Resource;
-    globals.Energy = Resource;
+    Object.defineProperty(globals, 'Resource', {enumerable: true, value: Resource});
+    Object.defineProperty(globals, 'Energy', {enumerable: true, value: Resource});
 };

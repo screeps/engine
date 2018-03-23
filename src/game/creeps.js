@@ -1164,7 +1164,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-
-    globals.Creep = Creep;
+    Object.defineProperty(globals, 'Creep', {enumerable: true, value: Creep});
 };
 
