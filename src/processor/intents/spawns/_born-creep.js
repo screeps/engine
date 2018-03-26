@@ -12,7 +12,10 @@ module.exports = function(spawn, creep, roomObjects, roomTerrain, bulk, stats, g
         (i.type == 'constructionSite' && _.contains(C.OBSTACLE_OBJECT_TYPES, i.structureType))  // unwalkable site
     );
 
-    const directions = spawn.spawning.directions || [1,2,3,4,5,6,7,8];
+    var directions = [1,2,3,4,5,6,7,8];
+    if(spawn.spawning && spawn.spawning.directions) {
+        directions = spawn.spawning.directions;
+    }
     const otherDirections = _.difference([1,2,3,4,5,6,7,8], directions);
     // find the first direction where the creep can spawn
     for (var direction of directions) {
