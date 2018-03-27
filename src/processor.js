@@ -9,20 +9,20 @@ var q = require('q'),
 
 var roomsQueue, usersQueue, lastRoomsStatsSaveTime = 0, currentHistoryPromise = q.when();
 
-function processRoom(roomId, intents, objects, terrain, gameTime, roomInfo, flags, userVisibility) {
+function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomInfo, flags, userVisibility}) {
 
     return q.when().then(() => {
 
         var bulk = driver.bulkObjectsWrite(),
-        userBulk = driver.bulkUsersWrite(),
-        flagsBulk = driver.bulkFlagsWrite(),
-        oldObjects = {},
-        roomController,
-        hasNewbieWalls = false,
-        stats = driver.getRoomStatsUpdater(roomId),
-        objectsToHistory = {},
-        roomSpawns = [], roomExtensions = [],
-        oldRoomInfo = _.clone(roomInfo);
+            userBulk = driver.bulkUsersWrite(),
+            flagsBulk = driver.bulkFlagsWrite(),
+            oldObjects = {},
+            roomController,
+            hasNewbieWalls = false,
+            stats = driver.getRoomStatsUpdater(roomId),
+            objectsToHistory = {},
+            roomSpawns = [], roomExtensions = [],
+            oldRoomInfo = _.clone(roomInfo);
 
         roomInfo.active = false;
 
@@ -93,6 +93,9 @@ function processRoom(roomId, intents, objects, terrain, gameTime, roomInfo, flag
             if(object.type == 'nuke') {
                 roomInfo.active = true;
             }
+            if(object.type == 'tombstone') {
+                roomInfo.active = true;
+            }
             if(object.type == 'portal') {
                 roomInfo.active = true;
             }
@@ -132,14 +135,14 @@ function processRoom(roomId, intents, objects, terrain, gameTime, roomInfo, flag
                     object = objects[objectId];
 
                     if (objectId == 'room') {
-                        require('./processor/intents/room/intents')(objectIntents, objects, terrain, bulk, userBulk, roomController, flags, flagsBulk);
+                        require('./processor/intents/room/intents')(userId, objectIntents, objects, terrain, bulk, userBulk, roomController, flags, flagsBulk);
                         continue;
                     }
 
-                    if (!object || object._skip) continue;
+                    if (!object || object._skip || object.user && object.user != userId) continue;
 
                     if (object.type == 'creep')
-                        require('./processor/intents/creeps/intents')(object, objectIntents, objects, terrain, bulk, userBulk, roomController, stats, gameTime, roomInfo);
+                        require('./processor/intents/creeps/intents')(object, objectIntents, objects, terrain, bulk, userBulk, roomController, stats, gameTime, roomInfo, users);
                     if (object.type == 'link')
                         require('./processor/intents/links/intents')(object, objectIntents, objects, terrain, bulk, userBulk, roomController, stats);
                     if (object.type == 'tower')
@@ -150,9 +153,6 @@ function processRoom(roomId, intents, objects, terrain, gameTime, roomInfo, flag
                         require('./processor/intents/spawns/intents')(object, objectIntents, objects, terrain, bulk, userBulk, roomController, stats, gameTime);
 
                     if (object.type == 'constructionSite') {
-                        if (objectIntents.remove) {
-                            require('./processor/intents/construction-sites/remove')(object, objects, bulk);
-                        }
                     }
 
                     if (object.type == 'rampart') {
@@ -191,7 +191,7 @@ function processRoom(roomId, intents, objects, terrain, gameTime, roomInfo, flag
 
                     if(object.type == 'controller') {
                         if(objectIntents.unclaim) {
-                            require('./processor/intents/controllers/unclaim')(object, objectIntents.unclaim, objects, terrain, bulk, userBulk, gameTime, roomInfo);
+                            require('./processor/intents/controllers/unclaim')(object, objectIntents.unclaim, objects, terrain, bulk, userBulk, gameTime, roomInfo, users);
                         }
                         if(objectIntents.activateSafeMode) {
                             require('./processor/intents/controllers/activateSafeMode')(object, objectIntents.activateSafeMode, objects, terrain, bulk, userBulk, gameTime, roomInfo);
@@ -264,13 +264,15 @@ function processRoom(roomId, intents, objects, terrain, gameTime, roomInfo, flag
             if (object.type == 'tower')
                 require('./processor/intents/towers/tick')(object, objects, terrain, bulk, userBulk, roomController);
             if (object.type == 'controller')
-                require('./processor/intents/controllers/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime, roomInfo);
+                require('./processor/intents/controllers/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime, roomInfo, users);
             if (object.type == 'lab')
                 require('./processor/intents/labs/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime);
             if (object.type == 'container')
                 require('./processor/intents/containers/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime);
             if (object.type == 'terminal')
                 require('./processor/intents/terminal/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime);
+            if (object.type == 'tombstone')
+                require('./processor/intents/tombstones/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime);
 
             if (object.type == 'nuke') {
                 require('./processor/intents/nukes/tick')(object, objects, terrain, bulk, userBulk, roomController, stats, gameTime, roomInfo);
@@ -391,8 +393,8 @@ function saveRoomHistory(roomId, objects, gameTime) {
     return currentHistoryPromise.then(() => {
         var promise = q.when();
 
-        if (!(gameTime % 20)) {
-            var baseTime = Math.floor((gameTime - 1) / 20) * 20;
+        if (!(gameTime % driver.config.historyChunkSize)) {
+            var baseTime = Math.floor((gameTime - 1) / driver.config.historyChunkSize) * driver.config.historyChunkSize;
             promise = driver.history.upload(roomId, baseTime);
         }
 
@@ -430,8 +432,16 @@ driver.connect('processor').then(() => driver.queue.create('rooms', 'read'))
             })
             .then((result) => {
                 driver.config.emit('processorLoopStage','processRoom', roomId);
-                result.unshift(roomId);
-                processRoom.apply(this, result)
+                processRoom(roomId, {
+                    intents: result[0],
+                    objects: result[1].objects,
+                    users: result[1].users,
+                    terrain: result[2],
+                    gameTime: result[3],
+                    roomInfo: result[4],
+                    flags: result[5],
+                    userVisibility: result[6]
+                })
                 .catch((error) => console.log('Error processing room '+roomId+':', _.isObject(error) ? (error.stack || error) : error))
                 .then(() => {
                     return driver.clearRoomIntents(roomId);

@@ -4,6 +4,30 @@ var _ = require('lodash'),
     C = driver.constants,
     movement = require('../movement');
 
+function _applyDamage(object, damage) {
+
+    let damageReduce = 0, damageEffective = damage;
+
+    if(_.any(object.body, i => !!i.boost)) {
+        for(let i=0; i<object.body.length; i++) {
+            if(damageEffective <= 0) {
+                break;
+            }
+            let bodyPart = object.body[i], damageRatio = 1;
+            if(bodyPart.boost && C.BOOSTS[bodyPart.type][bodyPart.boost] && C.BOOSTS[bodyPart.type][bodyPart.boost].damage) {
+                damageRatio = C.BOOSTS[bodyPart.type][bodyPart.boost].damage;
+            }
+            let bodyPartHitsEffective = bodyPart.hits / damageRatio;
+            damageReduce += Math.min(bodyPartHitsEffective, damageEffective) * (1 - damageRatio);
+            damageEffective -= Math.min(bodyPartHitsEffective, damageEffective);
+        }
+    }
+
+    damage -= Math.round(damageReduce);
+
+    object.hits -= damage;
+}
+
 module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime) {
 
     if(!object || object.type != 'creep') return;
@@ -51,9 +75,11 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
             bulk.update(object, {interRoom: {room, x, y}});
         }
 
-        var portal = _.find(roomObjects, i => i.type == 'portal' && i.x == object.x && i.y == object.y);
-        if(portal) {
-            bulk.update(object, {interRoom: portal.destination});
+        if(object.ageTime) { // since NPC creeps may appear right on portals without `ageTime` defined at the first tick
+            var portal = _.find(roomObjects, i => i.type == 'portal' && i.x == object.x && i.y == object.y);
+            if (portal) {
+                bulk.update(object, {interRoom: portal.destination});
+            }
         }
 
         if(!object.tutorial) {
@@ -63,16 +89,7 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
             }
 
             if(gameTime >= object.ageTime-1) {
-
-                C.RESOURCES_ALL.forEach(resourceType => {
-                    var amount = object[resourceType];
-                    if (amount) {
-                        require('./_create-energy')(object.x, object.y, object.room, amount, roomObjects, bulk, resourceType);
-                    }
-                });
-
-                bulk.remove(object._id);
-                delete roomObjects[object._id];
+                require('./_die')(object, roomObjects, bulk, undefined, undefined, gameTime);
             }
         }
 
@@ -94,12 +111,45 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
         bulk.update(object._id, {fatigue: object.fatigue});
     }
 
-    if(_.isNaN(object.hits)) {
-        require('./_die')(object, roomObjects, bulk, stats);
+    if(_.isNaN(object.hits) || object.hits <= 0) {
+        require('./_die')(object, roomObjects, bulk, stats, undefined, gameTime);
     }
 
     if(object.userSummoned && _.any(roomObjects, i => i.type == 'creep' && i.user != '2' && i.user != roomController.user)) {
-        require('./_die')(object, roomObjects, bulk, stats);
+        require('./_die')(object, roomObjects, bulk, stats, undefined, gameTime);
     }
 
+    let oldHits = object.hits;
+
+    if (object._damageToApply) {
+        _applyDamage(object, object._damageToApply);
+        delete object._damageToApply;
+    }
+
+    if (object._healToApply) {
+        object.hits += object._healToApply;
+        delete object._healToApply;
+    }
+
+    if(object.hits > object.hitsMax) {
+        object.hits = object.hitsMax;
+    }
+
+    if(object.hits <= 0) {
+        require('./_die')(object, roomObjects, bulk, stats, undefined, gameTime);
+    }
+    else if(object.hits != oldHits) {
+
+        require('./_recalc-body')(object);
+
+        if(object.hits < oldHits) {
+            require('./_drop-resources-without-space')(object, roomObjects, roomTerrain, bulk);
+        }
+
+        bulk.update(object, {
+            hits: object.hits,
+            body: object.body,
+            energyCapacity: object.energyCapacity
+        });
+    }
 };

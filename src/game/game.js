@@ -30,6 +30,7 @@
             flags: {},
             constructionSites: {},
             minerals: {},
+            tombstones: {},
             nukes: {}
         });
 
@@ -190,6 +191,7 @@
         require('./nukes').make(runtimeData, intents, register, globals);
         require('./resources').make(runtimeData, intents, register, globals);
         require('./flags').make(runtimeData, intents, register, globals);
+        require('./tombstones').make(runtimeData, intents, register, globals);
         require('./construction-sites').make(runtimeData, intents, register, globals);
         require('./path-finder').make(runtimeData, intents, register, globals);
 
@@ -283,7 +285,7 @@
                 }
 
             }
-            if (!object.off && (object.type == 'extension' || object.type == 'spawn')) {
+            if (!object.off && (object.type == 'extension' || object.type == 'spawn') && (object.user == runtimeData.user._id)) {
                 register.rooms[object.room].energyAvailable += object.energy;
                 register.rooms[object.room].energyCapacityAvailable += object.energyCapacity;
             }
@@ -301,12 +303,17 @@
             if (object.type == 'energy') {
                 register._objects[i] = new globals.Energy(i);
                 addObjectToRegister(register, 'energy', register._objects[i], object);
-                addObjectToFindCache(register, C.FIND_DROPPED_ENERGY, register.energy[i], object);
+                addObjectToFindCache(register, C.FIND_DROPPED_RESOURCES, register.energy[i], object);
             }
             if (object.type == 'nuke') {
                 register._objects[i] = new globals.Nuke(i);
                 addObjectToRegister(register, 'nukes', register._objects[i], object);
                 addObjectToFindCache(register, C.FIND_NUKES, register._objects[i], object);
+            }
+            if (object.type == 'tombstone') {
+                register._objects[i] = new globals.Tombstone(i);
+                addObjectToRegister(register, 'tombstones', register._objects[i], object);
+                addObjectToFindCache(register, C.FIND_TOMBSTONES, register._objects[i], object);
             }
 
             if (object.type == 'constructionSite') {
@@ -458,7 +465,7 @@
             if (runCodeCache[userId].runtimeData.user._id == '2') {
                 runCodeCache[userId].codeModules = {
                     main: "PathFinder.use(true);  var  healer  =  require('healer'),  findAttack  =  require('findAttack');  for  (var  i  in  Game.creeps)  {  var  creep  =  Game.creeps[i];  if  (!creep.room)  {  continue;  }  if  (creep.getActiveBodyparts('heal')  >  0)  {  healer(creep);  }  else  {  findAttack(Game.creeps[i]);  }  require('shootAtWill')(creep);  }  for  (var  i  in  Memory.creeps)  {  if  (!Game.creeps[i])  {  delete  Memory.creeps[i];  }  }",
-                    findAttack: "var flee = require('flee'); function checkPath(pos1, pos2) { var path = pos1.findPathTo(pos2); if (!path.length) { return false; } return path[path.length - 1].x == pos2.x && path[path.length - 1].y == pos2.y; } function costCallbackIgnoreRamparts(roomName, cm) { var ramparts = Game.rooms[roomName].find(FIND_STRUCTURES, {filter: i => i.structureType == STRUCTURE_RAMPART || i.structureType == STRUCTURE_WALL}); ramparts.forEach(i => cm.set(i.pos.x, i.pos.y, 0)); } module.exports = function (creep) { if (!creep.getActiveBodyparts(ATTACK) && creep.getActiveBodyparts(RANGED_ATTACK) && flee(creep, 3)) { return; } var target, healers = creep.room.find(FIND_MY_CREEPS, { filter: function (i) { return i.getActiveBodyparts('heal') > 0; } }); if (creep.hits < creep.hitsMax / 2 && healers.length > 0 && !creep.getActiveBodyparts(ATTACK)) { target = creep.pos.findClosestByPath(FIND_MY_CREEPS, { ignoreRoads: true, filter: function (i) { return i.getActiveBodyparts('heal') > 0; } }); if (!target || creep.moveTo(target, {maxRooms: 1, ignoreRoads: true}) != OK) { target = null; } } var nearCreeps = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 1, { filter: function (i) { return i.owner.username != 'Source Keeper' } }); if (nearCreeps) { creep.attack(nearCreeps[0]); } if (!target) { target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, { ignoreRoads: true, ignoreCreeps: true, filter: function (i) { return i.owner.username != 'Source Keeper' } }); if (target && (creep.getActiveBodyparts(ATTACK) || !creep.pos.inRangeTo(target, 3))) { creep.moveTo(target, {maxRooms: 1, ignoreRoads: true, ignoreCreeps: true}); } } if (!target) { target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, { ignoreRoads: true, filter: function (i) { return i.owner.username != 'Source Keeper' }, costCallback: costCallbackIgnoreRamparts }); if (target && (creep.getActiveBodyparts(ATTACK) || !creep.pos.inRangeTo(target, 3))) { creep.moveTo(target, {maxRooms: 1, ignoreRoads: true, costCallback: costCallbackIgnoreRamparts}); } } if (!target) { target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, { ignoreDestructibleStructures: true, ignoreRoads: true, filter: function (i) { return i.owner.username != 'Source Keeper' } }); if (target && (creep.getActiveBodyparts(ATTACK) || !creep.pos.inRangeTo(target, 3))) { creep.moveTo(target, {ignoreDestructibleStructures: true, maxRooms: 1, ignoreRoads: true}); } } if (!target) { if (creep.room.controller && creep.room.controller.level > 0 && !creep.room.find(FIND_HOSTILE_CREEPS).length) { var spawns = _.filter(creep.room.find(FIND_HOSTILE_SPAWNS), spawn => !checkPath(creep.pos, spawn.pos)); if (!spawns.length) { creep.suicide(); return; } target = spawns[0]; if (target) { creep.moveTo(target, {ignoreDestructibleStructures: true, maxRooms: 1, ignoreRoads: true}); } } return; } creep.attack(target); if (creep.getActiveBodyparts(WORK) > 0 && creep.memory._move && creep.memory._move.path) { var path = Room.deserializePath(creep.memory._move.path); if (path.length && creep.pos.isNearTo(path[0].x, path[0].y)) { var structures = creep.room.lookForAt('structure', path[0].x, path[0].y); if (structures.length > 0) { creep.dismantle(structures[0]); } } } }",
+                    findAttack: "var flee = require('flee'); function checkPath(pos1, pos2) { var path = pos1.findPathTo(pos2); if (!path.length) { return false; } return path[path.length - 1].x == pos2.x && path[path.length - 1].y == pos2.y; } function costCallbackIgnoreRamparts(roomName, cm) { var ramparts = Game.rooms[roomName].find(FIND_STRUCTURES, {filter: i => i.structureType == STRUCTURE_RAMPART || i.structureType == STRUCTURE_WALL}); ramparts.forEach(i => cm.set(i.pos.x, i.pos.y, 0)); } module.exports = function (creep) { if (!creep.getActiveBodyparts(ATTACK) && creep.getActiveBodyparts(RANGED_ATTACK) && flee(creep, 3)) { return; } var target, healers = creep.room.find(FIND_MY_CREEPS, { filter: function (i) { return i.getActiveBodyparts('heal') > 0; } }); if (creep.hits < creep.hitsMax / 2 && healers.length > 0 && !creep.getActiveBodyparts(ATTACK)) { target = creep.pos.findClosestByPath(FIND_MY_CREEPS, { ignoreRoads: true, filter: function (i) { return i.getActiveBodyparts('heal') > 0; } }); if (!target || creep.moveTo(target, {maxRooms: 1, ignoreRoads: true}) != OK) { target = null; } } var nearCreeps = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 1, { filter: function (i) { return i.owner.username != 'Source Keeper' } }); if (nearCreeps) { creep.attack(nearCreeps[0]); } if (!target) { target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, { ignoreRoads: true, ignoreCreeps: true, filter: function (i) { return i.owner.username != 'Source Keeper' } }); if (target && (creep.getActiveBodyparts(ATTACK) || !creep.pos.inRangeTo(target, 3))) { creep.moveTo(target, {maxRooms: 1, ignoreRoads: true, ignoreCreeps: true}); } } if (!target) { target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, { ignoreRoads: true, filter: function (i) { return i.owner.username != 'Source Keeper' }, costCallback: costCallbackIgnoreRamparts }); if (target && (creep.getActiveBodyparts(ATTACK) || !creep.pos.inRangeTo(target, 3))) { creep.moveTo(target, {maxRooms: 1, ignoreRoads: true, costCallback: costCallbackIgnoreRamparts}); } } if (!target) { target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, { ignoreDestructibleStructures: true, ignoreRoads: true, filter: function (i) { return i.owner.username != 'Source Keeper' } }); if (target && (creep.getActiveBodyparts(ATTACK) || !creep.pos.inRangeTo(target, 3))) { creep.moveTo(target, {ignoreDestructibleStructures: true, maxRooms: 1, ignoreRoads: true}); } } if (!target) { if (creep.room.controller && creep.room.controller.level > 0 && !creep.room.find(FIND_HOSTILE_CREEPS).length) { var spawns = _.filter(creep.room.find(FIND_HOSTILE_SPAWNS), spawn => !checkPath(creep.pos, spawn.pos)); if (!spawns.length) { creep.suicide(); return; } target = spawns[0]; if (target) { creep.moveTo(target, {ignoreDestructibleStructures: true, maxRooms: 1, ignoreRoads: true}); } } return; } creep.attack(target); if ((creep.getActiveBodyparts(WORK) > 0 || creep.getActiveBodyparts(ATTACK) > 0) && creep.memory._move && creep.memory._move.path) { var path = Room.deserializePath(creep.memory._move.path); if (path.length && creep.pos.isNearTo(path[0].x, path[0].y)) { var structures = creep.room.lookForAt('structure', path[0].x, path[0].y); if (structures.length > 0) { creep.attack(structures[0]); creep.dismantle(structures[0]); } } } }",
                     flee: "var rooms = require('rooms'); module.exports = function(creep, range) { var nearCreeps = creep.pos.findInRange(FIND_HOSTILE_CREEPS, range-1, {filter: i => i.getActiveBodyparts(ATTACK) > 0 || i.getActiveBodyparts(RANGED_ATTACK) > 0}); if(nearCreeps.length > 0) { var ret = PathFinder.search(creep.pos, _.map(nearCreeps, i => ({pos: i.pos, range: range})), { maxRooms: 1, flee: true, roomCallback(roomName) { if(!rooms.rooms[roomName] || rooms.rooms[roomName].time < Game.time) { rooms.rooms[roomName] = {costMatrix: rooms.createCostMatrix(roomName), time: Game.time}; } return rooms.rooms[roomName].costMatrix; } }); if(ret.path.length) { creep.moveTo(ret.path[0]); creep.say('flee'); return true; } } return false; }",
                     healer: "var flee = require('flee'); module.exports = function (creep) { var target; var healTargets = creep.pos.findInRange(FIND_MY_CREEPS, 3); if(healTargets.length > 0) { healTargets = healTargets.sort((a,b) => (b.hitsMax - b.hits) - (a.hitsMax - a.hits)); if (creep.pos.isNearTo(healTargets[0])) { creep.heal(healTargets[0]); } else { creep.rangedHeal(healTargets[0]); } } if (creep.hits < creep.hitsMax / 2) { if (!flee(creep)) { target = creep.pos.findClosestByPath(FIND_MY_CREEPS, {filter: i => i.getActiveBodyparts('heal') > 0}); if (target) { creep.moveTo(target, {maxRooms: 1, ignoreRoads: true}); } } return; } target = creep.pos.findClosestByRange(FIND_MY_CREEPS, {filter: i => i.hits < i.hitsMax}); if (!target) { if (flee(creep, 4)) { return; } target = creep.pos.findClosestByRange(FIND_MY_CREEPS, {filter: i => i != creep && i.getActiveBodyparts(HEAL) == 0}); } if (!target) { creep.suicide(); return; } if (creep.pos.isNearTo(target)) { creep.move(creep.pos.getDirectionTo(target)); } else { creep.moveTo(target, {maxRooms: 1, ignoreRoads: true, reusePath: 0}); } if (creep.getActiveBodyparts(RANGED_ATTACK)) { require('shootAtWill')(creep); } }",
                     rooms: "module.exports = { rooms: {}, createCostMatrix(roomName) { var cm = new PathFinder.CostMatrix; Game.rooms[roomName].find(FIND_CREEPS).forEach(i => cm.set(i.pos.x, i.pos.y, 255)); Game.rooms[roomName].find(FIND_STRUCTURES).forEach(i => { if(i.structureType != STRUCTURE_ROAD && i.structureType != STRUCTURE_CONTAINER) { cm.set(i.pos.x, i.pos.y, 255); } }); return cm; } } ",
@@ -484,7 +491,7 @@
                 runCodeCache[userId].globals.require.timestamp = runCodeCache[userId].runtimeData.userCodeTimestamp;
             }
 
-            driver.config.emit('playerSandbox',runCodeCache[userId].globals, userId);
+            driver.config.emit('playerSandbox',runCodeCache[userId].globals, userId, runCodeCache[userId]);
 
             runCodeCache[userId].resetUsedCpu();
 
@@ -530,28 +537,33 @@
                 throw new Error(`Unknown module '${moduleName}'`);
             }
 
-            this.globals.require.cache[moduleName] = -1;
-
-            var moduleObject = {
-                exports: {},
-                user: this.runtimeData.user._id,
-                timestamp: this.runtimeData.userCodeTimestamp,
-                name: moduleName,
-                code: this.codeModules[moduleName]
-            };
-
-            try {
-                driver.evalCode(moduleObject, this.globals, false, this.timeout, this.scriptCachedData);
+            if(_.isObject(this.codeModules[moduleName]) && this.codeModules[moduleName].binary !== undefined) {
+                this.globals.require.cache[moduleName] = driver.bufferFromBase64(this.codeModules[moduleName].binary);
             }
-            catch(e) {
-                delete this.globals.require.cache[moduleName];
-                throw e;
-            }
+            else {
+                this.globals.require.cache[moduleName] = -1;
 
-            this.globals.require.cache[moduleName] = moduleObject.exports;
-            if(moduleObject.__initGlobals) {
-                this.globals.require.initGlobals = this.globals.require.initGlobals || {};
-                this.globals.require.initGlobals[moduleName] = moduleObject.__initGlobals;
+                var moduleObject = {
+                    exports: {},
+                    user: this.runtimeData.user._id,
+                    timestamp: this.runtimeData.userCodeTimestamp,
+                    name: moduleName,
+                    code: this.codeModules[moduleName]
+                };
+
+                try {
+                    driver.evalCode(moduleObject, this.globals, false, this.timeout, this.scriptCachedData);
+                }
+                catch (e) {
+                    delete this.globals.require.cache[moduleName];
+                    throw e;
+                }
+
+                this.globals.require.cache[moduleName] = moduleObject.exports;
+                if (moduleObject.__initGlobals) {
+                    this.globals.require.initGlobals = this.globals.require.initGlobals || {};
+                    this.globals.require.initGlobals[moduleName] = moduleObject.__initGlobals;
+                }
             }
         }
         else if (this.globals.require.cache[moduleName] === -1) {

@@ -4,7 +4,7 @@ var utils = require('./../utils'),
     C = driver.constants,
     _ = require('lodash');
 
-var runtimeData, intents, register, globals, createdCreepNames;
+var runtimeData, intents, register, globals, createdCreepNames, lastActivateSafeMode;
 
 function data(id) {
     if(!runtimeData.roomObjects[id]) {
@@ -26,6 +26,8 @@ function _storeGetter(o) {
 }
 
 function _transfer(target, resourceType, amount) {
+
+    register.deprecated('`Structure*.transfer` is considered deprecated and will be removed soon. Please use `Creep.withdraw` instead.');
 
     if (!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
         register.assertTargetObject(target);
@@ -61,6 +63,8 @@ function _transfer(target, resourceType, amount) {
 }
 
 function _transferEnergy(target, amount) {
+
+    register.deprecated('`Structure*.transferEnergy` is considered deprecated and will be removed soon. Please use `Creep.withdraw` instead.');
 
     if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
         register.assertTargetObject(target);
@@ -105,6 +109,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     globals = _globals;
 
     createdCreepNames = [];
+    lastActivateSafeMode = null;
 
     if(globals.Structure) {
         return;
@@ -192,7 +197,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id));
     });
 
-    globals.Structure = Structure;
+    Object.defineProperty(globals, 'Structure', {enumerable: true, value: Structure});
 
     /**
      * OwnedStructure
@@ -213,7 +218,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         my: (o) => _.isUndefined(o.user) ? undefined : o.user == runtimeData.user._id
     });
 
-    globals.OwnedStructure = OwnedStructure;
+    Object.defineProperty(globals, 'OwnedStructure', {enumerable: true, value: OwnedStructure});
 
     /**
      * StructureContainer
@@ -234,7 +239,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     StructureContainer.prototype.transfer = register.wrapFn(_transfer);
 
-    globals.StructureContainer = StructureContainer;
+    Object.defineProperty(globals, 'StructureContainer', {enumerable: true, value: StructureContainer});
 
     /**
      * StructureController
@@ -260,7 +265,12 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         safeMode: o => o.safeMode && o.safeMode > runtimeData.time ? o.safeMode - runtimeData.time : undefined,
         safeModeCooldown: o => o.safeModeCooldown && o.safeModeCooldown > runtimeData.time ? o.safeModeCooldown - runtimeData.time : undefined,
         safeModeAvailable: o => o.safeModeAvailable || 0,
-        sign: o => o.sign ? {
+        sign: o => o.hardSign ? {
+                username: C.SYSTEM_USERNAME,
+                text: o.hardSign.text,
+                time: o.hardSign.time,
+                datetime: new Date(o.hardSign.datetime)
+            } : o.sign ? {
                 username: runtimeData.users[o.sign.user].username,
                 text: o.sign.text,
                 time: o.sign.time,
@@ -286,18 +296,24 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.safeModeAvailable <= 0) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
-        if(this.safeModeCooldown || this.upgradeBlocked > 0) {
+        if(this.safeModeCooldown || this.upgradeBlocked > 0 ||
+            this.ticksToDowngrade < C.CONTROLLER_DOWNGRADE[this.level] - C.CONTROLLER_DOWNGRADE_SAFEMODE_THRESHOLD) {
             return C.ERR_TIRED;
         }
         if(_.any(register.structures, i => i.structureType == 'controller' && i.my && i.safeMode)) {
             return C.ERR_BUSY;
         }
 
+        if(lastActivateSafeMode) {
+            intents.remove(lastActivateSafeMode, 'activateSafeMode');
+        }
+        lastActivateSafeMode = this.id;
+
         intents.set(this.id, 'activateSafeMode', {});
         return C.OK;
     });
 
-    globals.StructureController = StructureController;
+    Object.defineProperty(globals, 'StructureController', {enumerable: true, value: StructureController});
 
     /**
      * StructureExtension
@@ -317,7 +333,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     StructureExtension.prototype.transferEnergy = register.wrapFn(_transferEnergy);
 
-    globals.StructureExtension = StructureExtension;
+    Object.defineProperty(globals, 'StructureExtension', {enumerable: true, value: StructureExtension});
 
     /**
      * StructureExtractor
@@ -334,7 +350,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         cooldown: (o) => o.cooldown || 0
     });
 
-    globals.StructureExtractor = StructureExtractor;
+    Object.defineProperty(globals, 'StructureExtractor', {enumerable: true, value: StructureExtractor});
 
     /**
      * StructureKeeperLair
@@ -353,7 +369,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         ticksToSpawn: (o) => o.nextSpawnTime ? o.nextSpawnTime - runtimeData.time : undefined
     });
 
-    globals.StructureKeeperLair = StructureKeeperLair;
+    Object.defineProperty(globals, 'StructureKeeperLair', {enumerable: true, value: StructureKeeperLair});
 
     /**
      * StructureLab
@@ -470,7 +486,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
         bodyPartsCount = bodyPartsCount || 0;
-        var nonBoostedParts = _(target.body).filter(i => !i.boost && C.BOOSTS[i.type][data(this.id).mineralType]).size();
+        var nonBoostedParts = _(target.body).filter(i => !i.boost && C.BOOSTS[i.type] && C.BOOSTS[i.type][data(this.id).mineralType]).size();
 
         if(!nonBoostedParts || bodyPartsCount && bodyPartsCount > nonBoostedParts) {
             return C.ERR_NOT_FOUND;
@@ -480,7 +496,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    globals.StructureLab = StructureLab;
+    Object.defineProperty(globals, 'StructureLab', {enumerable: true, value: StructureLab});
 
     /**
      * StructureLink
@@ -531,8 +547,14 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 return C.ERR_RCL_NOT_ENOUGH;
             }
         }
-        if ((target instanceof globals.Creep) && !this.pos.isNearTo(target)) {
-            return C.ERR_NOT_IN_RANGE;
+        if (target instanceof globals.Creep) {
+
+            register.deprecated('`StructureLink.transferEnergy` applied to creeps is considered deprecated and will be ' +
+                'removed soon. Please use `Creep.withdraw` instead.');
+
+            if (!this.pos.isNearTo(target)) {
+                return C.ERR_NOT_IN_RANGE;
+            }
         }
         if (!data(this.id).energy) {
             return C.ERR_NOT_ENOUGH_ENERGY;
@@ -561,7 +583,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     });
 
-    globals.StructureLink = StructureLink;
+    Object.defineProperty(globals, 'StructureLink', {enumerable: true, value: StructureLink});
 
     /**
      * StructureObserver
@@ -596,7 +618,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    globals.StructureObserver = StructureObserver;
+    Object.defineProperty(globals, 'StructureObserver', {enumerable: true, value: StructureObserver});
 
     /**
      * StructurePowerBank
@@ -616,7 +638,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         owner: () => ({username: 'Power Bank'})
     });
 
-    globals.StructurePowerBank = StructurePowerBank;
+    Object.defineProperty(globals, 'StructurePowerBank', {enumerable: true, value: StructurePowerBank});
 
     /**
      * StructurePowerSpawn
@@ -653,7 +675,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    globals.StructurePowerSpawn = StructurePowerSpawn;
+    Object.defineProperty(globals, 'StructurePowerSpawn', {enumerable: true, value: StructurePowerSpawn});
 
     /**
      * StructureRampart
@@ -679,7 +701,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    globals.StructureRampart = StructureRampart;
+    Object.defineProperty(globals, 'StructureRampart', {enumerable: true, value: StructureRampart});
 
     /**
      * StructureRoad
@@ -696,7 +718,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         ticksToDecay: (o) => o.nextDecayTime ? o.nextDecayTime - runtimeData.time : o.decayTime ? o.decayTime - runtimeData.time : undefined
     });
 
-    globals.StructureRoad = StructureRoad;
+    Object.defineProperty(globals, 'StructureRoad', {enumerable: true, value: StructureRoad});
 
 
     /**
@@ -717,7 +739,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     StructureStorage.prototype.transfer = register.wrapFn(_transfer);
 
-    globals.StructureStorage = StructureStorage;
+    Object.defineProperty(globals, 'StructureStorage', {enumerable: true, value: StructureStorage});
 
     /**
      * StructureTerminal
@@ -732,7 +754,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     utils.defineGameObjectProperties(StructureTerminal.prototype, data, {
         store: _storeGetter,
-        storeCapacity: (o) => o.energyCapacity
+        storeCapacity: (o) => o.energyCapacity,
+        cooldown: o => o.cooldownTime && o.cooldownTime > runtimeData.time ? o.cooldownTime - runtimeData.time : 0
     });
 
     StructureTerminal.prototype.transfer = register.wrapFn(_transfer);
@@ -756,8 +779,11 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!data(this.id)[resourceType] || data(this.id)[resourceType] < amount) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
+        if(data(this.id).cooldownTime > runtimeData.time) {
+            return C.ERR_TIRED;
+        }
         var range = utils.calcRoomsDistance(data(this.id).room, targetRoomName, true);
-        var cost = Math.max(0, Math.ceil(amount * (Math.log((range+9) * 0.1) + 0.1)));
+        var cost = utils.calcTerminalEnergyCost(amount,range);
         if(resourceType != C.RESOURCE_ENERGY && data(this.id).energy < cost ||
         resourceType == C.RESOURCE_ENERGY && data(this.id).energy < amount + cost) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
@@ -770,7 +796,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    globals.StructureTerminal = StructureTerminal;
+    Object.defineProperty(globals, 'StructureTerminal', {enumerable: true, value: StructureTerminal});
 
     /**
      * StructureTower
@@ -849,7 +875,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    globals.StructureTower = StructureTower;
+    Object.defineProperty(globals, 'StructureTower', {enumerable: true, value: StructureTower});
 
     /**
      * StructureWall
@@ -866,7 +892,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         ticksToLive: (o) => o.ticksToLive,
     });
 
-    globals.StructureWall = StructureWall;
+    Object.defineProperty(globals, 'StructureWall', {enumerable: true, value: StructureWall});
 
 
     /**
@@ -881,10 +907,10 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     StructureSpawn.prototype.constructor = StructureSpawn;
 
     utils.defineGameObjectProperties(StructureSpawn.prototype, data, {
-        name: (o) => o.user == runtimeData.user._id ? o.name : undefined,
+        name: (o) => o.name,
         energy: (o) => o.energy,
         energyCapacity: (o) => o.energyCapacity,
-        spawning: (o) => o.spawning || null
+        spawning: (o, id) => o.spawning ? new StructureSpawn.Spawning(id) : null
     });
 
     Object.defineProperty(StructureSpawn.prototype, 'memory', {
@@ -1063,8 +1089,168 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return name;
     });
 
+    function calcEnergyAvailable(roomObjects, energyStructures){
+        return _.sum(energyStructures, id => {
+            if (roomObjects[id] && !roomObjects[id].off && (roomObjects[id].type === 'spawn' || roomObjects[id].type === 'extension')) {
+                return roomObjects[id].energy;
+            } else {
+                return 0;
+            }
+        });
+    }
+
+    StructureSpawn.prototype.spawnCreep = register.wrapFn(function spawnCreep(body, name, options = {}) {
+
+        if(!name || !_.isObject(options)) {
+            return C.ERR_INVALID_ARGS;
+        }
+
+        if(globals.Game.creeps[name] || createdCreepNames.indexOf(name) != -1) {
+            return C.ERR_NAME_EXISTS;
+        }
+
+        let energyStructures = options.energyStructures && _.uniq(_.map(options.energyStructures, 'id'));
+
+        let directions = options.directions;
+        if(directions !== undefined) {
+            if(!_.isArray(directions)) {
+                return C.ERR_INVALID_ARGS;
+            }
+            // convert directions to numbers, eliminate duplicates
+            directions = _.uniq(_.map(directions, d => +d));
+            if(directions.length > 0) {
+                // bail if any numbers are out of bounds or non-integers
+                if(!_.all(directions, (direction) => direction >= 1 && direction <= 8 && direction === (direction | 0))) {
+                    return C.ERR_INVALID_ARGS;
+                }
+            }
+        }
+
+        if(!this.my) {
+            return C.ERR_NOT_OWNER;
+        }
+
+        if(data(this.id).spawning) {
+            return C.ERR_BUSY;
+        }
+
+        if(data(this.id).off) {
+            return C.ERR_RCL_NOT_ENOUGH;
+        }
+
+        if(!body || !_.isArray(body) || body.length === 0 || body.length > C.MAX_CREEP_SIZE) {
+            return C.ERR_INVALID_ARGS;
+        }
+
+        for(let i=0; i<body.length; i++) {
+            if(!_.contains(C.BODYPARTS_ALL, body[i]))
+                return C.ERR_INVALID_ARGS;
+        }
+
+        let energyAvailable = energyStructures ? calcEnergyAvailable(runtimeData.roomObjects, energyStructures) : this.room.energyAvailable;
+        if(energyAvailable < utils.calcCreepCost(body)) {
+            return C.ERR_NOT_ENOUGH_ENERGY;
+        }
+
+        if(options.dryRun) {
+            return C.OK;
+        }
+
+        createdCreepNames.push(name);
+
+        if(_.isUndefined(globals.Memory.creeps)) {
+            globals.Memory.creeps = {};
+        }
+
+        if(_.isObject(globals.Memory.creeps)) {
+            globals.Memory.creeps[name] = options.memory || globals.Memory.creeps[name] || {};
+        }
+
+        globals.Game.creeps[name] = new globals.Creep();
+        globals.RoomObject.call(globals.Game.creeps[name], this.pos.x, this.pos.y, this.pos.roomName);
+        Object.defineProperties(globals.Game.creeps[name], {
+            name: {
+                enumerable: true,
+                get() {
+                    return name;
+                }
+            },
+            spawning: {
+                enumerable: true,
+                get() {
+                    return true;
+                }
+            },
+            my: {
+                enumerable: true,
+                get() {
+                    return true;
+                }
+            },
+            body: {
+                enumerable: true,
+                get() {
+                    return _.map(body, type => ({type, hits: 100}))
+                }
+            },
+            owner: {
+                enumerable: true,
+                get() {
+                    return new Object({username: runtimeData.user.username});
+                }
+            },
+            ticksToLive: {
+                enumerable: true,
+                get() {
+                    return C.CREEP_LIFE_TIME;
+                }
+            },
+            carryCapacity: {
+                enumerable: true,
+                get() {
+                    return _.reduce(body, (result, type) => result += type === C.CARRY ? C.CARRY_CAPACITY : 0, 0);
+                }
+            },
+            carry: {
+                enumerable: true,
+                get() {
+                    return {energy: 0};
+                }
+            },
+            fatigue: {
+                enumerable: true,
+                get() {
+                    return 0;
+                }
+            },
+            hits: {
+                enumerable: true,
+                get() {
+                    return body.length * 100;
+                }
+            },
+            hitsMax: {
+                enumerable: true,
+                get() {
+                    return body.length * 100;
+                }
+            },
+            saying: {
+                enumerable: true,
+                get() {
+                    return undefined;
+                }
+            }
+        });
+
+        intents.set(this.id, 'createCreep', {name, body, energyStructures, directions});
+
+        return C.OK;
+    });
+
     StructureSpawn.prototype.transferEnergy = register.wrapFn(function(target, amount) {
 
+        register.deprecated('`StructureSpawn.transferEnergy` is considered deprecated and will be removed soon. Please use `Creep.withdraw` instead.')
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
@@ -1102,16 +1288,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    StructureSpawn.prototype.destroy = register.wrapFn(function() {
-
-        if(!this.my) {
-            return C.ERR_NOT_OWNER;
-        }
-
-        intents.pushByName('room', 'destroyStructure', {roomName: this.room.name, id: this.id});
-        return C.OK;
-    });
-
     StructureSpawn.prototype.notifyWhenAttacked = register.wrapFn(function(enabled) {
 
         if(!this.my) {
@@ -1131,24 +1307,21 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     StructureSpawn.prototype.renewCreep = register.wrapFn(function(target) {
 
-        if(!this.my) {
-            return C.ERR_NOT_OWNER;
+        if(this.spawning) {
+            return C.ERR_BUSY;
         }
-        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
+        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
+        }
+        if(!this.my || !target.my) {
+            return C.ERR_NOT_OWNER;
         }
         if(runtimeData.roomObjects[this.id].off) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
-        if(!target.my) {
-            return C.ERR_NOT_OWNER;
-        }
         if(!target.pos.isNearTo(this.pos)) {
             return C.ERR_NOT_IN_RANGE;
-        }
-        if(this.spawning) {
-            return C.ERR_BUSY;
         }
         if(this.room.energyAvailable < Math.ceil(C.SPAWN_RENEW_RATIO * utils.calcCreepCost(target.body) / C.CREEP_SPAWN_TIME / target.body.length)) {
             return C.ERR_NOT_ENOUGH_ENERGY;
@@ -1184,8 +1357,46 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    globals.StructureSpawn = StructureSpawn;
-    globals.Spawn = StructureSpawn;
+    Object.defineProperty(globals, 'StructureSpawn', {enumerable: true, value: StructureSpawn});
+    Object.defineProperty(globals, 'Spawn', {enumerable: true, value: StructureSpawn});
+
+    /**
+     * SpawnSpawning
+     * @param {Number} spawnId
+     * @param {Object} properties
+     * @constructor
+     */
+    StructureSpawn.Spawning = register.wrapFn(function(spawnId) {
+        this.spawn = register._objects[spawnId];
+        this.name = data(spawnId).spawning.name;
+        this.needTime = data(spawnId).spawning.needTime;
+        this.remainingTime = data(spawnId).spawning.remainingTime;
+        this.directions = data(spawnId).spawning.directions;
+    });
+
+    StructureSpawn.Spawning.prototype.setDirections = register.wrapFn(function(directions) {
+        if(!this.spawn.my) {
+            return C.ERR_NOT_OWNER;
+        }
+        if(_.isArray(directions) && directions.length > 0) {
+            // convert directions to numbers, eliminate duplicates
+            directions = _.uniq(_.map(directions, e => +e));
+            // bail if any numbers are out of bounds or non-integers
+            if(!_.any(directions, (direction)=>direction < 1 || direction > 8 || direction !== (direction | 0))) {
+                intents.set(this.spawn.id, 'setSpawnDirections', {directions});
+                return C.OK;
+            }
+        }
+        return C.ERR_INVALID_ARGS;
+    });
+
+    StructureSpawn.Spawning.prototype.cancel = register.wrapFn(function() {
+        if(!this.spawn.my) {
+            return C.ERR_NOT_OWNER;
+        }
+        intents.set(this.spawn.id, 'cancelSpawning', {});
+        return C.OK;
+    });
 
     /**
      * StructureNuker
@@ -1210,7 +1421,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
-        if(runtimeData.rooms[this.room.name].novice > Date.now()) {
+        if(runtimeData.rooms[this.room.name].novice > Date.now() || runtimeData.rooms[this.room.name].respawnArea > Date.now()) {
             return C.ERR_INVALID_TARGET;
         }
         if(!(pos instanceof globals.RoomPosition)) {
@@ -1236,7 +1447,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    globals.StructureNuker = StructureNuker;
+    Object.defineProperty(globals, 'StructureNuker', {enumerable: true, value: StructureNuker});
 
 
     /**
@@ -1251,10 +1462,20 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     StructurePortal.prototype.constructor = StructurePortal;
 
     utils.defineGameObjectProperties(StructurePortal.prototype, data, {
-        destination: o => new globals.RoomPosition(o.destination.x, o.destination.y, o.destination.room),
+        destination: o => {
+            if(o.destination.shard) {
+                return {
+                    shard: o.destination.shard,
+                    room: o.destination.room
+                };
+            }
+            else {
+                return new globals.RoomPosition(o.destination.x, o.destination.y, o.destination.room);
+            }
+        },
         ticksToDecay: (o) => o.decayTime ? o.decayTime - runtimeData.time : undefined
     });
 
-    globals.StructurePortal = StructurePortal;
+    Object.defineProperty(globals, 'StructurePortal', {enumerable: true, value: StructurePortal});
 
 };

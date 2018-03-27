@@ -3,20 +3,16 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-
-module.exports = function(spawn, roomObjects, cost, bulk, roomController) {
-
+function oldEnergyHandling(spawn, roomObjects, cost, bulk){
     var spawns = _.filter(roomObjects, i => i.type == 'spawn' && i.user == spawn.user && !i.off);
     var extensions = _.filter(roomObjects, i => i.type == 'extension' && i.user == spawn.user && !i.off);
-
     var availableEnergy = _.sum(extensions, 'energy') + _.sum(spawns, 'energy');
 
     if(availableEnergy < cost) {
         return false;
     }
 
-    extensions.sort(utils.comparatorDistance(spawn));
-
+    spawns.sort(utils.comparatorDistance(spawn));
     spawns.forEach((i) => {
         var neededEnergy = Math.min(cost, i.energy);
         i.energy -= neededEnergy;
@@ -24,6 +20,11 @@ module.exports = function(spawn, roomObjects, cost, bulk, roomController) {
         bulk.update(i, {energy: i.energy});
     });
 
+    if(cost <= 0) {
+        return true;
+    }
+
+    extensions.sort(utils.comparatorDistance(spawn));
     extensions.forEach((extension) => {
         if(cost <= 0) {
             return;
@@ -35,4 +36,43 @@ module.exports = function(spawn, roomObjects, cost, bulk, roomController) {
     });
 
     return true;
+}
+
+function newEnergyHandling(spawn, roomObjects, cost, bulk, energyStructures){
+    energyStructures = _.filter(energyStructures, id => {
+        let energyStructure = roomObjects[id];
+
+        return energyStructure && !energyStructure.off && energyStructure.user === spawn.user &&
+            (energyStructure.type === 'spawn' || energyStructure.type === 'extension');
+    });
+
+    energyStructures = _.uniq(energyStructures);
+
+    let availableEnergy = _.sum(energyStructures, id => roomObjects[id].energy);
+    if(availableEnergy < cost) {
+        return false;
+    }
+
+    _.forEach(energyStructures, id => {
+        let energyStructure = roomObjects[id];
+
+        let energyChange = Math.min(cost, energyStructure.energy);
+        energyStructure.energy -= energyChange;
+        bulk.update(energyStructure, {energy: energyStructure.energy});
+
+        cost -= energyChange;
+        if(cost <= 0) {
+            return false;
+        }
+    });
+
+    return true;
+}
+
+module.exports = function chargeEnergy(spawn, roomObjects, cost, bulk, energyStructures) {
+    if(energyStructures === undefined) {
+        return oldEnergyHandling(spawn, roomObjects, cost, bulk);
+    } else {
+        return newEnergyHandling(spawn, roomObjects, cost, bulk, energyStructures);
+    }
 };

@@ -232,6 +232,10 @@ exports.makeMap = function(runtimeData, register) {
 
         getRoomLinearDistance(roomName1, roomName2, continuous) {
             return utils.calcRoomsDistance(roomName1, roomName2, continuous);
+        },
+
+        getWorldSize() {
+            return driver.getWorldSize();
         }
     }
 };

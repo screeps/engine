@@ -52,9 +52,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my && !(this.room && this.room.controller && this.room.controller.my)) {
             return C.ERR_NOT_OWNER;
         }
-        intents.set(this.id, 'remove', {});
+        intents.pushByName('room', 'removeConstructionSite', {roomName: data(this.id).room, id: this.id});
         return C.OK;
     });
 
-    globals.ConstructionSite = ConstructionSite;
+    Object.defineProperty(globals, 'ConstructionSite', {enumerable: true, value: ConstructionSite});
 };

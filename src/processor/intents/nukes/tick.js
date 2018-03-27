@@ -5,7 +5,7 @@ var _ = require('lodash'),
 
 module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime, roomInfo) {
 
-    if(roomInfo.novice && roomInfo.novice > Date.now()) {
+    if(roomInfo.novice && roomInfo.novice > Date.now() || roomInfo.respawnArea && roomInfo.respawnArea > Date.now()) {
         bulk.remove(object._id);
         delete roomObjects[object._id];
         return;

@@ -434,8 +434,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                         name: ""+iCreateFlag.name,
                         color: +iCreateFlag.color,
                         secondaryColor: +iCreateFlag.secondaryColor,
-                        roomName: iCreateFlag.roomName,
-                        user: userId
+                        roomName: iCreateFlag.roomName
                     })
                 });
             }
@@ -455,8 +454,24 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                         y: parseInt(iCreateConstructionSite.y),
                         structureType: ""+iCreateConstructionSite.structureType,
                         name: ""+iCreateConstructionSite.name,
-                        roomName: ""+iCreateConstructionSite.roomName,
-                        user: userId
+                        roomName: ""+iCreateConstructionSite.roomName
+                    });
+                });
+            }
+            if(roomIntentsResult.removeConstructionSite) {
+                _.forEach(roomIntentsResult.removeConstructionSite, (iRemoveConstructionSite) => {
+
+                    intents[iRemoveConstructionSite.roomName] =
+                        intents[iRemoveConstructionSite.roomName] || {};
+
+                    var roomIntents = intents[iRemoveConstructionSite.roomName].room =
+                        intents[iRemoveConstructionSite.roomName].room || {};
+
+                    roomIntents.removeConstructionSite = roomIntents.removeConstructionSite || [];
+
+                    roomIntents.removeConstructionSite.push({
+                        roomName: ""+iRemoveConstructionSite.roomName,
+                        id: ""+iRemoveConstructionSite.id
                     });
                 });
             }
@@ -473,8 +488,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
 
                     roomIntents.destroyStructure.push({
                         roomName: ""+iDestroyStructure.roomName,
-                        id: ""+iDestroyStructure.id,
-                        user: userId
+                        id: ""+iDestroyStructure.id
                     });
                 });
             }
@@ -492,8 +506,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
 
                     roomIntents.removeFlag.push({
                         roomName: ""+iRemoveFlag.roomName,
-                        name: ""+iRemoveFlag.name,
-                        user: userId
+                        name: ""+iRemoveFlag.name
                     });
                 });
             }
@@ -511,7 +524,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                     intents.market.createOrder.push({
                         type: ""+iCreateOrder.type,
                         resourceType: ""+iCreateOrder.resourceType,
-                        price: exports.roundCredits(iCreateOrder.price),
+                        price: parseInt(iCreateOrder.price*1000),
                         totalAmount: parseInt(iCreateOrder.totalAmount),
                         roomName: iCreateOrder.roomName ? ""+iCreateOrder.roomName : undefined
                     })
@@ -530,7 +543,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                     intents.market.changeOrderPrice = intents.market.changeOrderPrice || [];
                     intents.market.changeOrderPrice.push({
                         orderId: ""+iChangeOrderPrice.orderId,
-                        newPrice: exports.roundCredits(iChangeOrderPrice.newPrice),
+                        newPrice: parseInt(iChangeOrderPrice.newPrice*1000),
                     });
                 });
             }
@@ -579,8 +592,6 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                 resourceType: ""+objectIntentsResult.transfer.resourceType
             };
         }
-
-        if(!(i in userRuntimeData.userObjects)) continue;
 
         if(objectIntentsResult.move) {
             objectIntents.move = {
@@ -653,7 +664,9 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
         if(objectIntentsResult.createCreep) {
             objectIntents.createCreep = {
                 name: ""+objectIntentsResult.createCreep.name,
-                body: _.filter(objectIntentsResult.createCreep.body, (i) => _.contains(C.BODYPARTS_ALL, i))
+                body: _.filter(objectIntentsResult.createCreep.body, (i) => _.contains(C.BODYPARTS_ALL, i)),
+                energyStructures: objectIntentsResult.createCreep.energyStructures,
+                directions: objectIntentsResult.createCreep.directions
             };
         }
         if(objectIntentsResult.renewCreep) {
@@ -793,7 +806,14 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                 sign: (""+objectIntentsResult.signController.sign).substring(0,100)
             };
         }
-
+        if(objectIntentsResult.setSpawnDirections) {
+            objectIntents.setSpawnDirections = {
+                directions: objectIntentsResult.setSpawnDirections.directions
+            };
+        }
+        if(objectIntentsResult.cancelSpawning) {
+            objectIntents.cancelSpawning = {};
+        }
 
         for(var iCustomType in driver.config.customIntentTypes) {
             if(objectIntentsResult[iCustomType]) {
@@ -841,28 +861,55 @@ exports.sendAttackingNotification = function(target, roomController) {
 };
 
 exports.checkStructureAgainstController = function(object, roomObjects, roomController) {
-
+    // owner-less objects are always active
     if(!object.user) {
         return true;
     }
 
-    if(!roomController || roomController.level < 1 || object.user && roomController.user != object.user) {
+    // eliminate some other easy cases
+    if(!roomController || roomController.level < 1 || roomController.user !== object.user) {
         return false;
     }
 
-    if(C.CONTROLLER_STRUCTURES[object.type][8] == 1) {
-        return C.CONTROLLER_STRUCTURES[object.type][roomController.level] != 0;
+    let allowedRemaining = C.CONTROLLER_STRUCTURES[object.type][roomController.level];
+
+    if(allowedRemaining === 0) {
+        return false;
     }
 
-    var objects = _.filter(roomObjects, {type: object.type, user: object.user});
+    // if only one object ever allowed, this is it
+    if(C.CONTROLLER_STRUCTURES[object.type][8] === 1) {
+        return allowedRemaining !== 0;
+    }
 
-    if(objects.length > C.CONTROLLER_STRUCTURES[object.type][roomController.level]) {
-        objects.sort(exports.comparatorDistance(roomController));
-        objects = _.take(objects, C.CONTROLLER_STRUCTURES[object.type][roomController.level]);
-        if(!_.contains(objects, object)) {
-            return false;
+    // Scan through the room objects of the same type and count how many are closer.
+    let foundSelf = false;
+    let objectDist = Math.max(Math.abs(object.x - roomController.x), Math.abs(object.y - roomController.y));
+    let objectIds = _.keys(roomObjects);
+    for (let i = 0; i < objectIds.length; i++) {
+        let compareObj = roomObjects[objectIds[i]];
+        if(compareObj.type === object.type && compareObj.user === object.user) {
+            let compareDist = Math.max(Math.abs(compareObj.x - roomController.x), Math.abs(compareObj.y - roomController.y));
+
+            if(compareDist < objectDist) {
+                allowedRemaining--;
+                if (allowedRemaining === 0) {
+                    return false;
+                }
+            } else if(!foundSelf && compareDist === objectDist) {
+                // Objects of equal distance that are discovered before we scan over the selected object are considered closer
+                if(object === compareObj) {
+                    foundSelf = true;
+                } else {
+                    allowedRemaining--;
+                    if (allowedRemaining === 0) {
+                        return false;
+                    }
+                }
+            }
         }
     }
+
     return true;
 };
 
@@ -875,7 +922,7 @@ exports.defineGameObjectProperties = function(obj, dataFn, properties) {
                 enumerable: true,
                 get() {
                     if(!this['_${name}']) {
-                        this['_${name}'] = properties['${name}'](dataFn(this.id));
+                        this['_${name}'] = properties['${name}'](dataFn(this.id), this.id);
                     }
                     return this['_${name}'];
                 }
@@ -974,18 +1021,23 @@ exports.calcBodyEffectiveness = function(body, bodyPartType, methodName, basePow
     return power;
 };
 
-exports.roundCredits = function(value) {
-    return Math.ceil(((+value)*100).toFixed(0))/100;
-};
-
 exports.calcRoomsDistance = function(room1, room2, continuous) {
     var [x1,y1] = exports.roomNameToXY(room1);
     var [x2,y2] = exports.roomNameToXY(room2);
     var dx = Math.abs(x2-x1);
     var dy = Math.abs(y2-y1);
     if(continuous) {
-        dx = Math.min(C.WORLD_WIDTH - dx, dx);
-        dy = Math.min(C.WORLD_HEIGHT - dy, dy);
+        var worldSize = driver.getWorldSize();
+        dx = Math.min(worldSize - dx, dx);
+        dy = Math.min(worldSize - dy, dy);
     }
     return Math.max(dx, dy);
+};
+
+exports.calcTerminalEnergyCost = function(amount, range) {
+    return Math.ceil(amount * (1 - Math.exp(-range / 30)))
+};
+
+exports.calcNeededGcl = function(gclLevel) {
+    return C.GCL_MULTIPLY * Math.pow(gclLevel-1, C.GCL_POW);
 };

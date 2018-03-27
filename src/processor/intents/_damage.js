@@ -3,43 +3,6 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-function damageBody(object, damage, roomObjects, roomTerrain, bulk) {
-
-    let damageReduce = 0, damageEffective = damage;
-
-    if(_.any(object.body, i => !!i.boost)) {
-        for(let i=0; i<object.body.length; i++) {
-            if(damageEffective <= 0) {
-                break;
-            }
-            let bodyPart = object.body[i], damageRatio = 1;
-            if(bodyPart.boost && C.BOOSTS[bodyPart.type][bodyPart.boost] && C.BOOSTS[bodyPart.type][bodyPart.boost].damage) {
-                damageRatio = C.BOOSTS[bodyPart.type][bodyPart.boost].damage;
-            }
-            let bodyPartHitsEffective = bodyPart.hits / damageRatio;
-            damageReduce += Math.min(bodyPartHitsEffective, damageEffective) * (1 - damageRatio);
-            damageEffective -= Math.min(bodyPartHitsEffective, damageEffective);
-        }
-    }
-
-    damage -= Math.round(damageReduce);
-
-    object.hits -= damage;
-
-    require('./creeps/_recalc-body')(object);
-
-    for(var i=0; i<C.RESOURCES_ALL.length; i++) {
-        var resourceType = C.RESOURCES_ALL[i];
-        var totalAmount = utils.calcResources(object);
-        if(totalAmount <= object.energyCapacity) {
-            break;
-        }
-        if(object[resourceType]) {
-            require('./creeps/drop')(object, {amount: Math.min(object[resourceType], totalAmount - object.energyCapacity), resourceType}, roomObjects, roomTerrain, bulk);
-        }
-    }
-}
-
 module.exports = function(object, target, damage, damageType, roomObjects, roomTerrain, bulk, roomController, stats, gameTime, roomInfo) {
 
     if(!target.hits) {
@@ -52,7 +15,7 @@ module.exports = function(object, target, damage, damageType, roomObjects, roomT
         if(damageType == 'melee' && !_.any(roomObjects, {type: 'rampart', x: object.x, y: object.y})) {
             attackBackPower = utils.calcBodyEffectiveness(target.body, C.ATTACK, 'attack', C.ATTACK_POWER);
         }
-        damageBody(target, damage, roomObjects, roomTerrain, bulk);
+        target._damageToApply = (target._damageToApply || 0) + damage;
     }
     else {
         target.hits -= damage;
@@ -70,12 +33,7 @@ module.exports = function(object, target, damage, damageType, roomObjects, roomT
         require('./creeps/_clear-newbie-walls')(roomObjects, bulk);
     }
     else if (target.hits <= 0) {
-
-        if(target.type == 'creep') {
-            require('./creeps/_die')(target, roomObjects, bulk, stats);
-        }
-        else {
-
+        if (target.type != 'creep') {
             C.RESOURCES_ALL.forEach(resourceType => {
                 if (target[resourceType] > 0) {
                     require('./creeps/_create-energy')(target.x, target.y, target.room,
@@ -97,15 +55,7 @@ module.exports = function(object, target, damage, damageType, roomObjects, roomT
         }
     }
     else {
-        if (target.type == 'creep') {
-            bulk.update(target, {
-                hits: target.hits,
-                body: target.body,
-                energy: target.energy,
-                energyCapacity: target.energyCapacity
-            });
-        }
-        else {
+        if (target.type != 'creep') {
             bulk.update(target, {hits: target.hits});
         }
     }
@@ -129,20 +79,8 @@ module.exports = function(object, target, damage, damageType, roomObjects, roomT
     }
 
     if(attackBackPower) {
-        damageBody(object, attackBackPower, roomObjects, roomTerrain, bulk);
+        object._damageToApply = (object._damageToApply || 0) + attackBackPower;
         object.actionLog.attacked = {x: target.x, y: target.y};
-
-        if(object.hits <= 0) {
-            require('./creeps/_die')(object, roomObjects, bulk, stats);
-        }
-        else {
-            bulk.update(object, {
-                hits: object.hits,
-                body: object.body,
-                energy: object.energy,
-                energyCapacity: object.energyCapacity
-            });
-        }
     }
 };
 

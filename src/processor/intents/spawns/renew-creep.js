@@ -13,7 +13,7 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
     }
 
     var target = roomObjects[intent.id];
-    if(!target || target.type != 'creep' || target.user != object.user) {
+    if(!target || target.type != 'creep' || target.user != object.user || target.spawning) {
         return;
     }
     if(Math.abs(target.x - object.x) > 1 || Math.abs(target.y - object.y) > 1) {
@@ -29,7 +29,7 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
     }
 
     var cost = Math.ceil(C.SPAWN_RENEW_RATIO * utils.calcCreepCost(target.body) / C.CREEP_SPAWN_TIME / target.body.length);
-    var result = require('./_charge-energy')(object, roomObjects, cost, bulk, roomController);
+    var result = require('./_charge-energy')(object, roomObjects, cost, bulk);
 
     if(!result) {
         return;
@@ -37,7 +37,6 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
 
     stats.inc('energyCreeps', object.user, cost);
 
-    target.ageTime += effect;
     target.actionLog.healed = {x: object.x, y: object.y};
     bulk.inc(target, 'ageTime', effect);
 
@@ -46,6 +45,8 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
             i.boost = null;
         });
         require('../creeps/_recalc-body')(target);
+        // we may not be able to hold all of the resources we could before now.
+        require('../creeps/_drop-resources-without-space')(target, roomObjects, roomTerrain, bulk);
         bulk.update(target, {body: target.body, energyCapacity: target.energyCapacity});
     }
 

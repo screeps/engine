@@ -22,25 +22,27 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
     if(!target.user && !target.reservation) {
         return;
     }
-    if(roomController && roomController.user != object.user && roomController.safeMode > gameTime) {
-        return;
-    }
-
-    var effect = Math.floor(_.filter(object.body, (i) => i.hits > 0 && i.type == C.CLAIM).length * C.CONTROLLER_CLAIM_DOWNGRADE);
-    if(!effect) {
+    if(roomController && roomController.user != object.user && roomController.safeMode > gameTime ||
+        roomController.upgradeBlocked > gameTime) {
         return;
     }
 
     if(target.reservation) {
+        var effect = Math.floor(_.filter(object.body, (i) => i.hits > 0 && i.type == C.CLAIM).length * C.CONTROLLER_RESERVE);
+        if(!effect) {
+            return;
+        }
         var endTime = target.reservation.endTime - effect;
         bulk.update(target, {reservation: {endTime}});
     }
     if(target.user) {
+        var effect = Math.floor(_.filter(object.body, (i) => i.hits > 0 && i.type == C.CLAIM).length * C.CONTROLLER_CLAIM_DOWNGRADE);
+        if(!effect) {
+            return;
+        }
         var downgradeTime = target.downgradeTime - effect;
-        bulk.update(target, {
-            downgradeTime,
-            upgradeBlocked: gameTime + C.CONTROLLER_ATTACK_BLOCKED_UPGRADE
-        });
+        bulk.update(target, {downgradeTime});
+        target._upgradeBlocked = gameTime + C.CONTROLLER_ATTACK_BLOCKED_UPGRADE;
     }
     object.actionLog.attack = {x: target.x, y: target.y};
 };

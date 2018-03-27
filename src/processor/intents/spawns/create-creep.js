@@ -4,7 +4,7 @@ var _ = require('lodash'),
     C = driver.constants;
 
 
-module.exports = function(spawn, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats) {
+module.exports = function(spawn, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime) {
 
     if(spawn.spawning) {
         return;
@@ -16,10 +16,25 @@ module.exports = function(spawn, intent, roomObjects, roomTerrain, bulk, bulkUse
         return;
     }
 
+    let directions = intent.directions;
+    if(directions !== undefined) {
+        if(!_.isArray(directions)) {
+            return;
+        }
+        // convert directions to numbers, eliminate duplicates
+        directions = _.uniq(_.map(directions, e => +e));
+        if(directions.length > 0) {
+            // bail if any numbers are out of bounds or non-integers
+            if(!_.all(directions, direction => direction >= 1 && direction <= 8 && direction === (direction | 0))) {
+                return;
+            }
+        }
+    }
+
     intent.body = intent.body.slice(0, C.MAX_CREEP_SIZE);
 
     var cost = utils.calcCreepCost(intent.body);
-    var result = require('./_charge-energy')(spawn, roomObjects, cost, bulk, roomController);
+    var result = require('./_charge-energy')(spawn, roomObjects, cost, bulk, intent.energyStructures, gameTime);
 
     if(!result) {
         return;
@@ -33,7 +48,8 @@ module.exports = function(spawn, intent, roomObjects, roomTerrain, bulk, bulkUse
         spawning: {
             name: intent.name,
             needTime: C.CREEP_SPAWN_TIME * intent.body.length,
-            remainingTime: C.CREEP_SPAWN_TIME * intent.body.length
+            remainingTime: C.CREEP_SPAWN_TIME * intent.body.length,
+            directions
         }
     });
 

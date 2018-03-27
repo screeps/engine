@@ -18,7 +18,10 @@ exports.make = function(runtimeData, intents, register) {
             if(resourceType != 'all' && !_.contains(C.RESOURCES_ALL, resourceType) && resourceType != C.SUBSCRIPTION_TOKEN) {
                 return {};
             }
-            cachedOrders[resourceType] = JSON.parse(JSON.stringify(runtimeData.market.orders[resourceType] || '{}'));
+            cachedOrders[resourceType] = JSON.parse(JSON.stringify(runtimeData.market.orders[resourceType]) || '{}');
+            for(var i in cachedOrders[resourceType]) {
+                cachedOrders[resourceType][i].price /= 1000;
+            }
         }
         return cachedOrders[resourceType];
     }
@@ -27,7 +30,7 @@ exports.make = function(runtimeData, intents, register) {
 
         calcTransactionCost: register.wrapFn(function(amount, roomName1, roomName2) {
             var distance = utils.calcRoomsDistance(roomName1, roomName2, true);
-            return Math.max(0, Math.ceil(amount * (Math.log((distance+9) * 0.1) + 0.1)));
+            return utils.calcTerminalEnergyCost(amount, distance);
         }),
 
         getAllOrders: register.wrapFn(function(filter) {
@@ -39,7 +42,9 @@ exports.make = function(runtimeData, intents, register) {
             if(!runtimeData.market.orders.all[id]) {
                 return null;
             }
-            return JSON.parse(JSON.stringify(runtimeData.market.orders.all[id]));
+            var result = JSON.parse(JSON.stringify(runtimeData.market.orders.all[id]));
+            result.price /= 1000;
+            return result;
         }),
 
         createOrder: register.wrapFn(function(type, resourceType, price, totalAmount, roomName) {
@@ -105,6 +110,9 @@ exports.make = function(runtimeData, intents, register) {
                 if(terminal[C.RESOURCE_ENERGY] < transferCost) {
                     return C.ERR_NOT_ENOUGH_RESOURCES;
                 }
+                if(terminal.cooldownTime > runtimeData.time) {
+                    return C.ERR_TIRED;
+                }
                 if(order.type == C.ORDER_BUY) {
                     if(order.resourceType != C.RESOURCE_ENERGY && (!terminal[order.resourceType] || terminal[order.resourceType] < amount) ||
                          order.resourceType == C.RESOURCE_ENERGY && terminal[C.RESOURCE_ENERGY] < amount + transferCost) {
@@ -167,7 +175,7 @@ exports.make = function(runtimeData, intents, register) {
         credits: {
             enumerable: true,
             get() {
-                return runtimeData.user.money || 0;
+                return (runtimeData.user.money || 0)/1000;
             }
         },
 
@@ -211,6 +219,7 @@ exports.make = function(runtimeData, intents, register) {
                         i.id = ""+i._id;
                         delete i._id;
                         delete i.user;
+                        i.price /= 1000;
                         return i;
                     }).indexBy('id').value();
                 }

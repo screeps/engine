@@ -5,7 +5,6 @@ var _ = require('lodash'),
 
 module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roomController, gameTime) {
 
-
     if(!object.nextDecayTime || gameTime >= object.nextDecayTime-1) {
         object.hits = object.hits || 0;
         object.hits -= C.CONTAINER_DECAY;

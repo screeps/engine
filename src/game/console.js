@@ -1,10 +1,12 @@
 var _ = require('lodash'),
     messages = {},
-    commandResults = {};
+    commandResults = {},
+    visual = {};
 
 exports.makeConsole = function(id, sandboxedFunctionWrapper) {
     messages[id] = [];
     commandResults[id] = [];
+    visual[id] = {};
     return Object.create(null, {
         log: {
             writable: true,
@@ -30,6 +32,31 @@ exports.makeConsole = function(id, sandboxedFunctionWrapper) {
                 }
                 commandResults[id].push(String(message));
             })
+        },
+        addVisual: {
+            value: sandboxedFunctionWrapper(function(roomName, data) {
+                roomName = roomName || "";
+                visual[id][roomName] = visual[id][roomName] || "";
+                if(visual[id][roomName].length > 500*1024) {
+                    throw new Error(`RoomVisual size in room ${roomName} has exceeded 500 KB limit`);
+                }
+                visual[id][roomName] += JSON.stringify(data)+"\n";
+            })
+        },
+        getVisualSize: {
+            value: sandboxedFunctionWrapper(function(roomName) {
+                roomName = roomName || "";
+                if(!visual[id][roomName]) {
+                    return 0;
+                }
+                return visual[id][roomName].length;
+            })
+        },
+        clearVisual: {
+            value: sandboxedFunctionWrapper(function(roomName) {
+                roomName = roomName || "";
+                visual[id][roomName] = "";
+            })
         }
     });
 };
@@ -43,5 +70,11 @@ exports.getMessages = function(id) {
 exports.getCommandResults = function(id) {
     var result = commandResults[id];
     commandResults[id] = [];
+    return result;
+};
+
+exports.getVisual = function(id) {
+    var result = visual[id];
+    visual[id] = [];
     return result;
 };

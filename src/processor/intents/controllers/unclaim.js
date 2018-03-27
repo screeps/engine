@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, gameTime, roomInfo) {
+module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, gameTime, roomInfo, users) {
 
     if(object.type != 'controller') {
         return;
@@ -12,6 +12,8 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
     if(!object.user || !object.level) {
         return;
     }
+
+    driver.removeRoomFromUser(object.room, users[object.user], bulkUsers);
 
     bulk.update(object, {
         user: null,
