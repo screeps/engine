@@ -9,7 +9,7 @@ var q = require('q'),
 
 var roomsQueue, usersQueue, lastRoomsStatsSaveTime = 0, currentHistoryPromise = q.when();
 
-function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomInfo, flags}) {
+function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomInfo, flags, userVisibility}) {
 
     return q.when().then(() => {
 
@@ -225,7 +225,7 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
         };
 
         var resultPromises = [];
-        var userVisibility = {};
+        var newUserVisibility = {};
 
         _.forEach(objects, (object) => {
 
@@ -280,7 +280,7 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
 
             if(object.type == 'observer') {
                 bulk.update(object, {observeRoom: object.observeRoom});
-                //resultPromises.push(core.setUserRoomVisibility(object.user, object.observeRoom));
+                resultPromises.push(driver.setUserRoomVisibility(object.user, object.observeRoom));
             }
 
             if (object.type == 'storage') {
@@ -314,7 +314,7 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
             }
 
             if (object.user) {
-                //userVisibility[object.user] = true;
+                newUserVisibility[object.user] = true;
 
                 if(object.type != 'constructionSite' && !object.newbieWall &&
                    (object.type != 'rampart' || !object.isPublic)) {
@@ -351,9 +351,16 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
             }
         });
 
-        /*for(var user in userVisibility) {
-            resultPromises.push(core.setUserRoomVisibility(user, roomId));
-        }*/
+        for(var user in newUserVisibility) {
+            if(userVisibility.indexOf(user) === -1) {
+                resultPromises.push(driver.setUserRoomVisibility(user, roomId));
+            }
+        }
+        userVisibility.forEach(user => {
+            if(!newUserVisibility[user]) {
+                resultPromises.push(driver.removeUserRoomVisibility(user, roomId));
+            }
+        });
 
         driver.config.emit('processRoom',roomId, roomInfo);
 
@@ -419,7 +426,8 @@ driver.connect('processor').then(() => driver.queue.create('rooms', 'read'))
                     driver.getRoomTerrain(_roomId),
                     driver.getGameTime(),
                     driver.getRoomInfo(_roomId),
-                    driver.getRoomFlags(_roomId)
+                    driver.getRoomFlags(_roomId),
+                    driver.getRoomUserVisibility(_roomId)
                 ])
             })
             .then((result) => {
@@ -431,7 +439,8 @@ driver.connect('processor').then(() => driver.queue.create('rooms', 'read'))
                     terrain: result[2],
                     gameTime: result[3],
                     roomInfo: result[4],
-                    flags: result[5]
+                    flags: result[5],
+                    userVisibility: result[6]
                 })
                 .catch((error) => console.log('Error processing room '+roomId+':', _.isObject(error) ? (error.stack || error) : error))
                 .then(() => {

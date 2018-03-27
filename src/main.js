@@ -134,6 +134,7 @@ driver.connect('main')
         driver.queue.create('users', 'write'),
         driver.queue.create('rooms', 'write'),
         driver.queue.create('usersIvm', 'write'),
+        driver.initUserRoomVisibility()
     ]))
     .then((data) => {
         usersQueue = data[0];
