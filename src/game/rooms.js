@@ -648,7 +648,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             throw new Error('look coords are out of bounds');
         }
 
-        var typeResult = privateStore[id].lookTypeSpatialRegisters[typeName][y][x];
+        var typeResult = privateStore[id].lookTypeSpatialRegisters[typeName][x * 50 + y];
         if(typeResult) {
             if(outArray) {
                 typeResult.forEach((i) => {
