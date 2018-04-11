@@ -38,10 +38,7 @@
             var keys = Object.keys(reg);
             reg.spatial = {};
             keys.forEach((i) => {
-                reg.spatial[i] = new Array(50);
-                for(var y=0;y<50;y++) {
-                    reg.spatial[i][y] = new Array(50);
-                }
+                reg.spatial[i] = new Array(2500);
             });
         }
     }
@@ -70,8 +67,13 @@
     function addObjectToRegister(register, type, objectInstance, objectRaw) {
         register[type][objectInstance.id] = objectInstance;
         register.byRoom[objectRaw.room][type][objectInstance.id] = objectInstance;
-        register.byRoom[objectRaw.room].spatial[type][objectRaw.y][objectRaw.x] = register.byRoom[objectRaw.room].spatial[type][objectRaw.y][objectRaw.x] || [];
-        register.byRoom[objectRaw.room].spatial[type][objectRaw.y][objectRaw.x].push(objectInstance);
+        let index = objectRaw.x * 50 + objectRaw.y;
+        let spatial = register.byRoom[objectRaw.room].spatial[type];
+        if (spatial[index] === undefined) {
+            spatial[index] = [ objectInstance ];
+        } else {
+            spatial[index].push(objectInstance);
+        }
     }
 
     driver.config.makeGameObject = function makeGameObject (runtimeData, intents, memory, getUsedCpuFn, globals, markStats, sandboxedFunctionWrapper) {
@@ -360,8 +362,13 @@
                 register.flags[id] = flag;
                 if(register.byRoom[flagRoomData.room]) {
                     register.byRoom[flagRoomData.room].flags[id] = flag;
-                    register.byRoom[flagRoomData.room].spatial.flags[info[4]][info[3]] = register.byRoom[flagRoomData.room].spatial.flags[info[4]][info[3]] || [];
-                    register.byRoom[flagRoomData.room].spatial.flags[info[4]][info[3]].push(flag);
+                    let index = info[3] * 50 + info[4];
+                    let spatial = register.byRoom[flagRoomData.room].spatial.flags;
+                    if (spatial[index] === undefined) {
+                        spatial[index] = [ flag ];
+                    } else {
+                        spatial[index].push(flag);
+                    }
                 }
 
                 game.flags[info[0]] = flag;
