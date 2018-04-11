@@ -362,7 +362,7 @@
                 register.flags[id] = flag;
                 if(register.byRoom[flagRoomData.room]) {
                     register.byRoom[flagRoomData.room].flags[id] = flag;
-                    let index = info[3] * 50 + info[4];
+                    let index = (+info[3]) * 50 + (+info[4]);
                     let spatial = register.byRoom[flagRoomData.room].spatial.flags;
                     if (spatial[index] === undefined) {
                         spatial[index] = [ flag ];
