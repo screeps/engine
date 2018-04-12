@@ -362,6 +362,8 @@ exports.checkControllerAvailability = function(type, roomObjects, roomController
     return structuresCnt < availableCnt;
 };
 
+// Note that game/rooms.js will swap this function out for a faster version, but may call back to
+// this function.
 exports.getRoomNameFromXY = function(x,y) {
     if(x < 0) {
         x = 'W'+(-x-1);
@@ -379,28 +381,18 @@ exports.getRoomNameFromXY = function(x,y) {
 };
 
 exports.roomNameToXY = function(name) {
-
-    name = name.toUpperCase();
-
-    var match = name.match(/^(\w)(\d+)(\w)(\d+)$/);
-    if(!match) {
-        return [undefined, undefined];
+    let xx = parseInt(name.substr(1), 10);
+    let verticalPos = (xx === 0 ? 1 : Math.ceil(Math.log10(xx + 1))) + 1;
+    let yy = parseInt(name.substr(verticalPos + 1), 10);
+    let horizontalDir = name.charAt(0);
+    let verticalDir = name.charAt(verticalPos);
+    if (horizontalDir === 'W' || horizontalDir === 'w') {
+        xx = -xx - 1;
     }
-    var [,hor,x,ver,y] = match;
-
-    if(hor == 'W') {
-        x = -x-1;
+    if (verticalDir === 'N' || verticalDir === 'n') {
+        yy = -yy - 1;
     }
-    else {
-        x = +x;
-    }
-    if(ver == 'N') {
-        y = -y-1;
-    }
-    else {
-        y = +y;
-    }
-    return [x,y];
+    return [xx, yy];
 };
 
 exports.comparatorDistance = function(target) {

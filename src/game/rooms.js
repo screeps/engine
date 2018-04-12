@@ -1201,18 +1201,102 @@ exports.makePos = function(_register) {
      * @param roomName
      * @constructor
      */
-    var RoomPosition = register.wrapFn(function(x, y, roomName) {
+    const kMaxWorldSize = 256;
+    const kMaxWorldSize2 = kMaxWorldSize >> 1;
+    const roomNames = [];
+    utils.getRoomNameFromXY = function(slowFn) {
+        return function(xx, yy) {
+            let id = (xx + kMaxWorldSize2) << 8 | (yy + kMaxWorldSize2);
+            let roomName = roomNames[id];
+            if (roomName === undefined) {
+                return roomNames[id] = slowFn(xx, yy);
+            } else {
+                return roomName;
+            }
+        };
+    }(utils.getRoomNameFromXY);
+    roomNames[0] = 'sim';
 
-        x = +x;
-        y = +y;
-
-        if(_.isNaN(x) || _.isNaN(y) || !_.isString(roomName)) {
-            throw new Error('invalid arguments in RoomPosition constructor');
+    let RoomPosition = register.wrapFn(function RoomPosition(xx, yy, roomName) {
+        let xy = roomName === 'sim' ? [-kMaxWorldSize2, -kMaxWorldSize2] : utils.roomNameToXY(roomName);
+        xy[0] += kMaxWorldSize2;
+        xy[1] += kMaxWorldSize2;
+        if (
+            xy[0] < 0 || xy[0] > kMaxWorldSize || xy[0] !== xy[0] ||
+            xy[1] < 0 || xy[1] > kMaxWorldSize || xy[1] !== xy[1] ||
+            xx < 0 || xx > 49 || xx !== xx ||
+            yy < 0 || yy > 49 || yy !== yy
+        ) {
+            throw new Error('Invalid arguments in RoomPosition constructor');
         }
+        Object.defineProperty(this, '__packedPos', {
+            enumerable: false,
+            value: xy[0] << 24 | xy[1] << 16 | xx << 8 | yy,
+            writable: true,
+        });
+    });
 
-        this.x = x;
-        this.y = y;
-        this.roomName = roomName;
+    Object.defineProperties(RoomPosition.prototype, {
+        x: {
+            enumerable: true,
+            get() {
+                return (this.__packedPos >> 8) & 0xff;
+            },
+            set(val) {
+                if (val < 0 || val > 49 || val !== val) {
+                    throw new Error('Invalid coordinate');
+                }
+                this.__packedPos = this.__packedPos & ~(0xff << 8) | val << 8;
+            },
+        },
+
+        y: {
+            enumerable: true,
+            get() {
+                return this.__packedPos & 0xff;
+            },
+            set(val) {
+                if (val < 0 || val > 49 || val !== val) {
+                    throw new Error('Invalid coordinate');
+                }
+                this.__packedPos = this.__packedPos & ~0xff | val << 8;
+            },
+        },
+
+        roomName: {
+            enumerable: true,
+            get() {
+                let roomName = roomNames[this.__packedPos >>> 16];
+                if (roomName === undefined) {
+                    return utils.getRoomNameFromXY(
+                        (this.__packedPos >>> 24) - kMaxWorldSize2,
+                        (this.__packedPos >>> 16 & 0xff) - kMaxWorldSize2
+                    );
+                } else {
+                    return roomName;
+                }
+            },
+            set(val) {
+                let xy = val === 'sim' ? [-kMaxWorldSize2, -kMaxWorldSize2] : utils.roomNameToXY(val);
+                xy[0] += kMaxWorldSize2;
+                xy[1] += kMaxWorldSize2;
+                if (
+                    xy[0] < 0 || xy[0] > kMaxWorldSize || xy[0] !== xy[0] ||
+                    xy[1] < 0 || xy[1] > kMaxWorldSize || xy[1] !== xy[1]
+                ) {
+                    throw new Error('Invalid roomName');
+                }
+                this.__packedPos = this.__packedPos & ~(0xffff << 16) | xy[0] << 24 | xy[1] << 16;
+            },
+        },
+    });
+
+    RoomPosition.prototype.toJSON = register.wrapFn(function() {
+        return Object.assign({
+            x: this.x,
+            y: this.y,
+            roomName: this.roomName,
+        }, this);
     });
 
     RoomPosition.prototype.toString = register.wrapFn(function() {
@@ -1250,7 +1334,7 @@ exports.makePos = function(_register) {
         var [thisRoomX, thisRoomY] = utils.roomNameToXY(this.roomName);
         var [thatRoomX, thatRoomY] = utils.roomNameToXY(roomName);
 
-	return utils.getDirection(thatRoomX*50 + x - thisRoomX*50 - this.x, thatRoomY*50 + y - thisRoomY*50 - this.y);
+        return utils.getDirection(thatRoomX*50 + x - thisRoomX*50 - this.x, thatRoomY*50 + y - thisRoomY*50 - this.y);
     });
 
     RoomPosition.prototype.findPathTo = register.wrapFn(function(firstArg, secondArg, opts) {
@@ -1436,6 +1520,9 @@ exports.makePos = function(_register) {
     });
 
     RoomPosition.prototype.isEqualTo = register.wrapFn(function(firstArg, secondArg) {
+        if (firstArg.__packedPos !== undefined) {
+            return firstArg.__packedPos === this.__packedPos;
+        }
         var [x,y,roomName] = utils.fetchXYArguments(firstArg, secondArg, globals);
         return x == this.x && y == this.y && (!roomName || roomName == this.roomName);
     });
