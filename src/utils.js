@@ -382,7 +382,12 @@ exports.getRoomNameFromXY = function(x,y) {
 
 exports.roomNameToXY = function(name) {
     let xx = parseInt(name.substr(1), 10);
-    let verticalPos = (xx === 0 ? 1 : Math.ceil(Math.log10(xx + 1))) + 1;
+    let verticalPos = 2;
+    if (xx >= 100) {
+        verticalPos = 4;
+    } else if (xx >= 10) {
+        verticalPos = 3;
+    }
     let yy = parseInt(name.substr(verticalPos + 1), 10);
     let horizontalDir = name.charAt(0);
     let verticalDir = name.charAt(verticalPos);
