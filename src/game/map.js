@@ -210,7 +210,7 @@ exports.makeMap = function(runtimeData, register) {
         },
 		
 		isNoviceZone(roomName) {
-		   if(runtimeData.rooms[roomName].novice > Date.now()) {
+		   if(runtimeData.rooms[roomName].novice && (runtimeData.rooms[roomName].novice > Date.now())) {
 			   return runtimeData.rooms[roomName].novice;
 		   } else {
 			   return false;
@@ -218,7 +218,7 @@ exports.makeMap = function(runtimeData, register) {
 		},
 
 		isRespawnZone(roomName) {
-		   if(runtimeData.rooms[roomName].respawnArea > Date.now()) {
+		   if(runtimeData.rooms[roomName].respawnArea && (runtimeData.rooms[roomName].respawnArea > Date.now())) {
 			   return runtimeData.rooms[roomName].respawnArea;
 		   } else {
 			   return false;
