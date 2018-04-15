@@ -217,12 +217,12 @@ exports.makeMap = function(runtimeData, register) {
 		   return ((runtimeData.rooms[roomName].respawnArea||0) > Date.now());
 		},
 		
-		getNoviceDate(roomName) {
+		getNoviceEndDate(roomName) {
 			let t=(runtimeData.rooms[roomName].novice||0);
 			return (t>Date.now()) ? t : 0;
 		},
 		
-		getRespawnDate(roomName) {
+		getRespawnEndDate(roomName) {
 			let t=(runtimeData.rooms[roomName].respawnArea||0);
 			return (t>Date.now()) ? t : 0;
 		},
