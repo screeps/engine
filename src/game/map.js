@@ -210,19 +210,19 @@ exports.makeMap = function(runtimeData, register) {
         },
 		
 		isNoviceZone(roomName) {
-		   if(runtimeData.rooms[roomName].novice && (runtimeData.rooms[roomName].novice > Date.now())) {
-			   return runtimeData.rooms[roomName].novice;
-		   } else {
-			   return false;
-		   }
+		   return ((runtimeData.rooms[roomName].novice||0) > Date.now());
 		},
 
 		isRespawnZone(roomName) {
-		   if(runtimeData.rooms[roomName].respawnArea && (runtimeData.rooms[roomName].respawnArea > Date.now())) {
-			   return runtimeData.rooms[roomName].respawnArea;
-		   } else {
-			   return false;
-		   }
+		   return ((runtimeData.rooms[roomName].respawnArea||0) > Date.now());
+		},
+		
+		getNoviceDate(roomName) {
+			return (runtimeData.rooms[roomName].novice||0);
+		},
+		
+		getRespawnDate(roomName) {
+			return (runtimeData.rooms[roomName].respawnArea||0);
 		},
 		
 		getTerrainAt(x, y, roomName) {
