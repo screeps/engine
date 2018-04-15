@@ -218,11 +218,13 @@ exports.makeMap = function(runtimeData, register) {
 		},
 		
 		getNoviceDate(roomName) {
-			return (runtimeData.rooms[roomName].novice||0);
+			let t=(runtimeData.rooms[roomName].novice||0);
+			return (t>Date.now()) ? t : 0;
 		},
 		
 		getRespawnDate(roomName) {
-			return (runtimeData.rooms[roomName].respawnArea||0);
+			let t=(runtimeData.rooms[roomName].respawnArea||0);
+			return (t>Date.now()) ? t : 0;
 		},
 		
 		getTerrainAt(x, y, roomName) {
