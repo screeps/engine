@@ -208,8 +208,24 @@ exports.makeMap = function(runtimeData, register) {
             }
             return _.contains(runtimeData.accessibleRooms, roomName);
         },
-		
-		getTerrainAt(x, y, roomName) {
+
+        isRoomNoviceZone(roomName) {
+            return !!runtimeData.zones[roomName] && runtimeData.zones[roomName].novice > Date.now();
+        },
+
+        isRoomRespawnZone(roomName) {
+            return !!runtimeData.zones[roomName] && runtimeData.zones[roomName].respawnArea > Date.now();
+        },
+
+        getRoomNoviceZoneEndDate(roomName) {
+            return runtimeData.zones[roomName] && runtimeData.zones[roomName].novice;
+        },
+
+        getRoomRespawnZoneEndDate(roomName) {
+            return runtimeData.zones[roomName] && runtimeData.zones[roomName].respawnArea;
+        },
+
+        getTerrainAt(x, y, roomName) {
 
             if(_.isObject(x)) {
                 y = x.y;
