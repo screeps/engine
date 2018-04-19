@@ -376,7 +376,7 @@
 
         _markTime(runtimeData.user._id, 'after objects 2');
 
-        game.map = register.map = map.makeMap(runtimeData, register);
+        game.map = register.map = map.makeMap(runtimeData, register, globals);
 
         markStats('beforeMarket');
 

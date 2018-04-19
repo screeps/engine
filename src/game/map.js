@@ -9,7 +9,7 @@ var utils = require('../utils'),
 
 const kRouteGrid = 30;
 
-exports.makeMap = function(runtimeData, register) {
+exports.makeMap = function(runtimeData, register, globals) {
 
     var heap, openClosed, parents;
     var originX, originY;
@@ -229,17 +229,10 @@ exports.makeMap = function(runtimeData, register) {
             return 'plain';
         },
         
-        getTerrainOfRoom(roomName) {
-            if(_.isObject(roomName))
-                roomName = roomName.name;
-            
-            var array = (runtimeData.staticTerrainData || {})[roomName];
-            if(!array)
-                return undefined;
-            
-            return new Uint8Array(array);
+        getRoomTerrain(roomName) {
+            return new globals.Room.Terrain(roomName);
         },
-
+        
         getRoomLinearDistance(roomName1, roomName2, continuous) {
             return utils.calcRoomsDistance(roomName1, roomName2, continuous);
         },

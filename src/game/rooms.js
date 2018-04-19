@@ -10,6 +10,9 @@ var runtimeData, intents, register, globals;
 
 var positionsSetCacheCounter, createdFlagNames, createdSpawnNames, privateStore, createdConstructionSites;
 
+let TerrainConstructor    = null;
+let TerrainConstructorSet = null;
+
 function getPathfinder(id, opts) {
     opts = opts || {};
     _.defaults(opts, {maxOps: 2000, heuristicWeight: 1});
@@ -382,7 +385,19 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     createdSpawnNames = [];
     privateStore = {};
     createdConstructionSites = 0;
-
+    
+    TerrainConstructor || (()=>{
+        for(var roomName in runtimeData.staticTerrainData) {
+            var array = runtimeData.staticTerrainData[roomName];
+            TerrainConstructor = array.constructor;
+            break;
+        }
+    })();
+    
+    TerrainConstructorSet || (()=>{
+        TerrainConstructorSet = TerrainConstructor.prototype.set;
+    })();
+    
     if(globals.Room) {
         return;
     }
@@ -1132,6 +1147,28 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     });
 
     globals.RoomVisual = RoomVisual;
+    
+    
+    Room.Terrain = register.wrapFn(function(roomName){ "use strict";
+        roomName = "" + roomName;
+        
+        const array = (runtimeData.staticTerrainData || {})[roomName];
+        if(!array)
+            throw new Error(`Could not access room ${roomName}`);
+        
+        this.get = register.wrapFn(function(x,y){
+            const value = array[y * 50 + x];
+            return (value & C.TERRAIN_MASK_WALL) || (value & C.TERRAIN_MASK_SWAMP) || 0;
+        });
+        
+        this.getRawBuffer = register.wrapFn(function(destinationArray){
+            if(!!destinationArray) {
+                TerrainConstructorSet.call(destinationArray, array);
+                return destinationArray;
+            }
+            return new TerrainConstructor(array);
+        });
+    });
 };
 
 exports.makePos = function(_register) {
