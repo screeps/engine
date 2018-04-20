@@ -70,9 +70,11 @@
         let index = objectRaw.x * 50 + objectRaw.y;
         let spatial = register.byRoom[objectRaw.room].spatial[type];
         if (spatial[index] === undefined) {
-            spatial[index] = [ objectInstance ];
-        } else {
+            spatial[index] = objectInstance;
+        } else if (Array.isArray(spatial[index])) {
             spatial[index].push(objectInstance);
+        } else {
+            spatial[index] = [ spatial[index], objectInstance ];
         }
     }
 
@@ -399,7 +401,7 @@
     };
 
     (function() {
-        
+
         var runCodeCache = {};
 
         exports.runCode = function (_globals, _sandboxedFunctionWrapper, _codeModules, _runtimeData, _intents, _memory, _fakeConsole, _consoleCommands, _timeout, _getUsedCpu, _resetUsedCpu, _markStats, _scriptCachedData) {

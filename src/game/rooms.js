@@ -651,7 +651,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         var typeResult = privateStore[id].lookTypeSpatialRegisters[typeName][x * 50 + y];
         if(typeResult) {
             if(outArray) {
-                typeResult.forEach((i) => {
+                var appendToOut = (i) => {
                     item = {type: typeName};
                     item[typeName] = i;
                     if(withCoords) {
@@ -659,10 +659,21 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                         item.y = y;
                     }
                     outArray.push(item);
-                });
+                };
+                if(Array.isArray(typeResult)) {
+                    typeResult.forEach(appendToOut);
+                }
+                else {
+                    appendToOut(typeResult);
+                }
                 return;
             }
-            return _.clone(typeResult);
+            if(Array.isArray(typeResult)) {
+                return _.clone(typeResult);
+            }
+            else {
+                return [typeResult];
+            }
         }
         return [];
     }
