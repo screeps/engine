@@ -123,7 +123,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     });
 
     Creep.prototype.toString = register.wrapFn(function() {
-        return `[creep ${!this.id || data(this.id).user == runtimeData.user._id ? this.name : '#'+this.id}]`;
+        return `[creep ${this.name}]`;
     });
 
     Creep.prototype.move = register.wrapFn(function(direction) {
@@ -1164,7 +1164,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-
-    globals.Creep = Creep;
+    Object.defineProperty(globals, 'Creep', {enumerable: true, value: Creep});
 };
 

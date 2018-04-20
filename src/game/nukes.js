@@ -41,5 +41,5 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return `[nuke #${this.id}]`;
     });
 
-    globals.Nuke = Nuke;
+    Object.defineProperty(globals, 'Nuke', {enumerable: true, value: Nuke});
 };

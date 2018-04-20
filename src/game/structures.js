@@ -197,7 +197,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id));
     });
 
-    globals.Structure = Structure;
+    Object.defineProperty(globals, 'Structure', {enumerable: true, value: Structure});
 
     /**
      * OwnedStructure
@@ -218,7 +218,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         my: (o) => _.isUndefined(o.user) ? undefined : o.user == runtimeData.user._id
     });
 
-    globals.OwnedStructure = OwnedStructure;
+    Object.defineProperty(globals, 'OwnedStructure', {enumerable: true, value: OwnedStructure});
 
     /**
      * StructureContainer
@@ -239,7 +239,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     StructureContainer.prototype.transfer = register.wrapFn(_transfer);
 
-    globals.StructureContainer = StructureContainer;
+    Object.defineProperty(globals, 'StructureContainer', {enumerable: true, value: StructureContainer});
 
     /**
      * StructureController
@@ -313,7 +313,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    globals.StructureController = StructureController;
+    Object.defineProperty(globals, 'StructureController', {enumerable: true, value: StructureController});
 
     /**
      * StructureExtension
@@ -333,7 +333,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     StructureExtension.prototype.transferEnergy = register.wrapFn(_transferEnergy);
 
-    globals.StructureExtension = StructureExtension;
+    Object.defineProperty(globals, 'StructureExtension', {enumerable: true, value: StructureExtension});
 
     /**
      * StructureExtractor
@@ -350,7 +350,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         cooldown: (o) => o.cooldown || 0
     });
 
-    globals.StructureExtractor = StructureExtractor;
+    Object.defineProperty(globals, 'StructureExtractor', {enumerable: true, value: StructureExtractor});
 
     /**
      * StructureKeeperLair
@@ -369,7 +369,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         ticksToSpawn: (o) => o.nextSpawnTime ? o.nextSpawnTime - runtimeData.time : undefined
     });
 
-    globals.StructureKeeperLair = StructureKeeperLair;
+    Object.defineProperty(globals, 'StructureKeeperLair', {enumerable: true, value: StructureKeeperLair});
 
     /**
      * StructureLab
@@ -496,7 +496,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    globals.StructureLab = StructureLab;
+    Object.defineProperty(globals, 'StructureLab', {enumerable: true, value: StructureLab});
 
     /**
      * StructureLink
@@ -583,7 +583,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     });
 
-    globals.StructureLink = StructureLink;
+    Object.defineProperty(globals, 'StructureLink', {enumerable: true, value: StructureLink});
 
     /**
      * StructureObserver
@@ -618,7 +618,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    globals.StructureObserver = StructureObserver;
+    Object.defineProperty(globals, 'StructureObserver', {enumerable: true, value: StructureObserver});
 
     /**
      * StructurePowerBank
@@ -638,7 +638,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         owner: () => ({username: 'Power Bank'})
     });
 
-    globals.StructurePowerBank = StructurePowerBank;
+    Object.defineProperty(globals, 'StructurePowerBank', {enumerable: true, value: StructurePowerBank});
 
     /**
      * StructurePowerSpawn
@@ -675,7 +675,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    globals.StructurePowerSpawn = StructurePowerSpawn;
+    Object.defineProperty(globals, 'StructurePowerSpawn', {enumerable: true, value: StructurePowerSpawn});
 
     /**
      * StructureRampart
@@ -701,7 +701,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    globals.StructureRampart = StructureRampart;
+    Object.defineProperty(globals, 'StructureRampart', {enumerable: true, value: StructureRampart});
 
     /**
      * StructureRoad
@@ -718,7 +718,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         ticksToDecay: (o) => o.nextDecayTime ? o.nextDecayTime - runtimeData.time : o.decayTime ? o.decayTime - runtimeData.time : undefined
     });
 
-    globals.StructureRoad = StructureRoad;
+    Object.defineProperty(globals, 'StructureRoad', {enumerable: true, value: StructureRoad});
 
 
     /**
@@ -739,7 +739,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     StructureStorage.prototype.transfer = register.wrapFn(_transfer);
 
-    globals.StructureStorage = StructureStorage;
+    Object.defineProperty(globals, 'StructureStorage', {enumerable: true, value: StructureStorage});
 
     /**
      * StructureTerminal
@@ -796,7 +796,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    globals.StructureTerminal = StructureTerminal;
+    Object.defineProperty(globals, 'StructureTerminal', {enumerable: true, value: StructureTerminal});
 
     /**
      * StructureTower
@@ -875,7 +875,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    globals.StructureTower = StructureTower;
+    Object.defineProperty(globals, 'StructureTower', {enumerable: true, value: StructureTower});
 
     /**
      * StructureWall
@@ -892,7 +892,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         ticksToLive: (o) => o.ticksToLive,
     });
 
-    globals.StructureWall = StructureWall;
+    Object.defineProperty(globals, 'StructureWall', {enumerable: true, value: StructureWall});
 
 
     /**
@@ -1288,16 +1288,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    StructureSpawn.prototype.destroy = register.wrapFn(function() {
-
-        if(!this.my) {
-            return C.ERR_NOT_OWNER;
-        }
-
-        intents.pushByName('room', 'destroyStructure', {roomName: this.room.name, id: this.id});
-        return C.OK;
-    });
-
     StructureSpawn.prototype.notifyWhenAttacked = register.wrapFn(function(enabled) {
 
         if(!this.my) {
@@ -1367,8 +1357,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    globals.StructureSpawn = StructureSpawn;
-    globals.Spawn = StructureSpawn;
+    Object.defineProperty(globals, 'StructureSpawn', {enumerable: true, value: StructureSpawn});
+    Object.defineProperty(globals, 'Spawn', {enumerable: true, value: StructureSpawn});
 
     /**
      * SpawnSpawning
@@ -1457,7 +1447,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    globals.StructureNuker = StructureNuker;
+    Object.defineProperty(globals, 'StructureNuker', {enumerable: true, value: StructureNuker});
 
 
     /**
@@ -1486,6 +1476,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         ticksToDecay: (o) => o.decayTime ? o.decayTime - runtimeData.time : undefined
     });
 
-    globals.StructurePortal = StructurePortal;
+    Object.defineProperty(globals, 'StructurePortal', {enumerable: true, value: StructurePortal});
 
 };

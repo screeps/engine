@@ -42,5 +42,5 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return `[source #${this.id}]`;
     });
 
-    globals.Source = Source;
+    Object.defineProperty(globals, 'Source', {enumerable: true, value: Source});
 };
