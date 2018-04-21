@@ -436,12 +436,7 @@
                 get() {
 
                     try {
-                        runCodeCache[userId].memory._parsed = JSON.parse(runCodeCache[userId].memory.get() || "{}",
-							function(key, val) {
-								return ((_.isObject(val) && val.__objId) ?
-									runCodeCache[userId].globals.Game.getObjectById(val.__objId) : val);
-							}
-						);
+                        runCodeCache[userId].memory._parsed = JSON.parse(runCodeCache[userId].memory.get() || "{}");
                         runCodeCache[userId].memory._parsed.__proto__ = null;
                     }
                     catch(e) {

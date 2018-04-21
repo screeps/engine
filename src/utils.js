@@ -931,7 +931,7 @@ exports.defineGameObjectProperties = function(obj, dataFn, properties) {
     Object.defineProperties(obj, propertiesInfo);
 
     obj.toJSON = function() {
-        var result = {__objId: this.id};
+        var result = {};
         for(var i in this) {
             if(i[0] == '_' || _.contains(['toJSON','toString'],i)) {
                 continue;

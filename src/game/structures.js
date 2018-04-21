@@ -1381,7 +1381,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 continue;
             }
             if(i == 'spawn'){
-				result[i] = {__objId: this.spawn.id, id: this.spawn.id};
+				result[i] = {id: this.spawn.id};
 				continue;
             }
             result[i] = this[i];
