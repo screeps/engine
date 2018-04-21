@@ -1374,6 +1374,21 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         this.directions = data(spawnId).spawning.directions;
     });
 
+	StructureSpawn.Spawning.prototype.toJSON = function(){
+        var result = {};
+        for(var i in this) {
+            if(i[0] == '_' || _.contains(['toJSON','toString'],i)) {
+                continue;
+            }
+            if(i == 'spawn'){
+				result[i] = {id: this.spawn.id};
+				continue;
+            }
+            result[i] = this[i];
+        }
+        return result;
+	}
+
     StructureSpawn.Spawning.prototype.setDirections = register.wrapFn(function(directions) {
         if(!this.spawn.my) {
             return C.ERR_NOT_OWNER;
