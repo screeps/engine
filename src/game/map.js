@@ -209,6 +209,24 @@ exports.makeMap = function(runtimeData, register) {
             return _.contains(runtimeData.accessibleRooms, roomName);
         },
 		
+		isNoviceZone(roomName) {
+		   return ((runtimeData.rooms[roomName].novice||0) > Date.now());
+		},
+
+		isRespawnZone(roomName) {
+		   return ((runtimeData.rooms[roomName].respawnArea||0) > Date.now());
+		},
+		
+		getNoviceEndDate(roomName) {
+			let t=(runtimeData.rooms[roomName].novice||0);
+			return (t>Date.now()) ? t : 0;
+		},
+		
+		getRespawnEndDate(roomName) {
+			let t=(runtimeData.rooms[roomName].respawnArea||0);
+			return (t>Date.now()) ? t : 0;
+		},
+		
 		getTerrainAt(x, y, roomName) {
 
             if(_.isObject(x)) {
