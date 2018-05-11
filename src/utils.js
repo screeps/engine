@@ -23,10 +23,9 @@ try {
 catch(e) {}
 
 exports.getDriver = function getDriver() {
-    var driverPath = typeof process != 'undefined' && process.env.DRIVER_MODULE ?
-        process.env.DRIVER_MODULE :
-        './core/index';
-    driver = require(driverPath);
+    driver = typeof process != 'undefined' && process.env.DRIVER_MODULE ?
+        require(process.env.DRIVER_MODULE) :
+        require('./core/index');
     loadDriver();
     return driver;
 };

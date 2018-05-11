@@ -42,7 +42,7 @@ function loop() {
             driver.config.emit('mainLoopStage',stage);
             return q.all([
                 usersLegacyQueue.whenAllDone()
-                    .then(() => driver.config.emit('mainLoopStage', stage, 'nonIvmDone')),
+                    .then(() => driver.config.emit('mainLoopStage', stage, 'legacyDone')),
                 usersIvmQueue.whenAllDone()
                     .then(() => driver.config.emit('mainLoopStage', stage, 'ivmDone')),
             ]);
