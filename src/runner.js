@@ -73,7 +73,6 @@ driver.connect('runner')
 
         return usersQueue.fetch()
             .then((_userId) => {
-                console.log(_userId);
                 userId = fetchedUserId = _userId;
                 var onlyInRoom;
                 var m = userId.match(/^SourceKeeper:(.*)$/);
