@@ -2,7 +2,7 @@
 (function() {
     var _ = require('lodash'),
         utils = require('../utils'),
-        driver = require('~runtime-driver'),
+        driver = utils.getRuntimeDriver(),
         C = driver.constants,
         map = require('./map'),
         market = require('./market'),
@@ -65,7 +65,7 @@
         }
     }
 
-    function makeGameObject ({runtimeData, intents, memory, getUsedCpu, globals, getHeapStatistics}) {
+    function makeGameObject ({runtimeData, intents, memory, getUsedCpu, globals, sandboxedFunctionWrapper, getHeapStatistics}) {
 
         var customObjectsInfo = {};
 
@@ -87,7 +87,7 @@
             byRoom: {},
             findCache: {},
             rooms: {},
-            wrapFn: function(fn) { return fn }
+            wrapFn: sandboxedFunctionWrapper || function(fn) { return fn }
         };
 
         var deprecatedShown = [];
@@ -126,9 +126,9 @@
                 tickLimit: runtimeData.cpu,
                 limit: runtimeData.user.cpu,
                 bucket: runtimeData.cpuBucket,
-                getHeapStatistics() {
+                getHeapStatistics: getHeapStatistics ? function() {
                     return getHeapStatistics();
-                }
+                } : undefined
             },
             map: {},
             gcl: {
@@ -376,7 +376,7 @@
         
         var runCodeCache = {};
 
-        exports.init = function (_globals, _codeModules, _runtimeData, _intents, _memory, _fakeConsole, _consoleCommands, _timeout, _getUsedCpu, _scriptCachedData, _getHeapStatistics) {
+        exports.init = function (_globals, _codeModules, _runtimeData, _intents, _memory, _fakeConsole, _consoleCommands, _timeout, _getUsedCpu, _scriptCachedData, _sandboxedFunctionWrapper, _getHeapStatistics) {
 
             var userId = _runtimeData.user._id;
 
@@ -392,6 +392,7 @@
             runCodeCache[userId].getUsedCpu = _getUsedCpu;
             runCodeCache[userId].scriptCachedData = _scriptCachedData;
             runCodeCache[userId].getHeapStatistics = _getHeapStatistics;
+            runCodeCache[userId].sandboxedFunctionWrapper = _sandboxedFunctionWrapper;
 
             _.extend(runCodeCache[userId].globals, {
                 RawMemory: runCodeCache[userId].memory,

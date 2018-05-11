@@ -6,7 +6,7 @@ var q = require('q'),
     config = require('./config');
 
 var lastAccessibleRoomsUpdate = 0;
-var usersQueue, roomsQueue, usersIvmQueue;
+var usersLegacyQueue, roomsQueue, usersIvmQueue;
 
 function loop() {
 
@@ -33,7 +33,7 @@ function loop() {
             stage = 'addUsersToQueue';
             driver.config.emit('mainLoopStage',stage, users);
             return q.all([
-                usersQueue.addMulti(users.nonIvm.map(user => user._id.toString())),
+                usersLegacyQueue.addMulti(users.legacy.map(user => user._id.toString())),
                 usersIvmQueue.addMulti(users.ivm.map(user => user._id.toString())),
             ]);
         })
@@ -41,7 +41,7 @@ function loop() {
             stage = 'waitForUsers';
             driver.config.emit('mainLoopStage',stage);
             return q.all([
-                usersQueue.whenAllDone()
+                usersLegacyQueue.whenAllDone()
                     .then(() => driver.config.emit('mainLoopStage', stage, 'nonIvmDone')),
                 usersIvmQueue.whenAllDone()
                     .then(() => driver.config.emit('mainLoopStage', stage, 'ivmDone')),
@@ -131,12 +131,12 @@ function loop() {
 
 driver.connect('main')
     .then(() =>  q.all([
-        driver.queue.create('users', 'write'),
+        driver.queue.create('usersLegacy', 'write'),
         driver.queue.create('rooms', 'write'),
         driver.queue.create('usersIvm', 'write'),
     ]))
     .then((data) => {
-        usersQueue = data[0];
+        usersLegacyQueue = data[0];
         roomsQueue = data[1];
         usersIvmQueue = data[2];
         loop();

@@ -31,6 +31,15 @@ exports.getDriver = function getDriver() {
     return driver;
 };
 
+exports.getRuntimeDriver = function getRuntimeDriver() {
+    try {
+        return require('~runtime-driver');
+    }
+    catch (e) {
+        return exports.getDriver();
+    }
+};
+
 exports.fetchXYArguments = function(firstArg, secondArg, globals) {
     var x,y, roomName;
     if(_.isUndefined(secondArg) || !_.isNumber(secondArg)) {

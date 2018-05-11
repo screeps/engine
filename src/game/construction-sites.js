@@ -1,6 +1,6 @@
 var utils = require('./../utils'),
     rooms = require('./rooms'),
-    driver = require('~runtime-driver'),
+    driver = utils.getRuntimeDriver(),
     C = driver.constants,
     _ = require('lodash');
 

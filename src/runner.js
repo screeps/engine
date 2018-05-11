@@ -61,7 +61,7 @@ function runUser(userId, onlyInRoom) {
 }
 
 driver.connect('runner')
-.then(() => driver.queue.create('usersIvm', 'read'))
+.then(() => driver.queue.create('users', 'read'))
 .then(_usersQueue => {
 
     var usersQueue = _usersQueue;
@@ -73,6 +73,7 @@ driver.connect('runner')
 
         return usersQueue.fetch()
             .then((_userId) => {
+                console.log(_userId);
                 userId = fetchedUserId = _userId;
                 var onlyInRoom;
                 var m = userId.match(/^SourceKeeper:(.*)$/);

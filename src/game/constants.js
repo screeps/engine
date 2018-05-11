@@ -1,3 +1,4 @@
-var driver = require('~runtime-driver');
+var utils = require('../utils'),
+    driver = utils.getRuntimeDriver();
 
 module.exports = driver.constants;
