@@ -143,6 +143,10 @@
             getObjectById(id) {
                 return register._objects[id] || null;
             },
+            setIntent(id, action, args) {
+                intents.set(id, action, args);
+                return C.OK;
+            },
             notify(message, groupInterval) {
                 if (intents.push('notify', {message, groupInterval}, 20)) {
                     return C.OK;
