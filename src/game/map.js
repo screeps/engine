@@ -216,6 +216,11 @@ exports.makeMap = function(runtimeData, register) {
                 x = x.x;
             }
 
+            // check if coordinates are out of bounds
+            if(x < 0 || x > 49 || y < 0 || y > 49) {
+                return undefined;
+            }
+
             if(!runtimeData.staticTerrainData || !runtimeData.staticTerrainData[roomName]) {
                 return undefined;
             }
