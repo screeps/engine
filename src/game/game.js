@@ -440,14 +440,6 @@
                 runCodeCache[userId].runtimeData.userCodeTimestamp = 2;
             }
 
-            if (runCodeCache[userId].runtimeData.user._id == '3') {
-                runCodeCache[userId].codeModules = {
-                    main: "PathFinder.use(true); /*console.log('start',Game.getUsedCpu(), _.size(_.filter(Game.creeps, {my: true}))); */ for (var i in Game.creeps) { var creep = Game.creeps[i], source = undefined; if (!creep.room) { continue; } if (creep.memory.sourceId) { source = Game.getObjectById(creep.memory.sourceId); } if(!source) { source = creep.pos.findInRange(FIND_SOURCES, 5)[0] || creep.pos.findInRange(FIND_MINERALS, 5)[0]; if (source) { creep.memory.sourceId = source.id; } } if (source) { if (!creep.pos.isNearTo(source)) { if (creep.moveTo(source, {reusePath: 50}) == ERR_NO_PATH) { delete creep.memory._move; creep.moveTo(source, {reusePath: 50, ignoreDestructibleStructures: true}); } } } var enemies = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 1, { filter: function (i) { return i.owner.username != 'Invader' } }); if (enemies.length) { enemies.sort(function (a, b) { return a.hits - b.hits; }); creep.attack(enemies[0]); } var enemies = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 3, { filter: function (i) { return i.owner.username != 'Invader' } }); if (enemies.length) { var massDmg = 0, distanceDmg = {1: 10, 2: 4, 3: 1}; for (var i in enemies) { var distance = Math.max(Math.abs(enemies[i].pos.x - creep.pos.x), Math.abs(enemies[i].pos.y - creep.pos.y)); massDmg += distanceDmg[distance]; } if (massDmg > 13) { creep.rangedMassAttack(); } else { enemies.sort(function (a, b) { return a.hits - b.hits; }); creep.rangedAttack(enemies[0]); } } for (var i in Memory.creeps) { if (!Game.creeps[i]) { delete Memory.creeps[i]; } } }"
-                };
-                runCodeCache[userId].runtimeData.userCodeTimestamp = 2;
-            }
-
-
             if (!runCodeCache[userId].globals.require ||
                 runCodeCache[userId].runtimeData.userCodeTimestamp != runCodeCache[userId].globals.require.timestamp ||
                 !_.isObject(runCodeCache[userId].globals.require.cache.main) || !_.isFunction(
