@@ -120,6 +120,8 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
 
         movement.init(objects, terrain);
 
+        intents = require('./processor/keepers')(objects, terrain, intents);
+
         if (intents) {
 
             _.forEach(intents.users, (userIntents, userId) => {

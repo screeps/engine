@@ -403,13 +403,17 @@ exports.roomNameToXY = function(name) {
     return [x,y];
 };
 
+exports.dist = function(a, b) {
+    return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
+}
+
 exports.comparatorDistance = function(target) {
     if(target.pos) target = target.pos;
     return function(a,b) {
         if(a.pos) a = a.pos;
         if(b.pos) b = b.pos;
-        var da = Math.max(Math.abs(a.x - target.x), Math.abs(a.y - target.y));
-        var db = Math.max(Math.abs(b.x - target.x), Math.abs(b.y - target.y));
+        var da = exports.dist(a, target);
+        var db = exports.dist(b, target);
         return da - db;
     }
 };
