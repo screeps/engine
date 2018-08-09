@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, gameTime, roomInfo) {
+module.exports = function(object, intent, {bulk, gameTime, roomInfo}) {
 
     if(!object.user || !object.level) {
         return;

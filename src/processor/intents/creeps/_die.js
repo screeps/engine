@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, roomObjects, bulk, stats, dropRate, gameTime) {
+module.exports = function(object, dropRate, {roomObjects, bulk, stats, gameTime}) {
 
     if(dropRate === undefined) {
         dropRate = C.CREEP_CORPSE_RATE;

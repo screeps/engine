@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, roomObjects, roomTerrain, bulk, userBulk, roomController, gameTime) {
+module.exports = function(object, {roomObjects, bulk, gameTime}) {
 
     if(object.unstableDate && Date.now() > object.unstableDate) {
         bulk.update(object, {

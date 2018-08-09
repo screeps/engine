@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-function oldEnergyHandling(spawn, roomObjects, cost, bulk){
+function oldEnergyHandling(spawn, cost, {roomObjects, bulk}){
     var spawns = _.filter(roomObjects, i => i.type == 'spawn' && i.user == spawn.user && !i.off);
     var extensions = _.filter(roomObjects, i => i.type == 'extension' && i.user == spawn.user && !i.off);
     var availableEnergy = _.sum(extensions, 'energy') + _.sum(spawns, 'energy');
@@ -38,7 +38,7 @@ function oldEnergyHandling(spawn, roomObjects, cost, bulk){
     return true;
 }
 
-function newEnergyHandling(spawn, roomObjects, cost, bulk, energyStructures){
+function newEnergyHandling(spawn, cost, energyStructures, {roomObjects, bulk}){
     energyStructures = _.filter(energyStructures, id => {
         let energyStructure = roomObjects[id];
 
@@ -69,10 +69,10 @@ function newEnergyHandling(spawn, roomObjects, cost, bulk, energyStructures){
     return true;
 }
 
-module.exports = function chargeEnergy(spawn, roomObjects, cost, bulk, energyStructures) {
+module.exports = function chargeEnergy(spawn, cost, energyStructures, scope) {
     if(energyStructures === undefined) {
-        return oldEnergyHandling(spawn, roomObjects, cost, bulk);
+        return oldEnergyHandling(spawn, cost, scope);
     } else {
-        return newEnergyHandling(spawn, roomObjects, cost, bulk, energyStructures);
+        return newEnergyHandling(spawn, cost, energyStructures, scope);
     }
 };

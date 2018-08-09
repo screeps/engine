@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(roomSpawns, roomExtensions, roomController, bulk) {
+module.exports = function(roomSpawns, roomExtensions, {roomController, bulk}) {
     var spawns = roomSpawns;
 
     if(spawns.length > C.CONTROLLER_STRUCTURES.spawn[roomController.level|0]) {

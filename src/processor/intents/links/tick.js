@@ -4,7 +4,7 @@ var _ = require('lodash'),
     C = driver.constants,
     movement = require('../movement');
 
-module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats) {
+module.exports = function(object, {bulk}) {
 
     if(!object || object.type != 'link') return;
 

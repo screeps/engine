@@ -1,8 +1,8 @@
 
-module.exports = function(object, objectIntents, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats) {
+module.exports = function(object, objectIntents, scope) {
 
 
     if(objectIntents.transfer)
-        require('./transfer')(object, objectIntents.transfer, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats);
+        require('./transfer')(object, objectIntents.transfer, scope);
 
 };

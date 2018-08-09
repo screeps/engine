@@ -3,7 +3,9 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, target, damage, damageType, roomObjects, roomTerrain, bulk, roomController, stats, gameTime, roomInfo) {
+module.exports = function(object, target, damage, damageType, scope) {
+
+    const {roomObjects, bulk, roomController, gameTime, roomInfo} = scope;
 
     if(!target.hits) {
         return;
@@ -30,14 +32,14 @@ module.exports = function(object, target, damage, damageType, roomObjects, roomT
     }
 
     if(target.type == 'constructedWall' && target.decayTime) {
-        require('./creeps/_clear-newbie-walls')(roomObjects, bulk);
+        require('./creeps/_clear-newbie-walls')(scope);
     }
     else if (target.hits <= 0) {
         if (target.type != 'creep') {
             C.RESOURCES_ALL.forEach(resourceType => {
                 if (target[resourceType] > 0) {
                     require('./creeps/_create-energy')(target.x, target.y, target.room,
-                    target[resourceType], roomObjects, bulk, resourceType);
+                    target[resourceType], resourceType, scope);
                 }
             });
 

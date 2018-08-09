@@ -4,7 +4,9 @@ var _ = require('lodash'),
     C = driver.constants;
 
 
-module.exports = function(spawn, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime) {
+module.exports = function(spawn, intent, scope) {
+
+    const {roomObjects, bulk, roomController, stats} = scope;
 
     if(spawn.spawning) {
         return;
@@ -34,7 +36,7 @@ module.exports = function(spawn, intent, roomObjects, roomTerrain, bulk, bulkUse
     intent.body = intent.body.slice(0, C.MAX_CREEP_SIZE);
 
     var cost = utils.calcCreepCost(intent.body);
-    var result = require('./_charge-energy')(spawn, roomObjects, cost, bulk, intent.energyStructures, gameTime);
+    var result = require('./_charge-energy')(spawn, cost, intent.energyStructures, scope);
 
     if(!result) {
         return;

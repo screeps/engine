@@ -6,7 +6,7 @@ var _ = require('lodash'),
 
 var createdStructureCounter = 0;
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime) {
+module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomController, stats, gameTime}) {
 
     if(object.type != 'creep') {
         return;

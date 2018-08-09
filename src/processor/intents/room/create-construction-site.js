@@ -6,7 +6,7 @@ var _ = require('lodash'),
 
 var createdConstructionSiteCounter = 0;
 
-module.exports = function(intent, userId, roomObjects, roomTerrain, bulk, bulkUsers, roomController) {
+module.exports = function(userId, intent, {roomObjects, roomTerrain, bulk, roomController}) {
 
     if(intent.x <= 0 || intent.x >= 49 || intent.y <= 0 || intent.y >= 49) {
         return;

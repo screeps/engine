@@ -3,7 +3,9 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(intent, userId, roomObjects, roomTerrain, bulk, bulkUsers, roomController) {
+module.exports = function(userId, intent, scope) {
+
+    const {roomObjects, bulk, roomController} = scope;
 
     var object = roomObjects[intent.id];
 
@@ -28,17 +30,17 @@ module.exports = function(intent, userId, roomObjects, roomTerrain, bulk, bulkUs
         // drop contents of anything with .energy or .store[]
         if (object[resourceType] > 0) {
             require('../creeps/_create-energy')(object.x, object.y, object.room,
-            object[resourceType], roomObjects, bulk, resourceType);
+            object[resourceType], resourceType, scope);
         }
         // drop mineral from lab
         if (object.mineralType === resourceType && object.mineralAmount > 0) {
             require('../creeps/_create-energy')(object.x, object.y, object.room,
-            object.mineralAmount, roomObjects, bulk, resourceType);
+            object.mineralAmount, resourceType, scope);
         }
     });
 
     if(object.type == 'constructedWall' && object.decayTime && object.user) {
-        require('../creeps/_clear-newbie-walls')(roomObjects, bulk);
+        require('../creeps/_clear-newbie-walls')(scope);
     }
 
 };

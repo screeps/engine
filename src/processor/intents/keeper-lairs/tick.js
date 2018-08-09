@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roomController, gameTime) {
+module.exports = function(object, {roomObjects, bulk, gameTime}) {
 
     if(!object || object.type != 'keeperLair') return;
 

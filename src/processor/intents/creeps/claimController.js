@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime, roomInfo, users) {
+module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, users}) {
 
     if(object.type != 'creep') {
         return;

@@ -4,7 +4,9 @@ var _ = require('lodash'),
     C = driver.constants,
     movement = require('../movement');
 
-module.exports = function(spawn, creep, roomObjects, roomTerrain, bulk, stats, gameTime) {
+module.exports = function(spawn, creep, scope) {
+
+    const {roomObjects, roomTerrain, bulk} = scope;
 
     var newX, newY, isOccupied, hostileOccupied;
     var checkObstacleFn = (i) => (i.x == newX && i.y == newY) && (
@@ -64,7 +66,7 @@ module.exports = function(spawn, creep, roomObjects, roomTerrain, bulk, stats, g
             }
         }
 
-        require('../creeps/_die')(hostileOccupied, roomObjects, bulk, stats, undefined, gameTime);
+        require('../creeps/_die')(hostileOccupied, undefined, scope);
         bulk.update(creep, {
             x: hostileOccupied.x,
             y: hostileOccupied.y,

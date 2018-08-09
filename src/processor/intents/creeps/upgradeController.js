@@ -4,7 +4,7 @@ var _ = require('lodash'),
     C = driver.constants,
     config = require('../../../config');
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime) {
+module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, stats, gameTime}) {
 
     if(object.type != 'creep') {
         return;

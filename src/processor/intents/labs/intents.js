@@ -1,5 +1,5 @@
 
-module.exports = function(object, objectIntents, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats) {
+module.exports = function(object, objectIntents, {roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats}) {
 
 
     if(objectIntents.transfer)

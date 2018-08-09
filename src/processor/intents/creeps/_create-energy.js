@@ -3,7 +3,11 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(x, y, room, amount, roomObjects, bulk, resourceType) {
+module.exports = function(x, y, room, amount, resourceType, scope) {
+
+    const {roomObjects, bulk} = scope;
+
+
 
     resourceType = resourceType || 'energy';
 

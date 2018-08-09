@@ -3,7 +3,9 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roomController, gameTime) {
+module.exports = function(object, scope) {
+
+    const {roomObjects, bulk, roomController, gameTime} = scope;
 
     if(!object.nextDecayTime || gameTime >= object.nextDecayTime-1) {
         object.hits = object.hits || 0;
@@ -13,7 +15,7 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
             C.RESOURCES_ALL.forEach(resourceType => {
                 if (object[resourceType] > 0) {
                     require('../creeps/_create-energy')(object.x, object.y, object.room,
-                    object[resourceType], roomObjects, bulk, resourceType);
+                    object[resourceType], resourceType, scope);
                 }
             });
 

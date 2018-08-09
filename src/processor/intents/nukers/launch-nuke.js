@@ -5,7 +5,7 @@ var _ = require('lodash'),
     C = driver.constants;
 
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime, roomInfo) {
+module.exports = function(object, intent, {roomObjects, bulk, roomController, gameTime, roomInfo}) {
 
     if(!utils.checkStructureAgainstController(object, roomObjects, roomController)) {
         return;
