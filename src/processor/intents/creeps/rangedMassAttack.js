@@ -27,7 +27,7 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
             i.y >= object.y - 3 && i.y <= object.y + 3;
     });
 
-    var distanceRate = {1: 1, 2: 0.4, 3: 0.1};
+    var distanceRate = {0: 2, 1: 1, 2: 0.4, 3: 0.1};
 
     for(var i in targets) {
 
@@ -47,9 +47,5 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
         require('../_damage')(object, target, targetAttackPower, 'ranged', roomObjects, roomTerrain, bulk, roomController, stats, gameTime, roomInfo);
     }
 
-
-
     object.actionLog.rangedMassAttack = {};
-
-
 };
