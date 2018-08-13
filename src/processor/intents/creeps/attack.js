@@ -5,7 +5,7 @@ var _ = require('lodash'),
 
 module.exports = function(object, intent, scope) {
 
-    const {roomObjects, roomController, gameTime} = scope;
+    let {roomObjects, roomController, gameTime} = scope;
 
     if(object.type != 'creep') {
         return;
@@ -37,7 +37,7 @@ module.exports = function(object, intent, scope) {
 
     var attackPower = utils.calcBodyEffectiveness(object.body, C.ATTACK, 'attack', C.ATTACK_POWER);
 
-    require('../_damage')(object, target, attackPower, 'melee', scope);
+    require('../_damage')(object, target, attackPower, C.EVENT_ATTACK_TYPE_MELEE, scope);
 
     object._attack = true;
 

@@ -75,6 +75,8 @@ module.exports = function(object, scope) {
             }
 
             bulk.update(object, {interRoom: {room, x, y}});
+
+            eventLog.push({event: C.EVENT_EXIT, objectId: object._id, data: {room, x, y}});
         }
 
         if(object.ageTime) { // since NPC creeps may appear right on portals without `ageTime` defined at the first tick

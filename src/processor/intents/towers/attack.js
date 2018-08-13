@@ -46,7 +46,7 @@ module.exports = function(object, intent, scope) {
         return;
     }
 
-    require('../_damage')(object, target, effect, 'ranged', scope);
+    require('../_damage')(object, target, effect, C.EVENT_ATTACK_TYPE_RANGED, scope);
 
     object.energy -= C.TOWER_ENERGY_COST;
     bulk.update(object, {energy: object.energy});

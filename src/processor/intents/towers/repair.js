@@ -46,6 +46,8 @@ module.exports = function(object, intent, {roomObjects, bulk, stats}) {
 
     stats.inc('energyConstruction', object.user, C.TOWER_ENERGY_COST);
 
-
+    eventLog.push({event: C.EVENT_REPAIR, objectId: object._id, data: {
+        targetId: target._id, amount: effect, energySpent: C.TOWER_ENERGY_COST, repairType: C.EVENT_REPAIR_TYPE_TOWER
+    }});
 
 };

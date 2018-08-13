@@ -38,6 +38,6 @@ module.exports = function(object, intent, scope) {
 
     var attackPower = utils.calcBodyEffectiveness(object.body, C.RANGED_ATTACK, 'rangedAttack', C.RANGED_ATTACK_POWER);
 
-    require('../_damage')(object, target, attackPower, 'ranged', scope);
+    require('../_damage')(object, target, attackPower, C.EVENT_ATTACK_TYPE_RANGED, scope);
 
 };

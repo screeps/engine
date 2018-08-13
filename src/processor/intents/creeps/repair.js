@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, intent, {roomObjects, bulk, stats}) {
+module.exports = function(object, intent, {roomObjects, bulk, stats, eventLog}) {
 
     if(object.type != 'creep') {
         return;
@@ -57,5 +57,9 @@ module.exports = function(object, intent, {roomObjects, bulk, stats}) {
 
     bulk.update(target, {hits: target.hits});
     bulk.update(object, {energy: object.energy});
+
+    eventLog.push({event: C.EVENT_REPAIR, objectId: object._id, data: {
+        targetId: target._id, amount: boostedEffect, energySpent: repairCost, repairType: EVENT_REPAIR_TYPE_CREEP
+    }});
 
 };

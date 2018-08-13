@@ -5,7 +5,7 @@ var _ = require('lodash'),
 
 module.exports = function(object, scope) {
 
-    const {roomObjects, bulk, roomController, gameTime} = scope;
+    const {roomObjects, bulk, roomController, gameTime, eventLog} = scope;
 
     if(!object.nextDecayTime || gameTime >= object.nextDecayTime-1) {
         object.hits = object.hits || 0;

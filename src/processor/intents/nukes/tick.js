@@ -40,12 +40,12 @@ module.exports = function(object, scope) {
                 if(rampart) {
                     let rampartHits = rampart.hits;
                     _.pull(objects, rampart);
-                    require('../_damage')(object, rampart, damage, 'ranged', scope);
+                    require('../_damage')(object, rampart, damage, C.EVENT_ATTACK_TYPE_NUKE, scope);
                     damage -= rampartHits;
                 }
                 if(damage > 0) {
                     objects.forEach(target => {
-                        require('../_damage')(object, target, damage, 'ranged', scope);
+                        require('../_damage')(object, target, damage, C.EVENT_ATTACK_TYPE_NUKE, scope);
                     });
                 }
             }

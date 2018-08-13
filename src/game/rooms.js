@@ -540,6 +540,15 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
     });
 
+    Object.defineProperty(Room.prototype, 'eventLog', {
+        configurable: true,
+        get() {
+            let value = JSON.parse(runtimeData.roomEventLog[this.name] || '[]');
+            Object.defineProperty(this, 'eventLog', {value});
+            return value;
+        }
+    });
+
     Room.prototype.find = register.wrapFn(function(type, opts) {
         var result = [];
         opts = opts || {};

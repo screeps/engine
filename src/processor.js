@@ -30,7 +30,9 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             roomTerrain = terrainItem.terrain;
         }
 
-        let scope = {roomObjects, roomTerrain, bulk, bulkUsers, stats, flags, bulkFlags, gameTime, roomInfo, users};
+        let eventLog = [];
+
+        let scope = {roomObjects, roomTerrain, bulk, bulkUsers, stats, flags, bulkFlags, gameTime, roomInfo, users, eventLog};
 
         _.forEach(roomObjects, (object) => {
             if(!object) {
@@ -364,6 +366,8 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
         resultPromises.push(bulk.execute());
         resultPromises.push(bulkUsers.execute());
         resultPromises.push(bulkFlags.execute());
+        resultPromises.push(driver.saveRoomEventLog(roomId, eventLog));
+
 
         if(!_.isEqual(roomInfo, oldRoomInfo)) {
             resultPromises.push(driver.saveRoomInfo(roomId, roomInfo));

@@ -3,9 +3,9 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, target, damage, damageType, scope) {
+module.exports = function(object, target, damage, attackType, scope) {
 
-    const {roomObjects, bulk, roomController, gameTime, roomInfo} = scope;
+    const {roomObjects, bulk, roomController, gameTime, roomInfo, eventLog} = scope;
 
     if(!target.hits) {
         return;
@@ -14,7 +14,7 @@ module.exports = function(object, target, damage, damageType, scope) {
     var attackBackPower = 0;
 
     if(target.type == 'creep') {
-        if(damageType == 'melee' && !_.any(roomObjects, {type: 'rampart', x: object.x, y: object.y})) {
+        if(attackType == C.EVENT_ATTACK_TYPE_MELEE && !_.any(roomObjects, {type: 'rampart', x: object.x, y: object.y})) {
             attackBackPower = utils.calcBodyEffectiveness(target.body, C.ATTACK, 'attack', C.ATTACK_POWER);
         }
         target._damageToApply = (target._damageToApply || 0) + damage;
@@ -45,6 +45,8 @@ module.exports = function(object, target, damage, damageType, scope) {
 
             bulk.remove(target._id);
             delete roomObjects[target._id];
+
+            eventLog.push({event: C.EVENT_OBJECT_DESTROYED, objectId: object._id, type: object.type});
         }
 
         if(target.type == 'spawn') {
@@ -61,11 +63,19 @@ module.exports = function(object, target, damage, damageType, scope) {
             bulk.update(target, {hits: target.hits});
         }
     }
-    if(object.actionLog) {
-        object.actionLog[object.type == 'creep' && damageType == 'ranged' ? 'rangedAttack' : 'attack'] = {
-            x: target.x,
-            y: target.y
-        };
+    if(object.actionLog && object.type == 'creep') {
+        if(attackType == C.EVENT_ATTACK_TYPE_MELEE) {
+            object.actionLog.attack = {
+                x: target.x,
+                y: target.y
+            };
+        }
+        if(attackType == C.EVENT_ATTACK_TYPE_RANGED) {
+            object.actionLog.rangedAttack = {
+                x: target.x,
+                y: target.y
+            };
+        }
     }
     if(target.actionLog) {
         target.actionLog.attacked = {x: object.x, y: object.y};
@@ -83,6 +93,10 @@ module.exports = function(object, target, damage, damageType, scope) {
     if(attackBackPower) {
         object._damageToApply = (object._damageToApply || 0) + attackBackPower;
         object.actionLog.attacked = {x: target.x, y: target.y};
+        eventLog.push({event: C.EVENT_ATTACK, objectId: target._id, data: {targetId: object._id,
+            damage: attackBackPower, attackType: C.EVENT_ATTACK_TYPE_HIT_BACK}})
     }
+
+    eventLog.push({event: C.EVENT_ATTACK, objectId: object._id, data: {targetId: target._id, damage, attackType}});
 };
 

@@ -46,7 +46,7 @@ module.exports = function(object, intent, scope) {
 
         var targetAttackPower = Math.round(attackPower * distanceRate[distance]);
 
-        require('../_damage')(object, target, targetAttackPower, 'ranged', scope);
+        require('../_damage')(object, target, targetAttackPower, C.EVENT_ATTACK_TYPE_MASS_RANGED, scope);
     }
 
 
