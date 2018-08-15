@@ -540,13 +540,15 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
     });
 
-    Object.defineProperty(Room.prototype, 'eventLog', {
-        configurable: true,
-        get() {
-            let value = JSON.parse(runtimeData.roomEventLog[this.name] || '[]');
-            Object.defineProperty(this, 'eventLog', {value});
-            return value;
+    Room.prototype.getEventLog = register.wrapFn(function(raw) {
+        if(raw) {
+            return runtimeData.roomEventLog[this.name] || '[]';
         }
+        let {roomEventLogCache} = register;
+        if(!roomEventLogCache[this.name]) {
+            roomEventLogCache[this.name] = JSON.parse(runtimeData.roomEventLog[this.name] || '[]');
+        }
+        return roomEventLogCache[this.name];
     });
 
     Room.prototype.find = register.wrapFn(function(type, opts) {

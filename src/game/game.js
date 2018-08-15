@@ -87,6 +87,7 @@
             byRoom: {},
             findCache: {},
             rooms: {},
+            roomEventLogCache: {},
             wrapFn: sandboxedFunctionWrapper || function(fn) { return fn }
         };
 
