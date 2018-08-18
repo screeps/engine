@@ -94,13 +94,19 @@ function runKeeper(object, roomObjects, roomTerrain, intents) {
 }
 
 function setintent(intents, id, action, opts) {
-    _.set(intents, `users[${KEEPER_ID}].objects[${id}].${action}`, opts);
+    delete intents.empty;
+    if (!intents[id]) intents[id] = {};
+    intents[id][action] = opts;
 }
 
 module.exports = function (roomObjects, roomTerrain, intents) {
     const keepers = _.filter(roomObjects, o => o.type === 'creep' && o.user == KEEPER_ID);
     if (!keepers.length) return;
-    if (!intents) intents = { users: {} };
-    keepers.forEach(k => runKeeper(k, roomObjects, roomTerrain, intents));
+    const myIntents = { empty: true };
+    keepers.forEach(k => runKeeper(k, roomObjects, roomTerrain, myIntents));
+    if (!myIntents.empty) {
+        if (!intents) intents = { users: {} };
+        intents.users[KEEPER_ID] = { objects: myIntents };
+    }
     return intents;
 }
