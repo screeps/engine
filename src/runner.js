@@ -74,6 +74,11 @@ driver.connect('runner')
         return usersQueue.fetch()
             .then((_userId) => {
                 userId = fetchedUserId = _userId;
+                // TODO remove the the special keeper logic once the driver
+                //  no longer creates keeper
+                if(userId.startsWith('Keeper:')) {
+                    return // Does anything need to be returned here?
+                }
                 var onlyInRoom;
                 var m = userId.match(/^Invader:(.*)$/);
                 if(m) {
