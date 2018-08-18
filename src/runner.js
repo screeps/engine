@@ -74,9 +74,9 @@ driver.connect('runner')
         return usersQueue.fetch()
             .then((_userId) => {
                 userId = fetchedUserId = _userId;
-                // TODO remove the the special keeper logic once the driver
-                //  no longer creates keeper
-                if(userId.startsWith('Keeper:')) {
+                // TODO remove the exception for SourceKeeper once the driver
+                //  no longer creates those users.
+                if(userId.startsWith('SourceKeeper:')) {
                     return // Does anything need to be returned here?
                 }
                 var onlyInRoom;
