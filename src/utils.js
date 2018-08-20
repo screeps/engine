@@ -155,7 +155,8 @@ exports.checkConstructionSite = function(objects, structureType, x, y) {
         if(structureType == 'extractor') {
             return true;
         }
-        if(exports.checkTerrain(objects, x, y, C.TERRAIN_MASK_WALL)) {
+        if(structureType != 'road' && structureType != 'rampart' &&
+            exports.checkTerrain(objects, x, y, C.TERRAIN_MASK_WALL)) {
             return false;
         }
         return true;
@@ -172,7 +173,8 @@ exports.checkConstructionSite = function(objects, structureType, x, y) {
         if(structureType == 'extractor') {
             return true;
         }
-        if(objects[y][x] & C.TERRAIN_MASK_WALL) {
+        if(structureType != 'road' && structureType != 'rampart' &&
+            objects[y][x] & C.TERRAIN_MASK_WALL) {
             return false;
         }
         return true;

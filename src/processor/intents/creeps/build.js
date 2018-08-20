@@ -31,7 +31,8 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
         return;
     }
 
-    if(target.structureType != 'extractor' && utils.checkTerrain(roomTerrain, target.x, target.y, C.TERRAIN_MASK_WALL)) {
+    if(target.structureType != 'extractor' && target.structureType != 'road' && target.structureType != 'rampart'  &&
+        utils.checkTerrain(roomTerrain, target.x, target.y, C.TERRAIN_MASK_WALL)) {
         return;
     }
 
@@ -138,6 +139,10 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
             if(_.any(roomObjects, {x: target.x, y: target.y, type: 'swamp'}) ||
                 utils.checkTerrain(roomTerrain, target.x, target.y, C.TERRAIN_MASK_SWAMP)) {
                 hits *= C.CONSTRUCTION_COST_ROAD_SWAMP_RATIO;
+            }
+            if(_.any(roomObjects, {x: target.x, y: target.y, type: 'wall'}) ||
+                utils.checkTerrain(roomTerrain, target.x, target.y, C.TERRAIN_MASK_WALL)) {
+                hits *= C.CONSTRUCTION_COST_ROAD_WALL_RATIO;
             }
             _.extend(newObject, {
                 hits,

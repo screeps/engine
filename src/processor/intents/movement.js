@@ -9,13 +9,28 @@ var _ = require('lodash'),
     roomTerrain;
 
 function checkObstacleAtXY(x,y,object, roomIsInSafeMode) {
+    var hasObstacle = false, hasRoad = false;
+    _.forEach(roomObjects, (i) => {
+        if (i.x != x || i.y != y) {
+            return;
+        }
+        if (i.type == 'creep' && !objects[i._id] && (!roomIsInSafeMode || roomIsInSafeMode != object.user || roomIsInSafeMode == object.user && object.user == i.user) ||
+            i.type != 'creep' && _.contains(C.OBSTACLE_OBJECT_TYPES, i.type) ||
+            i.type == 'rampart' && !i.isPublic && i.user != object.user ||
+            i.type == 'constructionSite' && i.user == object.user && _.contains(C.OBSTACLE_OBJECT_TYPES,
+                i.structureType)) {
+            hasObstacle = true;
+            return false;
+        }
+        if(i.type == 'road') {
+            hasRoad = true;
+        }
+    });
+    if(hasObstacle) {
+        return true;
+    }
+    return utils.checkTerrain(roomTerrain, x, y, C.TERRAIN_MASK_WALL) && !hasRoad;
 
-    return _.any(roomObjects, (i) => i.x == x && i.y == y &&
-        (i.type == 'creep' && !objects[i._id] && (!roomIsInSafeMode || roomIsInSafeMode != object.user || roomIsInSafeMode == object.user && object.user == i.user) ||
-        i.type != 'creep' && _.contains(C.OBSTACLE_OBJECT_TYPES, i.type) ||
-        i.type == 'rampart' && !i.isPublic && i.user != object.user ||
-        i.type == 'constructionSite' && i.user == object.user && _.contains(C.OBSTACLE_OBJECT_TYPES, i.structureType) ))
-        || utils.checkTerrain(roomTerrain, x, y, C.TERRAIN_MASK_WALL);
 }
 
 function calcResourcesWeight(creep) {
