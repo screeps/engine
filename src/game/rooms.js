@@ -1423,12 +1423,12 @@ exports.makePos = function(_register) {
         return room.createFlag(this, name, color, secondaryColor);
     });
 
-    RoomPosition.prototype.createConstructionSite = register.wrapFn(function(structureType) {
+    RoomPosition.prototype.createConstructionSite = register.wrapFn(function(structureType, name) {
         var room = register.rooms[this.roomName];
         if(!room) {
             throw new Error(`Could not access room ${this.roomName}`);
         }
-        return room.createConstructionSite(this, structureType);
+        return room.createConstructionSite(this.x, this.y, structureType, name);
     });
 
     Object.defineProperty(globals, 'RoomPosition', {enumerable: true, value: RoomPosition});
