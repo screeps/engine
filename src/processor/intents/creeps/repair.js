@@ -59,7 +59,7 @@ module.exports = function(object, intent, {roomObjects, bulk, stats, eventLog}) 
     bulk.update(object, {energy: object.energy});
 
     eventLog.push({event: C.EVENT_REPAIR, objectId: object._id, data: {
-        targetId: target._id, amount: boostedEffect, energySpent: repairCost, repairType: EVENT_REPAIR_TYPE_CREEP
+        targetId: target._id, amount: boostedEffect, energySpent: repairCost
     }});
 
 };
