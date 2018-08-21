@@ -40,7 +40,7 @@ module.exports = function(object, intent, scope) {
         bulk.update(object, {energy: object.energy});
 
         if (object.energy > object.energyCapacity) {
-            require('./drop')(object, {amount: object.energy - object.energyCapacity, resourceType: 'energy'}, roomObjects, roomTerrain, bulk);
+            require('./drop')(object, {amount: object.energy - object.energyCapacity, resourceType: 'energy'}, scope);
         }
 
         require('../_damage')(object, target, effect, C.EVENT_ATTACK_TYPE_DISMANTLE, scope);

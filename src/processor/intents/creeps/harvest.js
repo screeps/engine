@@ -3,7 +3,9 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomController, stats, eventLog}) {
+module.exports = function(object, intent, scope) {
+
+    const {roomObjects, roomTerrain, bulk, roomController, stats, eventLog} = scope;
 
     if(object.type != 'creep') {
         return;
@@ -50,7 +52,7 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
                 require('./drop')(object, {
                     amount: Math.min(object.energy, sum - object.energyCapacity),
                     resourceType: 'energy'
-                }, roomObjects, roomTerrain, bulk);
+                }, scope);
             }
 
             object.actionLog.harvest = {x: target.x, y: target.y};
@@ -97,7 +99,7 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
                 require('./drop')(object, {
                     amount: Math.min(object[target.mineralType], sum - object.energyCapacity),
                     resourceType: target.mineralType
-                }, roomObjects, roomTerrain, bulk);
+                }, scope);
             }
 
             object.actionLog.harvest = {x: target.x, y: target.y};
