@@ -30,7 +30,7 @@ function _applyDamage(object, damage) {
 
 module.exports = function(object, scope) {
 
-    const {roomObjects, bulk, roomController, gameTime} = scope;
+    const {roomObjects, bulk, roomController, gameTime, eventLog} = scope;
 
     if(!object || object.type != 'creep') return;
 
