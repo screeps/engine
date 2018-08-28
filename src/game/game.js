@@ -364,7 +364,7 @@
             })
         });
 
-        game.map = register.map = map.makeMap(runtimeData, register);
+        game.map = register.map = map.makeMap(runtimeData, register, globals);
 
         game.market = register.market = market.make(runtimeData, intents, register);
 
