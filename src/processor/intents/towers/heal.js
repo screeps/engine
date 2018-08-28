@@ -45,6 +45,6 @@ module.exports = function(object, intent, {roomObjects, bulk, eventLog}) {
     object.actionLog.heal = {x: target.x, y: target.y};
     target.actionLog.healed = {x: object.x, y: object.y};
 
-    eventLog.push({event: C.EVENT_HEAL, objectId: object._id, data: {targetId: target._id, amount: effect, healType: EVENT_HEAL_TYPE_RANGED}});
+    eventLog.push({event: C.EVENT_HEAL, objectId: object._id, data: {targetId: target._id, amount: effect, healType: C.EVENT_HEAL_TYPE_RANGED}});
 
 };
