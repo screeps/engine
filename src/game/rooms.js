@@ -1086,6 +1086,10 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return register.map.findExit(this.name, room);
     });
 
+    Room.prototype.getTerrain = register.wrapFn(function() {
+        return new Room.Terrain(this.name);
+    });
+
     Object.defineProperty(globals, 'Room', {enumerable: true, value: Room});
 
     /**
