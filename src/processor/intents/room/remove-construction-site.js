@@ -3,7 +3,9 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(intent, userId, roomObjects, roomTerrain, bulk, bulkUsers, roomController) {
+module.exports = function(userId, intent, scope) {
+
+    const {roomObjects, bulk, roomController} = scope;
 
     var object = roomObjects[intent.id];
 
@@ -13,6 +15,6 @@ module.exports = function(intent, userId, roomObjects, roomTerrain, bulk, bulkUs
 
     bulk.remove(object._id);
     if(object.progress > 1) {
-        require('../creeps/_create-energy')(object.x, object.y, object.room, Math.floor(object.progress/2), roomObjects, bulk);
+        require('../creeps/_create-energy')(object.x, object.y, object.room, Math.floor(object.progress/2), 'energy', scope);
     }
 };

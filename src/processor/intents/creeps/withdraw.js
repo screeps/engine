@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime) {
+module.exports = function(object, intent, {roomObjects, bulk, roomController, gameTime, eventLog}) {
 
     if(!_.contains(C.RESOURCES_ALL, intent.resourceType)) {
         return;
@@ -82,6 +82,6 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
 
     bulk.update(object, {[intent.resourceType]: object[intent.resourceType]});
 
-
+    eventLog.push({event: C.EVENT_TRANSFER, objectId: target._id, data: {targetId: object._id, resourceType: intent.resourceType, amount}});
 
 };

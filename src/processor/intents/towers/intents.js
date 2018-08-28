@@ -1,16 +1,13 @@
 
-module.exports = function(object, objectIntents, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime, roomInfo) {
-
+module.exports = function(object, objectIntents, scope) {
 
     if(objectIntents.transfer)
-        require('./transfer')(object, objectIntents.transfer, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats);
+        require('./transfer')(object, objectIntents.transfer, scope);
 
     if(objectIntents.heal)
-        require('./heal')(object, objectIntents.heal, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats);
+        require('./heal')(object, objectIntents.heal, scope);
     else if(objectIntents.repair)
-        require('./repair')(object, objectIntents.repair, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats);
+        require('./repair')(object, objectIntents.repair, scope);
     else if(objectIntents.attack)
-        require('./attack')(object, objectIntents.attack, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime, roomInfo);
-
-
+        require('./attack')(object, objectIntents.attack, scope);
 };

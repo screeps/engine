@@ -2,7 +2,7 @@
 let _ = require('lodash');
 let kObstacle = Infinity;
 let utils = require('../utils');
-let driver = utils.getDriver();
+let driver = utils.getRuntimeDriver();
 let C = driver.constants;
 
 exports.make = function(runtimeData, intents, register, globals) {

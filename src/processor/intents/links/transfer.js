@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController) {
+module.exports = function(object, intent, {roomObjects, bulk, roomController, eventLog}) {
 
     if(object.type != 'link') {
         return;
@@ -60,4 +60,6 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
 
     bulk.update(object, {energy: object.energy, cooldown: object.cooldown, actionLog: object.actionLog});
     bulk.update(target, {energy: target.energy});
+
+    eventLog.push({event: C.EVENT_TRANSFER, objectId: object._id, data: {targetId: target._id, resourceType: C.RESOURCE_ENERGY, amount}});
 };

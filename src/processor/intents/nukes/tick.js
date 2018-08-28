@@ -3,7 +3,9 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime, roomInfo) {
+module.exports = function(object, scope) {
+
+    const {roomObjects, bulk, roomController, gameTime, roomInfo} = scope;
 
     if(roomInfo.novice && roomInfo.novice > Date.now() || roomInfo.respawnArea && roomInfo.respawnArea > Date.now()) {
         bulk.remove(object._id);
@@ -18,7 +20,7 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
                 return;
             }
             if (target.type == 'creep') {
-                require('../creeps/_die')(target, roomObjects, bulk, stats, 0);
+                require('../creeps/_die')(target, 0, scope);
             }
             if(target.type == 'constructionSite' || target.type == 'energy') {
                 bulk.remove(target._id);
@@ -38,12 +40,12 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
                 if(rampart) {
                     let rampartHits = rampart.hits;
                     _.pull(objects, rampart);
-                    require('../_damage')(object, rampart, damage, 'ranged', roomObjects, roomTerrain, bulk, roomController, stats, gameTime, roomInfo);
+                    require('../_damage')(object, rampart, damage, C.EVENT_ATTACK_TYPE_NUKE, scope);
                     damage -= rampartHits;
                 }
                 if(damage > 0) {
                     objects.forEach(target => {
-                        require('../_damage')(object, target, damage, 'ranged', roomObjects, roomTerrain, bulk, roomController, stats, gameTime, roomInfo);
+                        require('../_damage')(object, target, damage, C.EVENT_ATTACK_TYPE_NUKE, scope);
                     });
                 }
             }

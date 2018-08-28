@@ -1,6 +1,6 @@
 var utils = require('./../utils'),
     rooms = require('./rooms'),
-    driver = utils.getDriver(),
+    driver = utils.getRuntimeDriver(),
     C = driver.constants;
 
 var runtimeData, intents, register, globals;

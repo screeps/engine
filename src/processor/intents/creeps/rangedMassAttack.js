@@ -3,7 +3,9 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime, roomInfo) {
+module.exports = function(object, intent, scope) {
+
+    const {roomObjects, roomController, gameTime} = scope;
 
     if(object.type != 'creep') {
         return;
@@ -27,7 +29,7 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
             i.y >= object.y - 3 && i.y <= object.y + 3;
     });
 
-    var distanceRate = {1: 1, 2: 0.4, 3: 0.1};
+    var distanceRate = {0: 1, 1: 1, 2: 0.4, 3: 0.1};
 
     for(var i in targets) {
 
@@ -44,12 +46,8 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
 
         var targetAttackPower = Math.round(attackPower * distanceRate[distance]);
 
-        require('../_damage')(object, target, targetAttackPower, 'ranged', roomObjects, roomTerrain, bulk, roomController, stats, gameTime, roomInfo);
+        require('../_damage')(object, target, targetAttackPower, C.EVENT_ATTACK_TYPE_MASS_RANGED, scope);
     }
 
-
-
     object.actionLog.rangedMassAttack = {};
-
-
 };

@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk) {
+module.exports = function(object, intent, {bulk}) {
 
     if(!/^(W|E)\d+(N|S)\d+$/.test(intent.targetRoomName)) {
         return;

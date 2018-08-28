@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(roomObjects, bulk) {
+module.exports = function({roomObjects, bulk}) {
 
     _.forEach(roomObjects, (i) => {
         if(i.type == 'constructedWall' && i.decayTime && i.user) {

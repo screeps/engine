@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, roomObjects, roomTerrain, bulk) {
+module.exports = function(object, {roomObjects, bulk}) {
 
     if(!object || object.type != 'energy') return;
 

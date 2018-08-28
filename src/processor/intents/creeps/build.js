@@ -6,7 +6,7 @@ var _ = require('lodash'),
 
 var createdStructureCounter = 0;
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime) {
+module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomController, stats, gameTime, eventLog}) {
 
     if(object.type != 'creep') {
         return;
@@ -31,7 +31,8 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
         return;
     }
 
-    if(target.structureType != 'extractor' && utils.checkTerrain(roomTerrain, target.x, target.y, C.TERRAIN_MASK_WALL)) {
+    if(target.structureType != 'extractor' && target.structureType != 'road' && target.structureType != 'rampart'  &&
+        utils.checkTerrain(roomTerrain, target.x, target.y, C.TERRAIN_MASK_WALL)) {
         return;
     }
 
@@ -62,6 +63,8 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
 
     object.actionLog.build = {x: target.x, y: target.y};
     bulk.update(object, {energy: object.energy});
+
+    eventLog.push({event: C.EVENT_BUILD, objectId: object._id, data: {targetId: target._id, amount: boostedEffect}});
 
     if(target.progress < target.progressTotal) {
         bulk.update(target, {
@@ -136,6 +139,10 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
             if(_.any(roomObjects, {x: target.x, y: target.y, type: 'swamp'}) ||
                 utils.checkTerrain(roomTerrain, target.x, target.y, C.TERRAIN_MASK_SWAMP)) {
                 hits *= C.CONSTRUCTION_COST_ROAD_SWAMP_RATIO;
+            }
+            if(_.any(roomObjects, {x: target.x, y: target.y, type: 'wall'}) ||
+                utils.checkTerrain(roomTerrain, target.x, target.y, C.TERRAIN_MASK_WALL)) {
+                hits *= C.CONSTRUCTION_COST_ROAD_WALL_RATIO;
             }
             _.extend(newObject, {
                 hits,

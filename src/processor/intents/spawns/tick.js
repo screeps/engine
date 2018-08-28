@@ -3,7 +3,9 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, energyAvailable) {
+module.exports = function(object, scope) {
+
+    const {roomObjects, bulk, roomController, energyAvailable} = scope;
 
     if(!object || object.type != 'spawn') return;
 
@@ -14,7 +16,7 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
 
             var spawningCreep = _.find(roomObjects, {type: 'creep', name: object.spawning.name, x: object.x, y: object.y});
 
-            var bornOk = require('./_born-creep')(object, spawningCreep, roomObjects, roomTerrain, bulk, stats);
+            var bornOk = require('./_born-creep')(object, spawningCreep, scope);
 
             if(bornOk) {
                 bulk.update(object, {spawning: null});

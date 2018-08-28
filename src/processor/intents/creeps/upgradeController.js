@@ -4,7 +4,7 @@ var _ = require('lodash'),
     C = driver.constants,
     config = require('../../../config');
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime) {
+module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, stats, gameTime, eventLog}) {
 
     if(object.type != 'creep') {
         return;
@@ -95,5 +95,9 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
         safeModeAvailable: target.safeModeAvailable,
         downgradeTime: target.downgradeTime
     });
+
+    eventLog.push({event: C.EVENT_UPGRADE_CONTROLLER, objectId: object._id, data: {
+        amount: boostedEffect, energySpent: buildEffect
+    }});
 
 };

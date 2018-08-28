@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, roomObjects, bulk, stats, dropRate, gameTime) {
+module.exports = function(object, dropRate, {roomObjects, bulk, stats, gameTime, eventLog}) {
 
     if(dropRate === undefined) {
         dropRate = C.CREEP_CORPSE_RATE;
@@ -86,6 +86,9 @@ module.exports = function(object, roomObjects, bulk, stats, dropRate, gameTime) 
     }
 
     bulk.insert(tombstone);
+
+    eventLog.push({event: C.EVENT_OBJECT_DESTROYED, objectId: object._id, type: 'creep'});
+
 
     if (stats && object.user != '3' && object.user != '2') {
         stats.inc('creepsLost', object.user, object.body.length);

@@ -4,7 +4,9 @@ var _ = require('lodash'),
     C = driver.constants,
     movement = require('../movement');
 
-module.exports = function(spawn, creep, roomObjects, roomTerrain, bulk, stats, gameTime) {
+module.exports = function(spawn, creep, scope) {
+
+    const {roomObjects, roomTerrain, bulk} = scope;
 
     var newX, newY, isOccupied, hostileOccupied;
     var checkObstacleFn = (i) => (i.x == newX && i.y == newY) && (
@@ -12,7 +14,10 @@ module.exports = function(spawn, creep, roomObjects, roomTerrain, bulk, stats, g
         (i.type == 'constructionSite' && _.contains(C.OBSTACLE_OBJECT_TYPES, i.structureType))  // unwalkable site
     );
 
-    const directions = spawn.spawning.directions || [1,2,3,4,5,6,7,8];
+    var directions = [1,2,3,4,5,6,7,8];
+    if(spawn.spawning && spawn.spawning.directions) {
+        directions = spawn.spawning.directions;
+    }
     const otherDirections = _.difference([1,2,3,4,5,6,7,8], directions);
     // find the first direction where the creep can spawn
     for (var direction of directions) {
@@ -61,7 +66,7 @@ module.exports = function(spawn, creep, roomObjects, roomTerrain, bulk, stats, g
             }
         }
 
-        require('../creeps/_die')(hostileOccupied, roomObjects, bulk, stats, undefined, gameTime);
+        require('../creeps/_die')(hostileOccupied, undefined, scope);
         bulk.update(creep, {
             x: hostileOccupied.x,
             y: hostileOccupied.y,

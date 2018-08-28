@@ -1,6 +1,6 @@
-module.exports = function(object, objectIntents, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime) {
+module.exports = function(object, objectIntents, scope) {
 
     if(objectIntents.processPower)
-        require('./process-power')(object, objectIntents.createCreep, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats);
+        require('./process-power')(object, objectIntents.createCreep, scope);
 
 };

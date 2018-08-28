@@ -2,22 +2,11 @@
 (function() {
     var _ = require('lodash'),
         utils = require('../utils'),
-        driver = utils.getDriver(),
+        driver = utils.getRuntimeDriver(),
         C = driver.constants,
         map = require('./map'),
         market = require('./market'),
         customPrototypes = require('./custom-prototypes');
-
-    var baseTime;
-    //var process = {hrtime: function() {}}
-
-    function _markTime(userId, str) {
-        /*var time = process.hrtime(baseTime);
-         time = time[0]*1e3 + time[1]/1e6;
-         baseTime = process.hrtime();
-         console.log('user '+userId+' runtime game '+str+' time: '+time);*/
-    }
-
 
     function populateRegister(reg, spatial) {
         _.extend(reg, {
@@ -38,10 +27,7 @@
             var keys = Object.keys(reg);
             reg.spatial = {};
             keys.forEach((i) => {
-                reg.spatial[i] = new Array(50);
-                for(var y=0;y<50;y++) {
-                    reg.spatial[i][y] = new Array(50);
-                }
+                reg.spatial[i] = new Array(2500);
             });
         }
     }
@@ -70,25 +56,30 @@
     function addObjectToRegister(register, type, objectInstance, objectRaw) {
         register[type][objectInstance.id] = objectInstance;
         register.byRoom[objectRaw.room][type][objectInstance.id] = objectInstance;
-        register.byRoom[objectRaw.room].spatial[type][objectRaw.y][objectRaw.x] = register.byRoom[objectRaw.room].spatial[type][objectRaw.y][objectRaw.x] || [];
-        register.byRoom[objectRaw.room].spatial[type][objectRaw.y][objectRaw.x].push(objectInstance);
+        let index = objectRaw.x * 50 + objectRaw.y;
+        let spatial = register.byRoom[objectRaw.room].spatial[type];
+        if (spatial[index] === undefined) {
+            spatial[index] = [ objectInstance ];
+        } else {
+            spatial[index].push(objectInstance);
+        }
     }
 
-    driver.config.makeGameObject = function makeGameObject (runtimeData, intents, memory, getUsedCpuFn, globals, markStats, sandboxedFunctionWrapper) {
+    function makeGameObject ({runtimeData, intents, memory, getUsedCpu, globals, sandboxedFunctionWrapper, getHeapStatistics}) {
 
         var customObjectsInfo = {};
 
-        if(driver.customObjectPrototypes) {
-            driver.customObjectPrototypes.forEach(i => {
-                i.opts = i.opts || {};
-                customObjectsInfo[i.objectType] = {
-                    name: i.name,
-                    make: customPrototypes(i.name, i.opts.parent, i.opts.properties, i.opts.prototypeExtender,
-                        !!i.opts.userOwned),
-                    findConstant: i.opts.findConstant
-                };
-            });
-        }
+        // if(driver.customObjectPrototypes) {
+        //     driver.customObjectPrototypes.forEach(i => {
+        //         i.opts = i.opts || {};
+        //         customObjectsInfo[i.objectType] = {
+        //             name: i.name,
+        //             make: customPrototypes(i.name, i.opts.parent, i.opts.properties, i.opts.prototypeExtender,
+        //                 !!i.opts.userOwned),
+        //             findConstant: i.opts.findConstant
+        //         };
+        //     });
+        // }
 
         var register = {
             _useNewPathFinder: true,
@@ -96,7 +87,8 @@
             byRoom: {},
             findCache: {},
             rooms: {},
-            wrapFn: sandboxedFunctionWrapper
+            roomEventLogCache: {},
+            wrapFn: sandboxedFunctionWrapper || function(fn) { return fn }
         };
 
         var deprecatedShown = [];
@@ -130,11 +122,14 @@
             cpuLimit: runtimeData.cpu,
             cpu: {
                 getUsed(){
-                    return getUsedCpuFn();
+                    return getUsedCpu();
                 },
                 tickLimit: runtimeData.cpu,
                 limit: runtimeData.user.cpu,
-                bucket: runtimeData.cpuBucket
+                bucket: runtimeData.cpuBucket,
+                getHeapStatistics: getHeapStatistics ? function() {
+                    return getHeapStatistics();
+                } : undefined
             },
             map: {},
             gcl: {
@@ -159,8 +154,6 @@
             }
         };
 
-        _markTime(runtimeData.user._id, 'before objects by room');
-
         register.objectsByRoom = {};
         register.objectsByRoomKeys = {};
         _.forEach(runtimeData.roomObjects, (i, key) => {
@@ -173,15 +166,11 @@
             register.objectsByRoomKeys[i.room].push(key);
         });
 
-        _markTime(runtimeData.user._id, 'after objects by room');
-
-
         for (var i in runtimeData.rooms) {
             register.byRoom[i] = {};
             populateRegister(register.byRoom[i], true);
         }
 
-        _markTime(runtimeData.user._id,'requires 0');
         require('./rooms').make(runtimeData, intents, register, globals);
         require('./rooms').makePos(register, globals);
         require('./creeps').make(runtimeData, intents, register, globals);
@@ -227,8 +216,6 @@
             nuker: globals.StructureNuker,
             portal: globals.StructurePortal
         };
-
-        _markTime(runtimeData.user._id, 'before objects');
 
         var c = {};
 
@@ -343,8 +330,6 @@
 
         }
 
-        _markTime(runtimeData.user._id, 'after objects 1');
-
         runtimeData.flags.forEach(flagRoomData => {
 
             var data = flagRoomData.data.split("|");
@@ -360,8 +345,13 @@
                 register.flags[id] = flag;
                 if(register.byRoom[flagRoomData.room]) {
                     register.byRoom[flagRoomData.room].flags[id] = flag;
-                    register.byRoom[flagRoomData.room].spatial.flags[info[4]][info[3]] = register.byRoom[flagRoomData.room].spatial.flags[info[4]][info[3]] || [];
-                    register.byRoom[flagRoomData.room].spatial.flags[info[4]][info[3]].push(flag);
+                    let index = (+info[3]) * 50 + (+info[4]);
+                    let spatial = register.byRoom[flagRoomData.room].spatial.flags;
+                    if (spatial[index] === undefined) {
+                        spatial[index] = [ flag ];
+                    } else {
+                        spatial[index].push(flag);
+                    }
                 }
 
                 game.flags[info[0]] = flag;
@@ -374,19 +364,11 @@
             })
         });
 
-        _markTime(runtimeData.user._id, 'after objects 2');
-
         game.map = register.map = map.makeMap(runtimeData, register, globals);
-
-        markStats('beforeMarket');
 
         game.market = register.market = market.make(runtimeData, intents, register);
 
-        markStats('afterMarket');
-
         _.extend(globals, JSON.parse(JSON.stringify(C)));
-
-        markStats('afterCloneConstants');
 
         return game;
     };
@@ -395,13 +377,12 @@
         
         var runCodeCache = {};
 
-        exports.runCode = function (_globals, _sandboxedFunctionWrapper, _codeModules, _runtimeData, _intents, _memory, _fakeConsole, _consoleCommands, _timeout, _getUsedCpu, _resetUsedCpu, _markStats, _scriptCachedData) {
+        exports.init = function (_globals, _codeModules, _runtimeData, _intents, _memory, _fakeConsole, _consoleCommands, _timeout, _getUsedCpu, _scriptCachedData, _sandboxedFunctionWrapper, _getHeapStatistics) {
 
             var userId = _runtimeData.user._id;
 
             runCodeCache[userId] = runCodeCache[userId] || {};
             runCodeCache[userId].globals = _globals;
-            runCodeCache[userId].sandboxedFunctionWrapper = _sandboxedFunctionWrapper;
             runCodeCache[userId].codeModules = _codeModules;
             runCodeCache[userId].runtimeData = _runtimeData;
             runCodeCache[userId].intents = _intents;
@@ -410,16 +391,16 @@
             runCodeCache[userId].consoleCommands = _consoleCommands;
             runCodeCache[userId].timeout = _timeout;
             runCodeCache[userId].getUsedCpu = _getUsedCpu;
-            runCodeCache[userId].resetUsedCpu = _resetUsedCpu;
-            runCodeCache[userId].markStats = _markStats || function() {};
             runCodeCache[userId].scriptCachedData = _scriptCachedData;
+            runCodeCache[userId].getHeapStatistics = _getHeapStatistics;
+            runCodeCache[userId].sandboxedFunctionWrapper = _sandboxedFunctionWrapper;
 
             _.extend(runCodeCache[userId].globals, {
                 RawMemory: runCodeCache[userId].memory,
                 console: runCodeCache[userId].fakeConsole
             });
 
-            if(!runCodeCache[userId].globals._) {
+            if (!runCodeCache[userId].globals._) {
                 runCodeCache[userId].globals._ = _.runInContext();
             }
 
@@ -432,7 +413,7 @@
                         runCodeCache[userId].memory._parsed = JSON.parse(runCodeCache[userId].memory.get() || "{}");
                         runCodeCache[userId].memory._parsed.__proto__ = null;
                     }
-                    catch(e) {
+                    catch (e) {
                         runCodeCache[userId].memory._parsed = null;
                     }
 
@@ -446,21 +427,7 @@
                 }
             });
 
-            runCodeCache[userId].markStats('beforeMake');
-
-            runCodeCache[userId].globals.Game = driver.config.makeGameObject(
-                runCodeCache[userId].runtimeData,
-                runCodeCache[userId].intents,
-                runCodeCache[userId].memory,
-                runCodeCache[userId].getUsedCpu,
-                runCodeCache[userId].globals,
-                runCodeCache[userId].markStats,
-                runCodeCache[userId].sandboxedFunctionWrapper,
-                _markTime);
-
-            runCodeCache[userId].markStats('afterMake');
-
-            _markTime(userId,'markGameObject');
+            runCodeCache[userId].globals.Game = makeGameObject(runCodeCache[userId]);
 
             if (runCodeCache[userId].runtimeData.user._id == '2') {
                 runCodeCache[userId].codeModules = {
@@ -482,18 +449,20 @@
             }
 
 
-            if(!runCodeCache[userId].globals.require ||
+            if (!runCodeCache[userId].globals.require ||
                 runCodeCache[userId].runtimeData.userCodeTimestamp != runCodeCache[userId].globals.require.timestamp ||
-                !_.isObject(runCodeCache[userId].globals.require.cache.main) || !_.isFunction(runCodeCache[userId].globals.require.cache.main.loop)) {
+                !_.isObject(runCodeCache[userId].globals.require.cache.main) || !_.isFunction(
+                    runCodeCache[userId].globals.require.cache.main.loop)) {
 
-                runCodeCache[userId].globals.require = runCodeCache[userId].sandboxedFunctionWrapper(requireFn.bind(runCodeCache[userId]));
+                runCodeCache[userId].globals.require = requireFn.bind(runCodeCache[userId]);
                 runCodeCache[userId].globals.require.cache = {lodash: runCodeCache[userId].globals._};
                 runCodeCache[userId].globals.require.timestamp = runCodeCache[userId].runtimeData.userCodeTimestamp;
             }
 
-            driver.config.emit('playerSandbox',runCodeCache[userId].globals, userId, runCodeCache[userId]);
+            return runCodeCache[userId];
+        };
 
-            runCodeCache[userId].resetUsedCpu();
+        exports.run = function(userId) {
 
             var mainExports = runCodeCache[userId].globals.require('main');
             if(_.isObject(mainExports) && _.isFunction(mainExports.loop)) {

@@ -2,10 +2,7 @@ var _ = require('lodash');
 
 var driver, C, offsetsByDirection;
 
-exports.getDriver = function getDriver() {
-    driver = typeof process != 'undefined' && process.env.DRIVER_MODULE ?
-        require(process.env.DRIVER_MODULE) :
-        require('./core/index');
+function loadDriver() {
     C = driver.constants;
     offsetsByDirection = {
         [C.TOP]: [0,-1],
@@ -17,7 +14,29 @@ exports.getDriver = function getDriver() {
         [C.LEFT]: [-1,0],
         [C.TOP_LEFT]: [-1,-1]
     };
+}
+
+try {
+    driver = require('~runtime-driver');
+    loadDriver();
+}
+catch(e) {}
+
+exports.getDriver = function getDriver() {
+    driver = typeof process != 'undefined' && process.env.DRIVER_MODULE ?
+        require(process.env.DRIVER_MODULE) :
+        require('./core/index');
+    loadDriver();
     return driver;
+};
+
+exports.getRuntimeDriver = function getRuntimeDriver() {
+    try {
+        return require('~runtime-driver');
+    }
+    catch (e) {
+        return exports.getDriver();
+    }
 };
 
 exports.fetchXYArguments = function(firstArg, secondArg, globals) {
@@ -136,7 +155,8 @@ exports.checkConstructionSite = function(objects, structureType, x, y) {
         if(structureType == 'extractor') {
             return true;
         }
-        if(exports.checkTerrain(objects, x, y, C.TERRAIN_MASK_WALL)) {
+        if(structureType != 'road' && structureType != 'rampart' &&
+            exports.checkTerrain(objects, x, y, C.TERRAIN_MASK_WALL)) {
             return false;
         }
         return true;
@@ -153,7 +173,8 @@ exports.checkConstructionSite = function(objects, structureType, x, y) {
         if(structureType == 'extractor') {
             return true;
         }
-        if(objects[y][x] & C.TERRAIN_MASK_WALL) {
+        if(structureType != 'road' && structureType != 'rampart' &&
+            objects[y][x] & C.TERRAIN_MASK_WALL) {
             return false;
         }
         return true;
@@ -397,7 +418,6 @@ exports.comparatorDistance = function(target) {
 
 exports.storeIntents = function(userId, userIntents, userRuntimeData) {
     var intents = {};
-    var driver = exports.getDriver();
 
     for(var i in userIntents) {
 
@@ -815,27 +835,27 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
             objectIntents.cancelSpawning = {};
         }
 
-        for(var iCustomType in driver.config.customIntentTypes) {
-            if(objectIntentsResult[iCustomType]) {
-                objectIntents[iCustomType] = {};
-                for(var prop in driver.config.customIntentTypes[iCustomType]) {
-                    switch(driver.config.customIntentTypes[iCustomType][prop]) {
-                        case 'string': {
-                            objectIntents[iCustomType][prop] = "" + objectIntentsResult[iCustomType][prop];
-                            break;
-                        }
-                        case 'number': {
-                            objectIntents[iCustomType][prop] = +objectIntentsResult[iCustomType][prop];
-                            break;
-                        }
-                        case 'boolean': {
-                            objectIntents[iCustomType][prop] = !!objectIntentsResult[iCustomType][prop];
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+        // for(var iCustomType in driver.config.customIntentTypes) {
+        //     if(objectIntentsResult[iCustomType]) {
+        //         objectIntents[iCustomType] = {};
+        //         for(var prop in driver.config.customIntentTypes[iCustomType]) {
+        //             switch(driver.config.customIntentTypes[iCustomType][prop]) {
+        //                 case 'string': {
+        //                     objectIntents[iCustomType][prop] = "" + objectIntentsResult[iCustomType][prop];
+        //                     break;
+        //                 }
+        //                 case 'number': {
+        //                     objectIntents[iCustomType][prop] = +objectIntentsResult[iCustomType][prop];
+        //                     break;
+        //                 }
+        //                 case 'boolean': {
+        //                     objectIntents[iCustomType][prop] = !!objectIntentsResult[iCustomType][prop];
+        //                     break;
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
     }
 

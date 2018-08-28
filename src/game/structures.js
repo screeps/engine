@@ -1,6 +1,6 @@
 var utils = require('./../utils'),
     rooms = require('./rooms'),
-    driver = utils.getDriver(),
+    driver = utils.getRuntimeDriver(),
     C = driver.constants,
     _ = require('lodash');
 
@@ -1367,7 +1367,10 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
      * @constructor
      */
     StructureSpawn.Spawning = register.wrapFn(function(spawnId) {
-        this.spawn = register._objects[spawnId];
+        Object.defineProperty(this, 'spawn', {
+            enumerable: false,
+            value: register._objects[spawnId]
+        });
         this.name = data(spawnId).spawning.name;
         this.needTime = data(spawnId).spawning.needTime;
         this.remainingTime = data(spawnId).spawning.remainingTime;

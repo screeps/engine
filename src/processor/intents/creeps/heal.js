@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime) {
+module.exports = function(object, intent, {roomObjects, roomController, gameTime, eventLog}) {
 
     if(object.type != 'creep') {
         return;
@@ -29,4 +29,6 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
 
     object.actionLog.heal = {x: target.x, y: target.y};
     target.actionLog.healed = {x: object.x, y: object.y};
+
+    eventLog.push({event: C.EVENT_HEAL, objectId: object._id, data: {targetId: target._id, amount: healPower, healType: EVENT_HEAL_TYPE_MELEE}});
 };

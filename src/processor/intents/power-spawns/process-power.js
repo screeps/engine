@@ -4,7 +4,7 @@ var _ = require('lodash'),
     C = driver.constants;
 
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats) {
+module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, roomController, stats}) {
 
     if(object.type != 'powerSpawn')
         return;

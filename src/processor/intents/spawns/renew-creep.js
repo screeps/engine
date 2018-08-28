@@ -3,7 +3,9 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime) {
+module.exports = function(object, intent, scope) {
+
+    const {roomObjects, bulk, stats, gameTime} = scope;
 
     if(object.type != 'spawn') {
         return;
@@ -29,7 +31,7 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
     }
 
     var cost = Math.ceil(C.SPAWN_RENEW_RATIO * utils.calcCreepCost(target.body) / C.CREEP_SPAWN_TIME / target.body.length);
-    var result = require('./_charge-energy')(object, roomObjects, cost, bulk);
+    var result = require('./_charge-energy')(object, cost, undefined, scope);
 
     if(!result) {
         return;
@@ -46,7 +48,7 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
         });
         require('../creeps/_recalc-body')(target);
         // we may not be able to hold all of the resources we could before now.
-        require('../creeps/_drop-resources-without-space')(target, roomObjects, roomTerrain, bulk);
+        require('../creeps/_drop-resources-without-space')(target, scope);
         bulk.update(target, {body: target.body, energyCapacity: target.energyCapacity});
     }
 

@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roomController, gameTime) {
+module.exports = function(object, {roomObjects, roomTerrain, bulk, gameTime}) {
 
     if(!object || object.type != 'road') return;
 
@@ -12,6 +12,10 @@ module.exports = function(object, roomObjects, roomTerrain, bulk, bulkUsers, roo
         if(_.any(roomObjects, (i) => i.x == object.x && i.y == object.y && i.type == 'swamp') ||
             utils.checkTerrain(roomTerrain, object.x, object.y, C.TERRAIN_MASK_SWAMP)) {
             decayAmount *= C.CONSTRUCTION_COST_ROAD_SWAMP_RATIO;
+        }
+        if(_.any(roomObjects, (i) => i.x == object.x && i.y == object.y && i.type == 'wall') ||
+            utils.checkTerrain(roomTerrain, object.x, object.y, C.TERRAIN_MASK_WALL)) {
+            decayAmount *= C.CONSTRUCTION_COST_ROAD_WALL_RATIO;
         }
         object.hits -= decayAmount;
         if(object.hits <= 0) {

@@ -1,20 +1,20 @@
-module.exports = function(object, objectIntents, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime) {
+module.exports = function(object, objectIntents, scope) {
 
     if(objectIntents.createCreep)
-        require('./create-creep')(object, objectIntents.createCreep, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime);
+        require('./create-creep')(object, objectIntents.createCreep, scope);
 
     if(objectIntents.transferEnergy)
-        require('./transfer-energy')(object, objectIntents.transferEnergy, roomObjects, roomTerrain, bulk, bulkUsers, roomController);
+        require('./transfer-energy')(object, objectIntents.transferEnergy, scope);
 
     if(objectIntents.renewCreep)
-        require('./renew-creep')(object, objectIntents.renewCreep, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime);
+        require('./renew-creep')(object, objectIntents.renewCreep, scope);
 
     if(objectIntents.recycleCreep)
-        require('./recycle-creep')(object, objectIntents.recycleCreep, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime);
+        require('./recycle-creep')(object, objectIntents.recycleCreep, scope);
 
     if(objectIntents.setSpawnDirections)
-        require('./set-spawn-directions')(object, objectIntents.setSpawnDirections, roomObjects, roomTerrain, bulk);
+        require('./set-spawn-directions')(object, objectIntents.setSpawnDirections, scope);
 
     if(objectIntents.cancelSpawning)
-        require('./cancel-spawning')(object, objectIntents.cancelSpawning, roomObjects, roomTerrain, bulk);
+        require('./cancel-spawning')(object, objectIntents.cancelSpawning, scope);
 };

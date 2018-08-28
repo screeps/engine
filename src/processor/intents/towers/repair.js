@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats) {
+module.exports = function(object, intent, {roomObjects, bulk, stats, eventLog}) {
 
     if(object.type != 'tower') {
         return;
@@ -46,6 +46,8 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
 
     stats.inc('energyConstruction', object.user, C.TOWER_ENERGY_COST);
 
-
+    eventLog.push({event: C.EVENT_REPAIR, objectId: object._id, data: {
+        targetId: target._id, amount: effect, energySpent: C.TOWER_ENERGY_COST
+    }});
 
 };

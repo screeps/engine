@@ -3,7 +3,9 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime) {
+module.exports = function(object, intent, scope) {
+
+    const {roomObjects} = scope;
 
     if(object.type != 'spawn') {
         return;
@@ -17,5 +19,5 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
         return;
     }
 
-    require('../creeps/_die')(target, roomObjects, bulk, undefined, 1.0, gameTime);
+    require('../creeps/_die')(target, 1.0, scope);
 };

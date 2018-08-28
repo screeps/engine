@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(intent, flags, userId) {
+module.exports = function(userId, intent, {flags}) {
 
     var name = intent.name.replace(/\|/g,"$VLINE$").replace(/~/g,"$TILDE$");
 

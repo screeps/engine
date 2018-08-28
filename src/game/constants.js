@@ -1,4 +1,4 @@
 var utils = require('../utils'),
-    driver = utils.getDriver();
+    driver = utils.getRuntimeDriver();
 
 module.exports = driver.constants;

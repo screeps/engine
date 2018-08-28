@@ -9,15 +9,14 @@ var q = require('q'),
 
 var roomsQueue, usersQueue, lastRoomsStatsSaveTime = 0, currentHistoryPromise = q.when();
 
-function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomInfo, flags}) {
+function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime, roomInfo, flags}) {
 
     return q.when().then(() => {
 
         var bulk = driver.bulkObjectsWrite(),
-            userBulk = driver.bulkUsersWrite(),
-            flagsBulk = driver.bulkFlagsWrite(),
+            bulkUsers = driver.bulkUsersWrite(),
+            bulkFlags = driver.bulkFlagsWrite(),
             oldObjects = {},
-            roomController,
             hasNewbieWalls = false,
             stats = driver.getRoomStatsUpdater(roomId),
             objectsToHistory = {},
@@ -26,12 +25,16 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
 
         roomInfo.active = false;
 
-        var terrainItem = terrain[_.findKey(terrain)];
+        var terrainItem = roomTerrain[_.findKey(roomTerrain)];
         if (terrainItem.terrain) {
-            terrain = terrainItem.terrain;
+            roomTerrain = terrainItem.terrain;
         }
 
-        _.forEach(objects, (object) => {
+        let eventLog = [];
+
+        let scope = {roomObjects, roomTerrain, bulk, bulkUsers, stats, flags, bulkFlags, gameTime, roomInfo, users, eventLog};
+
+        _.forEach(roomObjects, (object) => {
             if(!object) {
                 return;
             }
@@ -76,7 +79,7 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
                 };
             }
             if (object.type == 'controller') {
-                roomController = object;
+                scope.roomController = object;
             }
             if (object.type == 'observer') {
                 object.observeRoom = null;
@@ -110,15 +113,15 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
                 roomSpawns.push(object);
             }
 
-            driver.config.emit('processObject',object, objects, terrain, gameTime, roomInfo, bulk, userBulk);
+            driver.config.emit('processObject',object, roomObjects, roomTerrain, gameTime, roomInfo, bulk, bulkUsers);
 
         });
 
         if(roomSpawns.length || roomExtensions.length) {
-            require('./processor/intents/_calc_spawns')(roomSpawns, roomExtensions, roomController, bulk);
+            require('./processor/intents/_calc_spawns')(roomSpawns, roomExtensions, scope);
         }
 
-        movement.init(objects, terrain);
+        movement.init(roomObjects, roomTerrain);
 
         if (intents) {
 
@@ -132,44 +135,44 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
                 for (var objectId in userIntents.objects) {
 
                     var objectIntents = userIntents.objects[objectId],
-                    object = objects[objectId];
+                    object = roomObjects[objectId];
 
                     if (objectId == 'room') {
-                        require('./processor/intents/room/intents')(userId, objectIntents, objects, terrain, bulk, userBulk, roomController, flags, flagsBulk);
+                        require('./processor/intents/room/intents')(userId, objectIntents, scope);
                         continue;
                     }
 
                     if (!object || object._skip || object.user && object.user != userId) continue;
 
                     if (object.type == 'creep')
-                        require('./processor/intents/creeps/intents')(object, objectIntents, objects, terrain, bulk, userBulk, roomController, stats, gameTime, roomInfo, users);
+                        require('./processor/intents/creeps/intents')(object, objectIntents, scope);
                     if (object.type == 'link')
-                        require('./processor/intents/links/intents')(object, objectIntents, objects, terrain, bulk, userBulk, roomController, stats);
+                        require('./processor/intents/links/intents')(object, objectIntents, scope);
                     if (object.type == 'tower')
-                        require('./processor/intents/towers/intents')(object, objectIntents, objects, terrain, bulk, userBulk, roomController, stats, gameTime, roomInfo);
+                        require('./processor/intents/towers/intents')(object, objectIntents, scope);
                     if (object.type == 'lab')
-                        require('./processor/intents/labs/intents')(object, objectIntents, objects, terrain, bulk, userBulk, roomController, stats);
+                        require('./processor/intents/labs/intents')(object, objectIntents, scope);
                     if (object.type == 'spawn')
-                        require('./processor/intents/spawns/intents')(object, objectIntents, objects, terrain, bulk, userBulk, roomController, stats, gameTime);
+                        require('./processor/intents/spawns/intents')(object, objectIntents, scope);
 
                     if (object.type == 'constructionSite') {
                     }
 
                     if (object.type == 'rampart') {
                         if (objectIntents.setPublic) {
-                            require('./processor/intents/ramparts/set-public')(object, objectIntents.setPublic, objects, terrain, bulk, userBulk, roomController);
+                            require('./processor/intents/ramparts/set-public')(object, objectIntents.setPublic, scope);
                         }
                     }
 
                     if (object.type == 'terminal') {
                         if (objectIntents.send) {
-                            require('./processor/intents/terminal/send')(object, objectIntents.send, objects, terrain, bulk, userBulk, roomController);
+                            require('./processor/intents/terminal/send')(object, objectIntents.send, scope);
                         }
                     }
 
                     if (object.type == 'nuker') {
                         if (objectIntents.launchNuke) {
-                            require('./processor/intents/nukers/launch-nuke')(object, objectIntents.launchNuke, objects, terrain, bulk, userBulk, roomController, stats, gameTime, roomInfo);
+                            require('./processor/intents/nukers/launch-nuke')(object, objectIntents.launchNuke, scope);
                         }
                     }
 
@@ -180,21 +183,21 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
                     }
 
                     if(object.type == 'powerSpawn') {
-                        require('./processor/intents/power-spawns/intents')(object, objectIntents, objects, terrain, bulk, userBulk, roomController, stats);
+                        require('./processor/intents/power-spawns/intents')(object, objectIntents, scope);
                     }
 
                     if (object.type == 'extension' || object.type == 'storage' || object.type == 'powerSpawn' || object.type == 'terminal' || object.type == 'container') {
                         if (objectIntents.transfer) {
-                            require('./processor/intents/extensions/transfer')(object, objectIntents.transfer, objects, terrain, bulk, userBulk, roomController);
+                            require('./processor/intents/extensions/transfer')(object, objectIntents.transfer, scope);
                         }
                     }
 
                     if(object.type == 'controller') {
                         if(objectIntents.unclaim) {
-                            require('./processor/intents/controllers/unclaim')(object, objectIntents.unclaim, objects, terrain, bulk, userBulk, gameTime, roomInfo, users);
+                            require('./processor/intents/controllers/unclaim')(object, objectIntents.unclaim, scope);
                         }
                         if(objectIntents.activateSafeMode) {
-                            require('./processor/intents/controllers/activateSafeMode')(object, objectIntents.activateSafeMode, objects, terrain, bulk, userBulk, gameTime, roomInfo);
+                            require('./processor/intents/controllers/activateSafeMode')(object, objectIntents.activateSafeMode, scope);
                         }
                     }
 
@@ -203,15 +206,15 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
                     }
 
 
-                    driver.config.emit('processObjectIntents',object, userId, objectIntents, objects, terrain,
-                        gameTime, roomInfo, bulk, userBulk);
+                    driver.config.emit('processObjectIntents',object, userId, objectIntents, roomObjects, roomTerrain,
+                        gameTime, roomInfo, bulk, bulkUsers);
                 }
             });
         }
 
-        movement.check(roomController && roomController.safeMode > gameTime ? roomController.user : false);
+        movement.check(scope.roomController && scope.roomController.safeMode > gameTime ? scope.roomController.user : false);
 
-        var energyAvailable = _(objects).filter((i) => !i.off && (i.type == 'spawn' || i.type == 'extension')).sum('energy');
+        scope.energyAvailable = _(roomObjects).filter((i) => !i.off && (i.type == 'spawn' || i.type == 'extension')).sum('energy');
 
         var mapView = {
             w: [],
@@ -227,55 +230,55 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
         var resultPromises = [];
         var userVisibility = {};
 
-        _.forEach(objects, (object) => {
+        _.forEach(roomObjects, (object) => {
 
             if(!object || object._skip) {
                 return;
             }
 
             if (object.type == 'energy')
-                require('./processor/intents/energy/tick')(object, objects, terrain, bulk, userBulk, roomController);
+                require('./processor/intents/energy/tick')(object, scope);
             if (object.type == 'source')
-                require('./processor/intents/sources/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime);
+                require('./processor/intents/sources/tick')(object, scope);
             if (object.type == 'mineral')
-                require('./processor/intents/minerals/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime);
+                require('./processor/intents/minerals/tick')(object, scope);
             if (object.type == 'creep')
-                require('./processor/intents/creeps/tick')(object, objects, terrain, bulk, userBulk, roomController, stats, gameTime);
+                require('./processor/intents/creeps/tick')(object, scope);
             if (object.type == 'spawn')
-                require('./processor/intents/spawns/tick')(object, objects, terrain, bulk, userBulk, roomController, stats, energyAvailable);
+                require('./processor/intents/spawns/tick')(object, scope);
             if (object.type == 'rampart')
-                require('./processor/intents/ramparts/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime);
+                require('./processor/intents/ramparts/tick')(object, scope);
             if (object.type == 'extension')
-                require('./processor/intents/extensions/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime);
+                require('./processor/intents/extensions/tick')(object, scope);
             if (object.type == 'road')
-                require('./processor/intents/roads/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime);
+                require('./processor/intents/roads/tick')(object, scope);
             if (object.type == 'constructionSite')
-                require('./processor/intents/construction-sites/tick')(object, objects, terrain, bulk, userBulk, roomController);
+                require('./processor/intents/construction-sites/tick')(object, scope);
             if (object.type == 'keeperLair')
-                require('./processor/intents/keeper-lairs/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime);
+                require('./processor/intents/keeper-lairs/tick')(object, scope);
             if (object.type == 'portal')
-                require('./processor/intents/portals/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime);
+                require('./processor/intents/portals/tick')(object, scope);
             if (object.type == 'constructedWall')
-                require('./processor/intents/constructedWalls/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime);
+                require('./processor/intents/constructedWalls/tick')(object, scope);
             if (object.type == 'link')
-                require('./processor/intents/links/tick')(object, objects, terrain, bulk, userBulk, roomController);
+                require('./processor/intents/links/tick')(object, scope);
             if (object.type == 'extractor')
-                require('./processor/intents/extractors/tick')(object, objects, terrain, bulk, userBulk, roomController);
+                require('./processor/intents/extractors/tick')(object, scope);
             if (object.type == 'tower')
-                require('./processor/intents/towers/tick')(object, objects, terrain, bulk, userBulk, roomController);
+                require('./processor/intents/towers/tick')(object, scope);
             if (object.type == 'controller')
-                require('./processor/intents/controllers/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime, roomInfo, users);
+                require('./processor/intents/controllers/tick')(object, scope);
             if (object.type == 'lab')
-                require('./processor/intents/labs/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime);
+                require('./processor/intents/labs/tick')(object, scope);
             if (object.type == 'container')
-                require('./processor/intents/containers/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime);
+                require('./processor/intents/containers/tick')(object, scope);
             if (object.type == 'terminal')
-                require('./processor/intents/terminal/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime);
+                require('./processor/intents/terminal/tick')(object, scope);
             if (object.type == 'tombstone')
-                require('./processor/intents/tombstones/tick')(object, objects, terrain, bulk, userBulk, roomController, gameTime);
+                require('./processor/intents/tombstones/tick')(object, scope);
 
             if (object.type == 'nuke') {
-                require('./processor/intents/nukes/tick')(object, objects, terrain, bulk, userBulk, roomController, stats, gameTime, roomInfo);
+                require('./processor/intents/nukes/tick')(object, scope);
             }
 
             if(object.type == 'observer') {
@@ -284,8 +287,8 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
             }
 
             if (object.type == 'storage') {
-                if (roomController) {
-                    var energyCapacity = roomController.level > 0 && roomController.user == object.user && C.CONTROLLER_STRUCTURES.storage[roomController.level] > 0 ? C.STORAGE_CAPACITY : 0;
+                if (scope.roomController) {
+                    var energyCapacity = scope.roomController.level > 0 && scope.roomController.user == object.user && C.CONTROLLER_STRUCTURES.storage[scope.roomController.level] > 0 ? C.STORAGE_CAPACITY : 0;
                     if (energyCapacity != object.energyCapacity) {
                         bulk.update(object, {energyCapacity});
                     }
@@ -295,7 +298,7 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
             if(object.type == 'powerBank') {
                 if(gameTime >= object.decayTime-1) {
                     bulk.remove(object._id);
-                    delete objects[object._id];
+                    delete roomObjects[object._id];
                 }
             }
 
@@ -361,8 +364,10 @@ function processRoom(roomId, {intents, objects, users, terrain, gameTime, roomIn
 
         resultPromises.push(driver.mapViewSave(roomId, mapView));
         resultPromises.push(bulk.execute());
-        resultPromises.push(userBulk.execute());
-        resultPromises.push(flagsBulk.execute());
+        resultPromises.push(bulkUsers.execute());
+        resultPromises.push(bulkFlags.execute());
+        resultPromises.push(driver.saveRoomEventLog(roomId, eventLog));
+
 
         if(!_.isEqual(roomInfo, oldRoomInfo)) {
             resultPromises.push(driver.saveRoomInfo(roomId, roomInfo));
@@ -426,9 +431,9 @@ driver.connect('processor').then(() => driver.queue.create('rooms', 'read'))
                 driver.config.emit('processorLoopStage','processRoom', roomId);
                 processRoom(roomId, {
                     intents: result[0],
-                    objects: result[1].objects,
+                    roomObjects: result[1].objects,
                     users: result[1].users,
-                    terrain: result[2],
+                    roomTerrain: result[2],
                     gameTime: result[3],
                     roomInfo: result[4],
                     flags: result[5]

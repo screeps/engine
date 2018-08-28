@@ -1,6 +1,6 @@
 var _ = require('lodash'),
     utils = require('./../utils'),
-    driver = utils.getDriver(),
+    driver = utils.getRuntimeDriver(),
     C = driver.constants,
     pathfinding = require('@screeps/pathfinding');
 
@@ -555,6 +555,17 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
     });
 
+    Room.prototype.getEventLog = register.wrapFn(function(raw) {
+        if(raw) {
+            return runtimeData.roomEventLog[this.name] || '[]';
+        }
+        let {roomEventLogCache} = register;
+        if(!roomEventLogCache[this.name]) {
+            roomEventLogCache[this.name] = JSON.parse(runtimeData.roomEventLog[this.name] || '[]');
+        }
+        return roomEventLogCache[this.name];
+    });
+
     Room.prototype.find = register.wrapFn(function(type, opts) {
         var result = [];
         opts = opts || {};
@@ -663,7 +674,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             throw new Error('look coords are out of bounds');
         }
 
-        var typeResult = privateStore[id].lookTypeSpatialRegisters[typeName][y][x];
+        var typeResult = privateStore[id].lookTypeSpatialRegisters[typeName][x * 50 + y];
         if(typeResult) {
             if(outArray) {
                 typeResult.forEach((i) => {

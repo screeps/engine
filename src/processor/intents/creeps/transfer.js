@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers) {
+module.exports = function(object, intent, {roomObjects, bulk, eventLog}) {
 
     if(object.type != 'creep') {
         return;
@@ -102,5 +102,7 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
     object[intent.resourceType] -= amount;
 
     bulk.update(object, {[intent.resourceType]: object[intent.resourceType]});
+
+    eventLog.push({event: C.EVENT_TRANSFER, objectId: object._id, data: {targetId: target._id, resourceType: intent.resourceType, amount}});
 
 };

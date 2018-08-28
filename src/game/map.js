@@ -1,8 +1,7 @@
 var utils = require('../utils'),
-    driver = utils.getDriver(),
+    driver = utils.getRuntimeDriver(),
     C = driver.constants,
     _ = require('lodash'),
-    util = require('util'),
     pathUtils = require('./path-utils'),
     Heap = pathUtils.Heap,
     OpenClosed = pathUtils.OpenClosed;
@@ -214,6 +213,11 @@ exports.makeMap = function(runtimeData, register, globals) {
                 y = x.y;
                 roomName = x.roomName;
                 x = x.x;
+            }
+
+            // check if coordinates are out of bounds
+            if(x < 0 || x > 49 || y < 0 || y > 49) {
+                return undefined;
             }
 
             if(!runtimeData.staticTerrainData || !runtimeData.staticTerrainData[roomName]) {

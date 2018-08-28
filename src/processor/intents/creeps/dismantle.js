@@ -3,7 +3,9 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats, gameTime, roomInfo) {
+module.exports = function(object, intent, scope) {
+
+    const {roomObjects, roomTerrain, bulk, roomController, gameTime} = scope;
 
     if(object.type != 'creep') {
         return;
@@ -38,9 +40,9 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
         bulk.update(object, {energy: object.energy});
 
         if (object.energy > object.energyCapacity) {
-            require('./drop')(object, {amount: object.energy - object.energyCapacity, resourceType: 'energy'}, roomObjects, roomTerrain, bulk);
+            require('./drop')(object, {amount: object.energy - object.energyCapacity, resourceType: 'energy'}, scope);
         }
 
-        require('../_damage')(object, target, effect, 'melee', roomObjects, roomTerrain, bulk, roomController, stats, gameTime, roomInfo);
+        require('../_damage')(object, target, effect, C.EVENT_ATTACK_TYPE_DISMANTLE, scope);
     }
 };

@@ -3,7 +3,9 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats) {
+module.exports = function(object, intent, scope) {
+
+    const {roomObjects, roomTerrain, bulk, roomController, stats, eventLog} = scope;
 
     if(object.type != 'creep') {
         return;
@@ -50,12 +52,14 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
                 require('./drop')(object, {
                     amount: Math.min(object.energy, sum - object.energyCapacity),
                     resourceType: 'energy'
-                }, roomObjects, roomTerrain, bulk);
+                }, scope);
             }
 
             object.actionLog.harvest = {x: target.x, y: target.y};
 
             stats.inc('energyHarvested', object.user, amount);
+
+            eventLog.push({event: C.EVENT_HARVEST, objectId: object._id, data: {targetId: target._id, amount}});
         }
     }
 
@@ -95,12 +99,14 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk, bulkUs
                 require('./drop')(object, {
                     amount: Math.min(object[target.mineralType], sum - object.energyCapacity),
                     resourceType: target.mineralType
-                }, roomObjects, roomTerrain, bulk);
+                }, scope);
             }
 
             object.actionLog.harvest = {x: target.x, y: target.y};
 
             extractor._cooldown = C.EXTRACTOR_COOLDOWN;
+
+            eventLog.push({event: C.EVENT_HARVEST, objectId: object._id, data: {targetId: target._id, amount: harvestAmount}});
         }
 
     }
