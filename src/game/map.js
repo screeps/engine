@@ -209,6 +209,7 @@ exports.makeMap = function(runtimeData, register, globals) {
         },
         
         getTerrainAt(x, y, roomName) {
+            register.deprecated('Method `Game.map.getTerrainAt` is deprecated and will be removed. Please use a faster method `Game.map.getRoomTerrain` instead.');
             if(_.isObject(x)) {
                 y = x.y;
                 roomName = x.roomName;
