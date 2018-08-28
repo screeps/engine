@@ -29,7 +29,7 @@ module.exports = function(object, intent, scope) {
             i.y >= object.y - 3 && i.y <= object.y + 3;
     });
 
-    var distanceRate = {1: 1, 2: 0.4, 3: 0.1};
+    var distanceRate = {0: 1, 1: 1, 2: 0.4, 3: 0.1};
 
     for(var i in targets) {
 
@@ -49,9 +49,5 @@ module.exports = function(object, intent, scope) {
         require('../_damage')(object, target, targetAttackPower, C.EVENT_ATTACK_TYPE_MASS_RANGED, scope);
     }
 
-
-
     object.actionLog.rangedMassAttack = {};
-
-
 };
