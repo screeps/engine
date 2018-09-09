@@ -31,7 +31,7 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
         return;
     }
 
-    if(target.structureType != 'extractor' && target.structureType != 'road' && target.structureType != 'rampart'  &&
+    if(target.structureType != 'extractor' && target.structureType != 'road' &&
         utils.checkTerrain(roomTerrain, target.x, target.y, C.TERRAIN_MASK_WALL)) {
         return;
     }
