@@ -36,14 +36,19 @@ module.exports = function(object, dropRate, {roomObjects, bulk, stats, gameTime,
 
     if(dropRate > 0 && !object.userSummoned) {
         var lifeTime = _.any(object.body, {type: C.CLAIM}) ? C.CREEP_CLAIM_LIFE_TIME : C.CREEP_LIFE_TIME;
-        var bodyResources = {energy: utils.calcCreepCost(object.body) * dropRate * object._ticksToLive / lifeTime};
+        var lifeRate = dropRate * object._ticksToLive / lifeTime;
+        var bodyResources = {energy: 0};
 
         object.body.forEach(i => {
             if(i.boost) {
                 bodyResources[i.boost] = bodyResources[i.boost] || 0;
-                bodyResources[i.boost] += C.LAB_BOOST_MINERAL * dropRate * object._ticksToLive / lifeTime;
-                bodyResources.energy += C.LAB_BOOST_ENERGY * dropRate * object._ticksToLive / lifeTime;
+                bodyResources[i.boost] += C.LAB_BOOST_MINERAL * lifeRate;
+                bodyResources.energy += C.LAB_BOOST_ENERGY * lifeRate;
             }
+            bodyResources.energy += Math.min(
+                C.CREEP_PART_MAX_ENERGY,
+                C.BODYPART_COST[i.type] * lifeRate
+            );
         });
 
         _.forEach(bodyResources, (amount, resourceType) => {
