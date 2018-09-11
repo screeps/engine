@@ -783,6 +783,11 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                 bodyPartsCount: parseInt(objectIntentsResult.boostCreep.bodyPartsCount)
             };
         }
+        if(objectIntentsResult.unboostCreep) {
+            objectIntents.unboostCreep = {
+                id: ""+objectIntentsResult.unboostCreep.id
+            }
+        }
         if(objectIntentsResult.send) {
             objectIntents.send = {
                 targetRoomName: ""+objectIntentsResult.send.targetRoomName,

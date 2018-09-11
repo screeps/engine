@@ -496,6 +496,25 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
+    StructureLab.prototype.unboostCreep = register.wrapFn(function(target) {
+        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
+            register.assertTargetObject(target);
+            return C.ERR_INVALID_TARGET;
+        }
+        if(!this.my || !target.my) {
+            return C.ERR_NOT_OWNER;
+        }
+        if(!_.some(target.body, p => !!p.boost)) {
+            return C.ERR_NOT_FOUND;
+        }
+        if(!this.pos.isNearTo(target)) {
+            return C.ERR_NOT_IN_RANGE;
+        }
+        
+        intents.set(this.id, 'unboostCreep', {id: target.id});
+        return C.OK;
+    });
+
     Object.defineProperty(globals, 'StructureLab', {enumerable: true, value: StructureLab});
 
     /**
