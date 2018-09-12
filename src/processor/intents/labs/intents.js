@@ -10,4 +10,7 @@ module.exports = function(object, objectIntents, roomObjects, roomTerrain, bulk,
 
     if(objectIntents.boostCreep)
         require('./boost-creep')(object, objectIntents.boostCreep, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats);
+    
+    if(objectIntents.unboostCreep)
+        require('./unboost-creep')(object, objectIntents.unboostCreep, roomObjects, roomTerrain, bulk, bulkUsers, roomController, stats);
 };
