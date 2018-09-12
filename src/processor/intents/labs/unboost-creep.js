@@ -3,7 +3,8 @@ const _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, intent, roomObjects, roomTerrain, bulk) {
+module.exports = function(object, intent, scope) {
+    const {roomObjects, bulk} = scope;
     const target = roomObjects[intent.id];
     if(!target || target.type != 'creep' || target.user != object.user) {
         return;
@@ -27,12 +28,12 @@ module.exports = function(object, intent, roomObjects, roomTerrain, bulk) {
         
         const energyReturn = boostedParts[r]*C.LAB_UNBOOST_ENERGY;
         if(energyReturn>0) {
-            require('../creeps/_create-energy')(target.x, target.y, target.room, energyReturn, roomObjects, bulk, C.RESOURCE_ENERGY);
+            require('../creeps/_create-energy')(target.x, target.y, target.room, energyReturn, C.RESOURCE_ENERGY, scope);
         }
 
         const mineralReturn = boostedParts[r]*C.LAB_UNBOOST_MINERAL;
         if(mineralReturn > 0) {
-            require('../creeps/_create-energy')(target.x, target.y, target.room, mineralReturn, roomObjects, bulk, r);
+            require('../creeps/_create-energy')(target.x, target.y, target.room, mineralReturn, r, scope);
         }
     });
 };
