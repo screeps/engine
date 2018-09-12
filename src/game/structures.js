@@ -1348,6 +1348,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(target.ticksToLive + Math.floor(C.SPAWN_RENEW_RATIO * C.CREEP_LIFE_TIME / C.CREEP_SPAWN_TIME / target.body.length) > C.CREEP_LIFE_TIME) {
             return C.ERR_FULL;
         }
+        if(_.any(target.body, i => !!i.boost)) {
+            register.deprecated('Using `StructureSpawn.renewCreep` on a boosted creep is deprecated and will throw an error soon. Please remove boosts using `StructureLab.unboostCreep` before renewing.');
+        }
 
         intents.set(this.id, 'renewCreep', {id: target.id});
         return C.OK;
