@@ -4,6 +4,9 @@ const _ = require('lodash'),
     C = driver.constants;
 
 module.exports = function(object, intent, scope) {
+    if(object.cooldown > 0) {
+        return;
+    }
     const {roomObjects, bulk} = scope;
     const target = roomObjects[intent.id];
     if(!target || target.type != 'creep' || target.user != object.user) {
@@ -21,11 +24,11 @@ module.exports = function(object, intent, scope) {
     require('../creeps/_recalc-body')(target);
     bulk.update(target, {body: target.body, energyCapacity: target.energyCapacity});
 
-    C.RESOURCES_ALL.forEach(function(r){
+    const cooldown = _.reduce(C.RESOURCES_ALL, function(a, r){
         if(!boostedParts[r]) {
-            return;
+            return a;
         }
-        
+
         const energyReturn = boostedParts[r]*C.LAB_UNBOOST_ENERGY;
         if(energyReturn>0) {
             require('../creeps/_create-energy')(target.x, target.y, target.room, energyReturn, C.RESOURCE_ENERGY, scope);
@@ -35,5 +38,11 @@ module.exports = function(object, intent, scope) {
         if(mineralReturn > 0) {
             require('../creeps/_create-energy')(target.x, target.y, target.room, mineralReturn, r, scope);
         }
-    });
+        
+        return a + boostedParts[r]*utils.calcTotalReactionsTime(r)*C.LAB_UNBOOST_MINERAL/C.LAB_REACTION_AMOUNT;
+    }, 0);
+    
+    if(cooldown > 0) {
+        bulk.update(object, { cooldown });
+    }
 };

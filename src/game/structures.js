@@ -504,6 +504,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my || !target.my) {
             return C.ERR_NOT_OWNER;
         }
+        if(this.cooldown > 0) {
+            return C.ERR_TIRED;
+        }
         if(!_.some(target.body, p => !!p.boost)) {
             return C.ERR_NOT_FOUND;
         }

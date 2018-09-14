@@ -1064,3 +1064,9 @@ exports.calcTerminalEnergyCost = function(amount, range) {
 exports.calcNeededGcl = function(gclLevel) {
     return C.GCL_MULTIPLY * Math.pow(gclLevel-1, C.GCL_POW);
 };
+
+exports.calcTotalReactionsTime = function(mineral) {
+    const reagents = _.reduce(C.REACTIONS, (a,n,j) => { _.forEach(n, (k,v) => a[k] = [v,j]); return a; }, {});
+    const calcStep = m => !!C.REACTION_TIME[m] ? C.REACTION_TIME[m] + calcStep(reagents[m][0]) + calcStep(reagents[m][1]) : 0;
+    return calcStep(mineral);
+};
