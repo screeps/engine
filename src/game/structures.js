@@ -1388,4 +1388,23 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     });
 
     Object.defineProperty(globals, 'StructureFactory', {enumerable: true, value: StructureFactory});
+
+    const StructureInvaderCore = register.wrapFn(function (id) {
+        OwnedStructure.call(this, id);
+    });
+    StructureInvaderCore.prototype = Object.create(OwnedStructure.prototype);
+    StructureInvaderCore.prototype.constructor = StructureInvaderCore;
+
+    utils.defineGameObjectProperties(StructureInvaderCore.prototype, data, {
+        my: () => false,
+        level: o => o.level,
+        ticksToUpgrade: o => o.nextUpgradeTime ? o.nextUpgradeTime - runtimeData.time : undefined,
+        ticksToDecay: o => o.nextDecayTime ? o.nextDecayTime - runtimeData.time : undefined,
+    });
+
+    StructureInvaderCore.prototype.toString = register.wrapFn(function() {
+        return `[invaderCore ${'#'+this.id}]`;
+    });
+
+    Object.defineProperty(globals, 'StructureInvaderCore', {enumerable: true, value: StructureInvaderCore});
 };

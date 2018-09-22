@@ -235,7 +235,8 @@
             spawn: globals.StructureSpawn,
             nuker: globals.StructureNuker,
             portal: globals.StructurePortal,
-            factory: globals.StructureFactory
+            factory: globals.StructureFactory,
+            invaderCore: globals.StructureInvaderCore
         };
 
         var c = {};
