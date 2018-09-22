@@ -1460,13 +1460,13 @@ exports.makePos = function(_register) {
         if(type == 'terrain') {
             var terrainCode = runtimeData.staticTerrainData[this.roomName][this.y*50+this.x];
             if(terrainCode & C.TERRAIN_MASK_SWAMP) {
-                return 'swamp';
+                return ['swamp'];
             }
             else if(terrainCode & C.TERRAIN_MASK_WALL) {
-                return 'wall';
+                return ['wall'];
             }
             else {
-                return 'plain';
+                return ['plain'];
             }
         }
         var room = register.rooms[this.roomName];
