@@ -141,7 +141,8 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
             }
             _.extend(newObject, {
                 hits,
-                hitsMax: hits
+                hitsMax: hits,
+                nextDecayTime: gameTime + C.ROAD_DECAY_TIME
             });
         }
 
