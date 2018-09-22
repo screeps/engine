@@ -22,6 +22,17 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ga
     if(roomInfo.novice && roomInfo.novice > Date.now() || roomInfo.respawnArea && roomInfo.respawnArea > Date.now()) {
         return;
     }
+    
+    if(!_.isString(intent.roomName) || !/^(W|E)\d+(S|N)\d+$/.test(intent.roomName)) {
+        return;
+    }
+
+    var [tx,ty] = utils.roomNameToXY(intent.roomName);
+    var [x,y] = utils.roomNameToXY(object.room);
+
+    if(Math.abs(tx-x) > C.NUKE_RANGE || Math.abs(ty-y) > C.NUKE_RANGE) {
+        return;
+    }
 
     bulk.update(object, {
         energy: 0,
