@@ -47,7 +47,7 @@ module.exports = function(object, scope) {
     }
     else {
 
-        movement.execute(object, bulk, roomController, gameTime);
+        movement.execute(object, scope);
 
         if((object.x == 0 || object.y == 0 || object.x == 49 || object.y == 49) && object.user != '2' && object.user != '3') {
 

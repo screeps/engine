@@ -1458,7 +1458,16 @@ exports.makePos = function(_register) {
 
     RoomPosition.prototype.lookFor = register.wrapFn(function(type) {
         if(type == 'terrain') {
-            return [register.map.getTerrainAt(this)];
+            var terrainCode = runtimeData.staticTerrainData[this.roomName][this.y*50+this.x];
+            if(terrainCode & C.TERRAIN_MASK_SWAMP) {
+                return ['swamp'];
+            }
+            else if(terrainCode & C.TERRAIN_MASK_WALL) {
+                return ['wall'];
+            }
+            else {
+                return ['plain'];
+            }
         }
         var room = register.rooms[this.roomName];
         if(!room) {

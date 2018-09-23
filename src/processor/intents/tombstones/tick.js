@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function (object, roomObjects, roomTerrain, bulk, bulkUsers, roomController, gameTime) {
+module.exports = function (object, {roomObjects, bulk, gameTime}) {
     if (!object.decayTime || gameTime >= object.decayTime - 1) {
         C.RESOURCES_ALL.forEach(resourceType => {
             if (object[resourceType] > 0) {
