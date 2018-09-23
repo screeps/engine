@@ -102,6 +102,15 @@ const generateReward = function(level) {
     return result;
 };
 
+const levelAvailable = function(x, y, level, roomTerrain)
+{
+    if(!structuresTemplate[level]) {
+        return false;
+    }
+    
+    return _.reduce(structuresTemplate[level], (r, s) => r && !utils.checkTerrain(roomTerrain, x+s.dx,y+s.dy, C.TERRAIN_MASK_WALL), true);
+};
+
 /**
  * Creates group of structures for the specified level. This 
  *
@@ -167,5 +176,6 @@ const createStructures = function(x, y, room, level, user, nextDecayTime) {
 };
 
 module.exports = {
-    createStructures: createStructures
+    createStructures: createStructures,
+    levelAvailable: levelAvailable
 };
