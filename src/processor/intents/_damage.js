@@ -64,7 +64,7 @@ module.exports = function(object, target, damage, attackType, scope) {
         }
     }
     if(object.actionLog && object.type == 'creep') {
-        if(attackType == C.EVENT_ATTACK_TYPE_MELEE) {
+        if(attackType == C.EVENT_ATTACK_TYPE_MELEE || attackType == C.EVENT_ATTACK_TYPE_DISMANTLE) {
             object.actionLog.attack = {
                 x: target.x,
                 y: target.y
