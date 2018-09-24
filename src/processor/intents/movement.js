@@ -162,7 +162,9 @@ exports.check = function(roomIsInSafeMode) {
     }
 };
 
-exports.execute = function(object, bulk, roomController, gameTime) {
+exports.execute = function(object, scope) {
+
+    const {bulk, roomController, gameTime} = scope;
 
     var move = objects[object._id];
     if(!move) {
@@ -189,7 +191,11 @@ exports.execute = function(object, bulk, roomController, gameTime) {
     if(!roomController || roomController.user === object.user || !(roomController.safeMode > gameTime)) {
         var constructionSite = _.find(ceilObjects, (i) => i.type == 'constructionSite' && i.user != object.user);
         if (constructionSite) {
-            require('./construction-sites/remove')(constructionSite, roomObjects, bulk);
+            bulk.remove(constructionSite._id);
+            if(constructionSite.progress > 1) {
+                require('./creeps/_create-energy')(constructionSite.x, constructionSite.y,
+                    constructionSite.room, Math.floor(constructionSite.progress/2), 'energy', scope);
+            }
         }
     }
 
