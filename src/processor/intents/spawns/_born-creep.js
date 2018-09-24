@@ -66,7 +66,7 @@ module.exports = function(spawn, creep, scope) {
             }
         }
 
-        require('../creeps/_die')(hostileOccupied, undefined, scope);
+        require('../creeps/_die')(hostileOccupied, undefined, true, scope);
         bulk.update(creep, {
             x: hostileOccupied.x,
             y: hostileOccupied.y,

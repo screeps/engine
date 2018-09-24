@@ -20,7 +20,7 @@ module.exports = function(object, scope) {
                 return;
             }
             if (target.type == 'creep') {
-                require('../creeps/_die')(target, 0, scope);
+                require('../creeps/_die')(target, 0, true, scope);
             }
             if(target.type == 'constructionSite' || target.type == 'energy') {
                 bulk.remove(target._id);
