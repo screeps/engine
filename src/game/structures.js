@@ -14,7 +14,7 @@ function data(id) {
 }
 
 function _storeGetter(o) {
-    var result = {energy: o.energy};
+    var result = {energy: 0};
 
     C.RESOURCES_ALL.forEach(resourceType => {
         if (o[resourceType]) {

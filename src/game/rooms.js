@@ -1459,11 +1459,11 @@ exports.makePos = function(_register) {
     RoomPosition.prototype.lookFor = register.wrapFn(function(type) {
         if(type == 'terrain') {
             var terrainCode = runtimeData.staticTerrainData[this.roomName][this.y*50+this.x];
-            if(terrainCode & C.TERRAIN_MASK_SWAMP) {
-                return ['swamp'];
-            }
-            else if(terrainCode & C.TERRAIN_MASK_WALL) {
+            if(terrainCode & C.TERRAIN_MASK_WALL) {
                 return ['wall'];
+            }
+            else if(terrainCode & C.TERRAIN_MASK_SWAMP) {
+                return ['swamp'];
             }
             else {
                 return ['plain'];
