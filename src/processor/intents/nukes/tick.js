@@ -26,6 +26,11 @@ module.exports = function(object, scope) {
                 bulk.remove(target._id);
                 delete roomObjects[target._id];
             }
+            if(target.type == 'spawn' && target.spawning != null) {
+                bulk.update(target, {
+                    spawning: null
+                });
+            }
         });
 
         for(let dx=-2; dx<=2; dx++) {
