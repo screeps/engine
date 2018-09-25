@@ -19,5 +19,5 @@ module.exports = function(object, intent, scope) {
         return;
     }
 
-    require('../creeps/_die')(target, 1.0, scope);
+    require('../creeps/_die')(target, 1.0, false, scope);
 };

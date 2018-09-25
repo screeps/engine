@@ -12,5 +12,5 @@ module.exports = function(object, intent, scope) {
         return;
     }
 
-    require('./_die')(object, object.user == '2' ? 0 : undefined, scope);
+    require('./_die')(object, object.user == '2' ? 0 : undefined, false, scope);
 };

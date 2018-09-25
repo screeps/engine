@@ -93,7 +93,7 @@ module.exports = function(object, scope) {
             }
 
             if(gameTime >= object.ageTime-1) {
-                require('./_die')(object, undefined, scope);
+                require('./_die')(object, undefined, false, scope);
             }
         }
 
@@ -116,11 +116,11 @@ module.exports = function(object, scope) {
     }
 
     if(_.isNaN(object.hits) || object.hits <= 0) {
-        require('./_die')(object, undefined, scope);
+        require('./_die')(object, undefined, true, scope);
     }
 
     if(object.userSummoned && _.any(roomObjects, i => i.type == 'creep' && i.user != '2' && i.user != roomController.user)) {
-        require('./_die')(object, undefined, scope);
+        require('./_die')(object, undefined, false, scope);
     }
 
     let oldHits = object.hits;
@@ -140,7 +140,7 @@ module.exports = function(object, scope) {
     }
 
     if(object.hits <= 0) {
-        require('./_die')(object, undefined, scope);
+        require('./_die')(object, undefined, true, scope);
     }
     else if(object.hits != oldHits) {
 
