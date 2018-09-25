@@ -457,7 +457,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!_.some(target.body, p => !!p.boost)) {
             return C.ERR_NOT_FOUND;
         }
-        if(!this.pos.isNearTo(target)) {
+        if(!this.pos.inRange(target, C.RANGE_UNBOOST_CREEP)) {
             return C.ERR_NOT_IN_RANGE;
         }
 
