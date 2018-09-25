@@ -25,7 +25,7 @@ module.exports = function(object, intent, scope) {
         return;
     }
     var rampart = _.find(roomObjects, {type: 'rampart', x: target.x, y: target.y});
-    if(rampart && object.user != rampart.user && !rampart.isPublic ) {
+    if(rampart) {
         target = rampart;
     }
 
