@@ -411,7 +411,7 @@ exports.comparatorDistance = function(target) {
     }
 };
 
-exports.storeIntents = function(userId, userIntents, userRuntimeData) {
+exports.storeIntents = function(userId, userIntents, userRuntimeData, customIntentTypes = {}) {
     var intents = {};
 
     for(var i in userIntents) {
@@ -915,27 +915,27 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
             };
         }
 
-        // for(var iCustomType in driver.config.customIntentTypes) {
-        //     if(objectIntentsResult[iCustomType]) {
-        //         objectIntents[iCustomType] = {};
-        //         for(var prop in driver.config.customIntentTypes[iCustomType]) {
-        //             switch(driver.config.customIntentTypes[iCustomType][prop]) {
-        //                 case 'string': {
-        //                     objectIntents[iCustomType][prop] = "" + objectIntentsResult[iCustomType][prop];
-        //                     break;
-        //                 }
-        //                 case 'number': {
-        //                     objectIntents[iCustomType][prop] = +objectIntentsResult[iCustomType][prop];
-        //                     break;
-        //                 }
-        //                 case 'boolean': {
-        //                     objectIntents[iCustomType][prop] = !!objectIntentsResult[iCustomType][prop];
-        //                     break;
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+        for(var iCustomType in customIntentTypes) {
+            if(objectIntentsResult[iCustomType]) {
+                objectIntents[iCustomType] = {};
+                for(var prop in customIntentTypes[iCustomType]) {
+                    switch(customIntentTypes[iCustomType][prop]) {
+                        case 'string': {
+                            objectIntents[iCustomType][prop] = "" + objectIntentsResult[iCustomType][prop];
+                            break;
+                        }
+                        case 'number': {
+                            objectIntents[iCustomType][prop] = +objectIntentsResult[iCustomType][prop];
+                            break;
+                        }
+                        case 'boolean': {
+                            objectIntents[iCustomType][prop] = !!objectIntentsResult[iCustomType][prop];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
 
     }
 
@@ -1203,3 +1203,4 @@ exports.calcReward = function(resourceDensities, targetDensity, itemsLimit) {
 
     return _.object(order.map(i => resources[i]), result);
 };
+

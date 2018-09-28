@@ -74,17 +74,17 @@
 
         var customObjectsInfo = {};
 
-        // if(driver.customObjectPrototypes) {
-        //     driver.customObjectPrototypes.forEach(i => {
-        //         i.opts = i.opts || {};
-        //         customObjectsInfo[i.objectType] = {
-        //             name: i.name,
-        //             make: customPrototypes(i.name, i.opts.parent, i.opts.properties, i.opts.prototypeExtender,
-        //                 !!i.opts.userOwned),
-        //             findConstant: i.opts.findConstant
-        //         };
-        //     });
-        // }
+        if(runtimeData.customObjectPrototypes) {
+            runtimeData.customObjectPrototypes.forEach(i => {
+                i.opts = i.opts || {};
+                customObjectsInfo[i.objectType] = {
+                    name: i.name,
+                    make: customPrototypes(i.name, i.opts.parent, i.opts.properties, i.opts.prototypeExtender,
+                        !!i.opts.userOwned),
+                    findConstant: i.opts.findConstant
+                };
+            });
+        }
 
         var register = {
             _useNewPathFinder: true,
