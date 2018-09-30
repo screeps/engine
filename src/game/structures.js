@@ -472,7 +472,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
-        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning) {
+        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
