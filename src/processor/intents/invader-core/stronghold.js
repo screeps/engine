@@ -80,9 +80,9 @@ const structuresTemplate = {
 };
 
 /**
- * 
+ *
  * @param {number} level stronghold level (0-5)
- * @returns {{resource: string, amount: number}[]} 
+ * @returns {{resource: string, amount: number}[]}
  */
 const generateReward = function(level) {
     const result = [];
@@ -98,7 +98,7 @@ const generateReward = function(level) {
             amount: C.STRONGHOLD_REWARD_AMOUNT[2]
         });
     }
-    
+
     return result;
 };
 
@@ -107,12 +107,12 @@ const levelAvailable = function(x, y, level, roomTerrain)
     if(!structuresTemplate[level]) {
         return false;
     }
-    
+
     return _.reduce(structuresTemplate[level], (r, s) => r && !utils.checkTerrain(roomTerrain, x+s.dx,y+s.dy, C.TERRAIN_MASK_WALL), true);
 };
 
 /**
- * Creates group of structures for the specified level. This 
+ * Creates group of structures for the specified level. This
  *
  * @param {number} x X-coord of invaders core
  * @param {number} y Y-coord of invaders core
@@ -135,7 +135,7 @@ const createStructures = function(x, y, room, level, user, nextDecayTime) {
     objectOptions[C.STRUCTURE_TOWER] = {
         hits: C.TOWER_HITS,
         hitsMax: C.TOWER_HITS,
-        energy: 0,
+        energy: C.TOWER_CAPACITY,
         energyCapacity: C.TOWER_CAPACITY,
         actionLog: {attack: null, heal: null, repair: null}
     };
@@ -156,9 +156,9 @@ const createStructures = function(x, y, room, level, user, nextDecayTime) {
                     x: 0+x+i.dx,
                     y: 0+y+i.dy,
                     room: ""+room,
-                    type: i.type, 
+                    type: i.type,
                     nextDecayTime
-                }, 
+                },
                 objectOptions[i.type]||{}));
 
     const rewards = generateReward(level);
