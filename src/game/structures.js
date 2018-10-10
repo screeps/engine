@@ -504,6 +504,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my || !target.my) {
             return C.ERR_NOT_OWNER;
         }
+        if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
+            return C.ERR_RCL_NOT_ENOUGH;
+        }
         if(this.cooldown > 0) {
             return C.ERR_TIRED;
         }
@@ -513,7 +516,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.pos.isNearTo(target)) {
             return C.ERR_NOT_IN_RANGE;
         }
-        
+
         intents.set(this.id, 'unboostCreep', {id: target.id});
         return C.OK;
     });

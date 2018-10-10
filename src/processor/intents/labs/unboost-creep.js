@@ -7,9 +7,12 @@ module.exports = function(object, intent, scope) {
     if(object.cooldown > 0) {
         return;
     }
-    const {roomObjects, bulk} = scope;
+    const {roomObjects, bulk, roomController} = scope;
     const target = roomObjects[intent.id];
     if(!target || target.type != 'creep' || target.user != object.user) {
+        return;
+    }
+    if(!utils.checkStructureAgainstController(object, roomObjects, roomController)) {
         return;
     }
     if(Math.abs(target.x - object.x) > 1 || Math.abs(target.y - object.y) > 1) {
@@ -19,7 +22,7 @@ module.exports = function(object, intent, scope) {
     if(!_.some(boostedParts)) {
         return;
     }
-    
+
     target.body.forEach(function(p) {p.boost = null;});
     require('../creeps/_recalc-body')(target);
     bulk.update(target, {body: target.body, energyCapacity: target.energyCapacity});
@@ -38,10 +41,10 @@ module.exports = function(object, intent, scope) {
         if(mineralReturn > 0) {
             require('../creeps/_create-energy')(target.x, target.y, target.room, mineralReturn, r, scope);
         }
-        
+
         return a + boostedParts[r]*utils.calcTotalReactionsTime(r)*C.LAB_UNBOOST_MINERAL/C.LAB_REACTION_AMOUNT;
     }, 0);
-    
+
     if(cooldown > 0) {
         bulk.update(object, { cooldown });
     }
