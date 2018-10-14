@@ -9,10 +9,8 @@ module.exports = function(object, scope) {
     const {roomObjects, bulk, gameTime} = scope;
 
     if(object.nextDecayTime && gameTime >= object.nextDecayTime) {
-        const existingStructures = _.filter(roomObjects, {coreId: object._id});
-        existingStructures.forEach(s => bulk.remove(s._id));
-        bulk.remove(object._id);
-        delete roomObjects[object._id];
+        const existingStructures = _.filter(roomObjects, {strongholdId: object.strongholdId});
+        existingStructures.forEach(s => {bulk.remove(s._id); delete roomObjects[s._id]});
         return;
     }
 };
