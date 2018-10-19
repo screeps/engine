@@ -17,7 +17,7 @@ module.exports = function(object, intent, {bulk, gameTime, roomInfo}) {
     if(object.upgradeBlocked > gameTime) {
         return;
     }
-    if(object.downgradeTime < gameTime + C.CONTROLLER_DOWNGRADE[object.level] - C.CONTROLLER_DOWNGRADE_SAFEMODE_THRESHOLD) {
+    if(object.downgradeTime < gameTime + C.CONTROLLER_DOWNGRADE[object.level]/2 - C.CONTROLLER_DOWNGRADE_SAFEMODE_THRESHOLD) {
         return;
     }
 
