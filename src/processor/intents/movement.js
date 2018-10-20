@@ -99,7 +99,7 @@ exports.check = function(roomIsInSafeMode) {
 
         if(matrix[i].length > 1) {
             var rates = _.map(matrix[i], (object) => {
-                var moveBodyparts = _.filter(object.body, (i) => i.hits > 0 && i.type == C.MOVE).length,
+                var moves = utils.calcBodyEffectiveness(object.body, C.MOVE, 'fatigue', 1),
                     weight = _.filter(object.body, (i) => i.type != C.MOVE && i.type != C.CARRY).length;
                 weight += calcResourcesWeight(object);
                 weight = weight || 1;
@@ -111,11 +111,11 @@ exports.check = function(roomIsInSafeMode) {
                 return {
                     object,
                     rate1,
-                    rate2: moveBodyparts / weight
+                    rate2: moves / weight
                 };
             });
 
-            rates.sort((a,b) => b.rate1 - a.rate1 != 0 ? b.rate1 - a.rate1 : b.rate2 - a.rate2);
+            rates.sort((a,b) => b.rate1 - a.rate1 || b.rate2 - a.rate2);
 
             resultingMoveObject = rates[0].object;
         }
