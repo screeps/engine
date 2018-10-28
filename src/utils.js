@@ -612,8 +612,13 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
         }
 
         if(objectIntentsResult.move) {
-            objectIntents.move = {
-                direction: parseInt(objectIntentsResult.move.direction)
+            objectIntents.move = objectIntentsResult.move.id ?
+                { id: ""+objectIntentsResult.move.id } :
+                { direction: parseInt(objectIntentsResult.move.direction) };
+        }
+        if(objectIntentsResult.pull) {
+            objectIntents.pull = {
+                id: ""+objectIntentsResult.pull.id
             };
         }
         if(objectIntentsResult.harvest) {
@@ -964,6 +969,14 @@ exports.defineGameObjectProperties = function(obj, dataFn, properties) {
         return result;
     }
 };
+
+exports.isAtEdge = function(object) {
+    if(object.pos) {
+        object = object.pos;
+    }
+
+    return object.x == 0 || object.x == 49 || object.y == 0 || object.y == 49
+}
 
 exports.serializePath = function(path) {
     if(!_.isArray(path)) {

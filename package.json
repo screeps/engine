@@ -7,6 +7,9 @@
     "screeps-engine-processor": "dist/processor.js"
   },
   "main": "dist/index.js",
+  "scripts": {
+    "test": "jasmine"
+  },
   "dependencies": {
     "@screeps/pathfinding": "^0.4.16",
     "bulk-require": "^0.2.1",
@@ -22,7 +25,8 @@
     "gulp-plumber": "^1.1.0",
     "gulp-sourcemaps": "^2.6.0",
     "gulp-traceur": "^0.17.2",
-    "gulp-watch": "^4.3.11"
+    "gulp-watch": "^4.3.11",
+    "jasmine": "^3.3.0"
   },
   "license": "ISC",
   "author": "Artem Chivchalov <contact@screeps.com>",

@@ -6,21 +6,23 @@ var _ = require('lodash'),
 
 module.exports = function(object, intent, {roomObjects}) {
 
-    if(object.type != 'creep') {
+    if(object.type != 'creep' || object.spawning) {
         return;
     }
-    if(object.spawning || object.fatigue > 0) {
-        return;
-    }
-    if(_.filter(object.body, (i) => i.hits > 0 && i.type == C.MOVE).length == 0) {
+    if(!_.some(roomObjects, i => i._pull == object._id) && !_.some(object.body, i => i.hits > 0 && i.type == C.MOVE) || object.fatigue > 0) {
         return;
     }
 
-    if(!intent.direction) {
-        return;
+    var d = null;
+    if(intent.direction) {
+        d = utils.getOffsetsByDirection(intent.direction);
     }
-
-    var d = utils.getOffsetsByDirection(intent.direction);
+    if(intent.id) {
+        const creep = roomObjects[intent.id];
+        if(creep) {
+            d = [creep.x-object.x, creep.y-object.y];
+        }
+    }
 
     if(!d) {
         return;

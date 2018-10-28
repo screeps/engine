@@ -64,8 +64,22 @@ exports.init = function(_roomObjects, _roomTerrain) {
     roomTerrain = _roomTerrain;
 };
 
-exports.add = function(object, dx, dy) {
+exports.addPulling = function(object, target) {
+    const checkRecursiveTarget = t=>t._id==object._id || !!t._pull && !!roomObjects[t._pull] && checkRecursiveTarget(roomObjects[t._pull]);
+    if(!checkRecursiveTarget(target)) {
+        object._pull = target._id;
+        target._pulled = object._id;
+    }
+};
 
+exports.removePulling = function(object) {
+    if(object._pull && !!roomObjects[object._pull]) {
+        delete roomObjects[object._pull]._pulled;
+    }
+    delete object._pull;
+};
+
+exports.add = function(object, dx, dy) {
     var newX = object.x + dx,
         newY = object.y + dy;
 
@@ -86,7 +100,6 @@ exports.isTileBusy = function(x,y) {
 };
 
 exports.check = function(roomIsInSafeMode) {
-
     var newMatrix = {};
 
     for(var i in matrix) {
@@ -108,14 +121,17 @@ exports.check = function(roomIsInSafeMode) {
                 if(matrix[key] && _.any(matrix[key], {x,y})) {
                     rate1 = 100;
                 }
+
                 return {
                     object,
                     rate1,
-                    rate2: moves / weight
+                    rate2: !!object._pulled?1:0,
+                    rate3: !!object._pull?1:0,
+                    rate4: moves / weight
                 };
             });
 
-            rates.sort((a,b) => b.rate1 - a.rate1 || b.rate2 - a.rate2);
+            rates.sort((a,b) => b.rate1 - a.rate1 || b.rate2 - a.rate2 || b.rate3 - a.rate3 || b.rate4 - a.rate4);
 
             resultingMoveObject = rates[0].object;
         }
@@ -150,9 +166,14 @@ exports.check = function(roomIsInSafeMode) {
         x = parseInt(x);
         y = parseInt(y);
 
-        var object = matrix[i],
-            dx = x - object.x,
-            dy = y - object.y;
+        var object = matrix[i];
+
+        if(!!object._pulled && !!roomObjects[object._pulled]) {
+            if(roomObjects[object._pulled]._pull != object._id || i != `${roomObjects[object._pulled].x},${roomObjects[object._pulled].y}`) {
+                delete roomObjects[object._pulled]._pull;
+                delete object._pulled;
+            }
+        }
 
         var obstacle =  checkObstacleAtXY(x,y, object, roomIsInSafeMode);
 
@@ -203,14 +224,12 @@ exports.execute = function(object, scope) {
     fatigue += calcResourcesWeight(object);
     fatigue *= fatigueRate;
 
-    if((move.x == 0 || move.x == 49 || move.y == 0 || move.y == 49) &&
-       !(object.x == 0 || object.x == 49 || object.y == 0 || object.y == 49)) {
+    if(utils.isAtEdge(move) && !utils.isAtEdge(object)) {
         fatigue = 0;
+        object._fatigue = 0;
+        bulk.update(object, { x: move.x, y: move.y, fatigue });
+    } else {
+        bulk.update(object, { x: move.x, y: move.y });
+        require('./creeps/_add-fatigue')(object, fatigue, scope);
     }
-
-    bulk.update(object, {
-        x: move.x,
-        y: move.y,
-        fatigue
-    });
 };

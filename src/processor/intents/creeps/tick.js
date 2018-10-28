@@ -46,12 +46,9 @@ module.exports = function(object, scope) {
         }
     }
     else {
-
         movement.execute(object, scope);
 
-        if((object.x == 0 || object.y == 0 || object.x == 49 || object.y == 49) && object.user != '2' && object.user != '3') {
-
-
+        if(utils.isAtEdge(object) && object.user != '2' && object.user != '3') {
             var [roomX, roomY] = utils.roomNameToXY(object.room),
                 x = object.x,
                 y = object.y,
@@ -104,15 +101,9 @@ module.exports = function(object, scope) {
     }
 
 
-    if(object.fatigue > 0) {
-        var moves = utils.calcBodyEffectiveness(object.body, C.MOVE, 'fatigue', 1);
-
-        object.fatigue -= moves * 2;
-
-        if(object.fatigue < 0)
-            object.fatigue = 0;
-
-        bulk.update(object._id, {fatigue: object.fatigue});
+    const moves = utils.calcBodyEffectiveness(object.body, C.MOVE, 'fatigue', 1);
+    if(moves > 0) {
+        require('./_add-fatigue')(object, -2*moves, scope);
     }
 
     if(_.isNaN(object.hits) || object.hits <= 0) {

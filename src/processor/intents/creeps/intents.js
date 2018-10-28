@@ -14,7 +14,7 @@ var priorities = {
 
 var creepActions = ['drop','transfer','withdraw','pickup','heal','rangedHeal','dismantle','attack','harvest','move','repair',
     'build','rangedMassAttack','rangedAttack','say','suicide','claimController','upgradeController','reserveController',
-    'attackController','generateSafeMode','signController'];
+    'attackController','generateSafeMode','signController','pull'];
 
 var modules = require('bulk-require')(__dirname, ['*.js']);
 

@@ -126,7 +126,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return `[creep ${this.name}]`;
     });
 
-    Creep.prototype.move = register.wrapFn(function(direction) {
+    Creep.prototype.move = register.wrapFn(function(target) {
 
         if(!this.my) {
             return C.ERR_NOT_OWNER;
@@ -134,13 +134,23 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.spawning) {
             return C.ERR_BUSY;
         }
+
+        if(target && (target instanceof globals.Creep)) {
+            if(!target.pos.isNearTo(this.pos)) {
+                return C.ERR_NOT_IN_RANGE;
+            }
+
+            intents.set(this.id, 'move', {id: target.id});
+            return C.OK;
+        }
+
         if(data(this.id).fatigue > 0) {
             return C.ERR_TIRED;
         }
         if(!_hasActiveBodypart(this.body, C.MOVE)) {
             return C.ERR_NO_BODYPART;
         }
-        direction = +direction;
+        let direction = +target;
         if(!direction || direction < 1 || direction > 8) {
             return C.ERR_INVALID_ARGS;
         }
@@ -574,7 +584,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.room.controller && !this.room.controller.my && this.room.controller.safeMode) {
             return C.ERR_NOT_OWNER;
         }
-        
+
         if(resourceType == C.RESOURCE_ENERGY) {
 
             if (register.structures[target.id] &&
@@ -1155,6 +1165,35 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
 
         intents.set(this.id, 'signController', {id: target.id, sign: ""+sign});
+        return C.OK;
+    });
+
+    Creep.prototype.pull = register.wrapFn(function(target){
+        if(!this.my) {
+            return C.ERR_NOT_OWNER;
+        }
+
+        if(this.spawning) {
+            return C.ERR_BUSY;
+        }
+
+        if(data(this.id).fatigue > 0) {
+            return C.ERR_TIRED;
+        }
+        if(!_hasActiveBodypart(this.body, C.MOVE)) {
+            return C.ERR_NO_BODYPART;
+        }
+
+        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning || target.id == this.id) {
+            register.assertTargetObject(target);
+            return C.ERR_INVALID_TARGET;
+        }
+
+        if(!target.pos.isNearTo(this.pos)) {
+            return C.ERR_NOT_IN_RANGE;
+        }
+
+        intents.set(this.id, 'pull', {id: target.id});
         return C.OK;
     });
 
