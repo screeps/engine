@@ -119,11 +119,12 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
             });
         }
 
+        const hitsMax = !!roomController ? C.RAMPART_HITS_MAX[roomController.level] : 1;
         if (target.structureType == 'rampart') {
             _.extend(newObject, {
                 user: target.user,
                 hits: C.RAMPART_HITS,
-                hitsMax: C.RAMPART_HITS,
+                hitsMax,
                 nextDecayTime: gameTime + C.RAMPART_DECAY_TIME
             });
         }
@@ -242,29 +243,6 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
 
         roomObjects['createdStructure'+createdStructureCounter] = newObject;
         createdStructureCounter++;
-
-        /*if(target.structureType == 'spawn') {
-            for(var dx=-1; dx<=1; dx++) {
-                for(var dy=-1; dy<=1; dy++) {
-                    if(dx == 0 && dy == 0) {
-                        continue;
-                    }
-                    if(_.any(roomObjects, {x: target.x + dx, y: target.y, type: target.structureType})) {
-                        continue;
-                    }
-                    bulk.insert({
-                        type: 'rampart',
-                        x: target.x + dx,
-                        y: target.y + dy,
-                        room: target.room,
-                        user: target.user,
-                        hits: C.RAMPART_HITS,
-                        hitsMax: C.RAMPART_HITS,
-                        ticksToDecay: C.RAMPART_DECAY_TIME
-                    })
-                }
-            }
-        }*/
 
         delete roomObjects[intent.id];
     }
