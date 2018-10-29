@@ -10,7 +10,7 @@
   "dependencies": {
     "@screeps/pathfinding": "^0.4.16",
     "bulk-require": "^0.2.1",
-    "lodash": "^3.10.0",
+    "lodash": "^3.10.1",
     "q": "^1.0.1"
   },
   "devDependencies": {
