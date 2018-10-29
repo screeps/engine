@@ -883,14 +883,31 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.pos.inRangeTo(target, 3)) {
             return C.ERR_NOT_IN_RANGE;
         }
-        if(_.contains(C.OBSTACLE_OBJECT_TYPES, target.structureType) &&
-            _.any(register.objectsByRoom[data(this.id).room], (i) => i.x == target.pos.x && i.y == target.pos.y && _.contains(C.OBSTACLE_OBJECT_TYPES, i.type))) {
-            return C.ERR_INVALID_TARGET;
-        }
 
-        var buildPower = _getActiveBodyparts(this.body, C.WORK) * C.BUILD_POWER,
-            buildRemaining = target.progressTotal - target.progress,
-            buildEffect = Math.min(buildPower, buildRemaining, this.carry.energy);
+        const objects = register.objectsByRoom[data(this.id).room];
+        const objectsInTile = [], creepsInTile = [], myCreepsInTile = [];
+        const userId = data(this.id).user;
+        _.forEach(objects, function(obj){
+            if(obj.x == target.pos.x && obj.y == target.pos.y && _.contains(C.OBSTACLE_OBJECT_TYPES, obj.type)) {
+                if(obj.type == 'creep') {
+                    creepsInTile.push(obj);
+                    if(obj.user == userId) {
+                        myCreepsInTile.push(obj);
+                    }
+                } else {
+                    objectsInTile.push(obj);
+                }
+            }
+        });
+        if(_.contains(C.OBSTACLE_OBJECT_TYPES, target.structureType)) {
+            if(_.any(objectsInTile)) {
+                return C.ERR_INVALID_TARGET;
+            }
+            const blockingCreeps = (this.room.controller && this.room.controller.my && this.room.controller.safeMode) ? myCreepsInTile : creepsInTile;
+            if(_.any(blockingCreeps)) {
+                return C.ERR_INVALID_TARGET;
+            }
+        }
 
         intents.set(this.id, 'build', {id: target.id, x: target.pos.x, y: target.pos.y});
         return C.OK;

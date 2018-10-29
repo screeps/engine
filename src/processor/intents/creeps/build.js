@@ -23,12 +23,40 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
     if(Math.abs(target.x - object.x) > 3 || Math.abs(target.y - object.y) > 3) {
         return;
     }
-    if(_.any(roomObjects, {x: target.x, y: target.y, type: target.structureType})) {
+
+    const objectsInTile = [], creepsInTile = [], myCreepsInTile = [];
+    let structure = null;
+    _.forEach(roomObjects, function(obj){
+        if(obj.x == target.x && obj.y == target.y) {
+            if(obj.type == target.structureType) {
+                structure = obj;
+                return;
+            }
+            if(obj.type == 'creep') {
+                creepsInTile.push(obj);
+                if(obj.user == object.user) {
+                    myCreepsInTile.push(obj);
+                }
+            } else {
+                objectsInTile.push(obj);
+            }
+        }
+    });
+
+    if(!!structure) {
         return;
     }
-    if(_.contains(C.OBSTACLE_OBJECT_TYPES, target.structureType) &&
-        (_.any(roomObjects, (i) => i.x == target.x && i.y == target.y && _.contains(C.OBSTACLE_OBJECT_TYPES, i.type)))) {
-        return;
+
+    if(_.contains(C.OBSTACLE_OBJECT_TYPES, target.structureType)) {
+        if(_.any(objectsInTile, i => _.contains(C.OBSTACLE_OBJECT_TYPES, i.type))) {
+            return;
+        }
+
+        const mySafeMode = roomController && roomController.user == object.user && roomController.safeMode > gameTime;
+        const blockingCreeps = mySafeMode ? myCreepsInTile : creepsInTile;
+        if(_.any(blockingCreeps)) {
+            return;
+        }
     }
 
     if(target.structureType != 'extractor' && target.structureType != 'road' &&
