@@ -137,7 +137,7 @@ exports.calcCreepCost = function(body) {
 exports.checkConstructionSite = function(objects, structureType, x, y) {
 
     var borderTiles;
-    if(structureType != 'road' && (x == 1 || x == 48 || y == 1 || y == 48)) {
+    if(structureType != 'road' && structureType != 'container' && (x == 1 || x == 48 || y == 1 || y == 48)) {
         if(x == 1) borderTiles = [[0,y-1],[0,y],[0,y+1]];
         if(x == 48) borderTiles = [[49,y-1],[49,y],[49,y+1]];
         if(y == 1) borderTiles = [[x-1,0],[x,0],[x+1,0]];
