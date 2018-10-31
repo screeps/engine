@@ -302,7 +302,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 }
             }
 
-            if (object.type != 'flag') {
+            if (object.type != 'flag' && !!object._id) {
                 objectsToHistory[object._id] = object;
 
                 if (object.type == 'creep') {
