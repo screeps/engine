@@ -20,7 +20,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             hasNewbieWalls = false,
             stats = driver.getRoomStatsUpdater(roomId),
             objectsToHistory = {},
-            roomSpawns = [], roomExtensions = [],
+            roomSpawns = [], roomExtensions = [], roomNukes = [],
             oldRoomInfo = _.clone(roomInfo);
 
         roomInfo.active = false;
@@ -95,6 +95,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             }
             if(object.type == 'nuke') {
                 roomInfo.active = true;
+                roomNukes.push(object);
             }
             if(object.type == 'tombstone') {
                 roomInfo.active = true;
@@ -116,6 +117,10 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             driver.config.emit('processObject',object, roomObjects, roomTerrain, gameTime, roomInfo, bulk, bulkUsers);
 
         });
+
+        for(let nuke of roomNukes) {
+            require('./processor/intents/nukes/pretick')(nuke, intents, scope);
+        }
 
         if(roomSpawns.length || roomExtensions.length) {
             require('./processor/intents/_calc_spawns')(roomSpawns, roomExtensions, scope);
