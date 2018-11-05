@@ -434,7 +434,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_INVALID_ARGS;
         }
         if(!target || !target.id || (!register.spawns[target.id] && !register.creeps[target.id] && !register.structures[target.id]) ||
-            !(target instanceof globals.StructureSpawn) && !(target instanceof globals.Structure) && !(target instanceof globals.Creep)) {
+            !(target instanceof globals.StructureSpawn) && !(target instanceof globals.Structure) && !((target instanceof globals.Creep) && !target.spawning)) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }

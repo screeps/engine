@@ -3,6 +3,7 @@ const _ = require('lodash');
 exports.scope = {
     roomObjects: {},
     gameTime: 30,
+    eventLog: [],
     bulk: require('./bulk')
 };
 

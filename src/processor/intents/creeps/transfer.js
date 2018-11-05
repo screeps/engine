@@ -16,7 +16,7 @@ module.exports = function(object, intent, {roomObjects, bulk, eventLog}) {
     }
 
     var target = roomObjects[intent.id];
-    if(!target) {
+    if(!target || target.type == 'creep' && target.spawning) {
         return;
     }
     if(Math.abs(target.x - object.x) > 1 || Math.abs(target.y - object.y) > 1) {

@@ -29,7 +29,7 @@ function _transfer(target, resourceType, amount) {
 
     register.deprecated('`Structure*.transfer` is considered deprecated and will be removed soon. Please use `Creep.withdraw` instead.');
 
-    if (!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
+    if (!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning) {
         register.assertTargetObject(target);
         return C.ERR_INVALID_TARGET;
     }
@@ -66,7 +66,7 @@ function _transferEnergy(target, amount) {
 
     register.deprecated('`Structure*.transferEnergy` is considered deprecated and will be removed soon. Please use `Creep.withdraw` instead.');
 
-    if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
+    if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning) {
         register.assertTargetObject(target);
         return C.ERR_INVALID_TARGET;
     }
@@ -393,7 +393,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     StructureLab.prototype.transfer = register.wrapFn(function(target, resourceType, amount) {
 
-        if (!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
+        if (!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
@@ -546,7 +546,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_INVALID_ARGS;
         }
         if (!target || !target.id || !register.structures[target.id] && !register.creeps[target.id] ||
-            !(target instanceof globals.Structure) && !(target instanceof globals.Creep) ||
+            !(target instanceof globals.Structure) && !((target instanceof globals.Creep) && target.spawning) ||
             target === this) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
@@ -1279,7 +1279,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
-        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
+        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }

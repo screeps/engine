@@ -13,6 +13,7 @@ const commonData = {
     toString: function(){return `[creep #${this._id}@${this.x},${this.y}]`},
     move: function(target) { require('../../../src/processor/intents/creeps/move')(this, _.isNumber(target) ? {direction: target} : {id: target}, intents.scope); },
     pull: function(target) { require('../../../src/processor/intents/creeps/pull')(this, {id: target}, intents.scope); },
+    transfer: function(target, resourceType, amount) { require('../../../src/processor/intents/creeps/transfer')(this, {id: target, resourceType, amount}, intents.scope); },
     tick: function() { require('../../../src/processor/intents/creeps/tick')(this, intents.scope); }
 };
 
@@ -41,6 +42,14 @@ const creeps = {
         body: [
             {type: C.TOUGH, hits: 100},
             {type: C.TOUGH, hits: 100},
+            {type: C.MOVE, hits: 100}
+        ]
+    },
+    lorry: {
+        name: 'fullSpeed',
+        body: [
+            {type: C.CARRY, hits: 100},
+            {type: C.CARRY, hits: 100},
             {type: C.MOVE, hits: 100}
         ]
     },
