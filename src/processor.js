@@ -5,9 +5,12 @@ var q = require('q'),
     utils = require('./utils'),
     driver = utils.getDriver(),
     C = driver.constants,
-    config = require('./config');
+    config = require('./config'),
+    fakeRuntime = require('./processor/common/fake-runtime');
 
 var roomsQueue, usersQueue, lastRoomsStatsSaveTime = 0, currentHistoryPromise = q.when();
+
+const KEEPER_ID = "3";
 
 function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime, roomInfo, flags}) {
 
@@ -20,7 +23,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             hasNewbieWalls = false,
             stats = driver.getRoomStatsUpdater(roomId),
             objectsToHistory = {},
-            roomSpawns = [], roomExtensions = [], roomNukes = [],
+            roomSpawns = [], roomExtensions = [], roomNukes = [], keepers = [],
             oldRoomInfo = _.clone(roomInfo);
 
         roomInfo.active = false;
@@ -57,6 +60,9 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                     upgradeController: null,
                     reserveController: null
                 };
+                if(object.user == KEEPER_ID) {
+                    keepers.push(object);
+                }
             }
             if (object.type == 'link') {
                 object._actionLog = object.actionLog;
@@ -118,8 +124,24 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
 
         });
 
+        intents = intents || { users: {} };
+        driver.pathFinder.make({ RoomPosition: fakeRuntime.RoomPosition });
+
         for(let nuke of roomNukes) {
             require('./processor/intents/nukes/pretick')(nuke, intents, scope);
+        }
+
+        for(let keeper of keepers) {
+            const i = require('./processor/intents/creeps/keepers/pretick')(keeper, scope);
+
+            intents.users[keeper.user] = intents.users[keeper.user] || {};
+            intents.users[keeper.user].objects = intents.users[keeper.user].objects || {};
+            _.forEach(i, (ii, objId) => {
+                intents.users[keeper.user].objects[objId] = _.assign(
+                    ii,
+                    intents.users[keeper.user].objects[objId] || {}
+                );
+            });
         }
 
         if(roomSpawns.length || roomExtensions.length) {
