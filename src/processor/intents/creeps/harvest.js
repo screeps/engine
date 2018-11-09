@@ -77,7 +77,7 @@ module.exports = function(object, intent, scope) {
         if(extractor.user && extractor.user != object.user) {
             return;
         }
-        if(!utils.checkStructureAgainstController(extractor, roomObjects, roomController)) {
+        if(extractor.off) {
             return;
         }
         if(extractor.cooldown) {

@@ -7,7 +7,7 @@ var _ = require('lodash'),
 
 module.exports = function(object, intent, {roomObjects, bulk, roomController, gameTime, roomInfo}) {
 
-    if(!utils.checkStructureAgainstController(object, roomObjects, roomController)) {
+    if(object.off) {
         return;
     }
     if(object.G < object.GCapacity || object.energy < object.energyCapacity) {

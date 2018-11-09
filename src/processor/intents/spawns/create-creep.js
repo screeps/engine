@@ -14,7 +14,7 @@ module.exports = function(spawn, intent, scope) {
     if(spawn.type != 'spawn')
         return;
 
-    if(!utils.checkStructureAgainstController(spawn, roomObjects, roomController)) {
+    if(spawn.off) {
         return;
     }
 

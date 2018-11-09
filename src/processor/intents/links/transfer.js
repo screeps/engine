@@ -32,7 +32,7 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ev
         if(object.cooldown > 0) {
             return;
         }
-        if(!utils.checkStructureAgainstController(object, roomObjects, roomController)) {
+        if(object.off) {
             return;
         }
         targetTotal = target.energy;

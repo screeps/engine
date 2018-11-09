@@ -218,7 +218,6 @@
         };
 
         var c = {};
-
         for(var i in runtimeData.roomObjects) {
             var object = runtimeData.roomObjects[i];
 
@@ -270,7 +269,7 @@
                     addObjectToFindCache(register, C.FIND_MY_SPAWNS, register.spawns[i], object);
                     addObjectToFindCache(register, C.FIND_HOSTILE_SPAWNS, register.spawns[i], object);
                 }
-
+                
             }
             if (!object.off && (object.type == 'extension' || object.type == 'spawn') && (object.user == runtimeData.user._id)) {
                 register.rooms[object.room].energyAvailable += object.energy;
@@ -329,7 +328,7 @@
             }
 
         }
-
+        
         runtimeData.flags.forEach(flagRoomData => {
 
             var data = flagRoomData.data.split("|");

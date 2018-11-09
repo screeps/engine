@@ -20,7 +20,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             hasNewbieWalls = false,
             stats = driver.getRoomStatsUpdater(roomId),
             objectsToHistory = {},
-            roomSpawns = [], roomExtensions = [], roomNukes = [],
+            roomNukes = [],
             oldRoomInfo = _.clone(roomInfo);
 
         roomInfo.active = false;
@@ -107,23 +107,12 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 hasNewbieWalls = true;
             }
 
-            if(object.type == 'extension') {
-                roomExtensions.push(object);
-            }
-            if(object.type == 'spawn') {
-                roomSpawns.push(object);
-            }
-
             driver.config.emit('processObject',object, roomObjects, roomTerrain, gameTime, roomInfo, bulk, bulkUsers);
 
         });
 
         for(let nuke of roomNukes) {
             require('./processor/intents/nukes/pretick')(nuke, intents, scope);
-        }
-
-        if(roomSpawns.length || roomExtensions.length) {
-            require('./processor/intents/_calc_spawns')(roomSpawns, roomExtensions, scope);
         }
 
         movement.init(roomObjects, roomTerrain);
@@ -235,6 +224,8 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
         var resultPromises = [];
         var userVisibility = {};
 
+        let ownedTypes = ['extension','spawn','link','storage','tower','observer','powerSpawn','extractor','terminal','lab','nuker']
+        let ownedObjects = {}
         _.forEach(roomObjects, (object) => {
 
             if(!object || object._skip) {
@@ -321,6 +312,10 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 }
             }
 
+            if(ownedTypes.includes(object.type)) {
+                (ownedObjects[object.type] = ownedObjects[object.type] || []).push(object)
+            }
+
             if (object.user) {
                 //userVisibility[object.user] = true;
 
@@ -358,6 +353,11 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 mapView.pb.push([object.x, object.y]);
             }
         });
+
+
+        if(scope.roomController) {
+            require('./processor/intents/_check_active_structures')(ownedObjects, scope);
+        }
 
         /*for(var user in userVisibility) {
             resultPromises.push(core.setUserRoomVisibility(user, roomId));
