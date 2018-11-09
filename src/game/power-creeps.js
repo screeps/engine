@@ -169,7 +169,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my || !powerSpawn.my) {
             return C.ERR_NOT_OWNER;
         }
-        if(!utils.checkStructureAgainstController(data(powerSpawn.id), register.objectsByRoom[data(powerSpawn.id).room], data(powerSpawn.room.controller.id))) {
+        if(data(powerSpawn.id).off) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
 
@@ -329,7 +329,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
-        if((target instanceof globals.StructurePowerSpawn) && !utils.checkStructureAgainstController(data(target.id), register.objectsByRoom[data(target.id).room], data(target.room.controller.id))) {
+        if((target instanceof globals.StructurePowerSpawn) && data(target.id).off) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
         if(!target.pos.isNearTo(this.pos)) {

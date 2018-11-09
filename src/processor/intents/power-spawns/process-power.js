@@ -9,7 +9,7 @@ module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, roomCon
     if(object.type != 'powerSpawn' || !object.store)
         return;
 
-    if(!utils.checkStructureAgainstController(object, roomObjects, roomController)) {
+    if(object.off) {
         return;
     }
 
