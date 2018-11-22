@@ -8,7 +8,7 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "test": "jasmine"
+    "test": "cross-env DRIVER_MODULE=@screeps/driver jasmine"
   },
   "dependencies": {
     "@screeps/pathfinding": "^0.4.16",

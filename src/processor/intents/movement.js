@@ -192,6 +192,10 @@ exports.execute = function(object, scope) {
         return;
     }
 
+    if(!object._pulled && (!_.some(object.body, i => i.hits > 0 && i.type == C.MOVE) || object._oldFatigue > 0)) {
+        return;
+    }
+
     var ceilObjects = _.filter(roomObjects, (i) => i.x == move.x && i.y == move.y);
 
     var fatigueRate = 2;

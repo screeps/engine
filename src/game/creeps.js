@@ -1194,13 +1194,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_BUSY;
         }
 
-        if(data(this.id).fatigue > 0) {
-            return C.ERR_TIRED;
-        }
-        if(!_hasActiveBodypart(this.body, C.MOVE)) {
-            return C.ERR_NO_BODYPART;
-        }
-
         if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning || target.id == this.id) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;

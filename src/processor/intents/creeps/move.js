@@ -9,9 +9,8 @@ module.exports = function(object, intent, {roomObjects}) {
     if(object.type != 'creep' || object.spawning) {
         return;
     }
-    if(!_.some(roomObjects, i => i._pull == object._id) && !_.some(object.body, i => i.hits > 0 && i.type == C.MOVE) || object.fatigue > 0) {
-        return;
-    }
+
+    object._oldFatigue = object.fatigue;
 
     var d = null;
     if(intent.direction) {

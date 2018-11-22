@@ -5,7 +5,7 @@ const _ = require('lodash'),
     movement = require('../movement');
 
 module.exports = function(object, intent, {roomObjects}) {
-    if(object.type != 'creep' || object.spawning || object.fatigue > 0 || !_.some(object.body, i => i.hits > 0 && i.type == C.MOVE)) {
+    if(object.type != 'creep' || object.spawning) {
         return;
     }
 
