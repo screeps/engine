@@ -12,7 +12,8 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
         bulkTransactions = driver.bulkTransactionsWrite(),
         bulkUsersMoney = driver.bulkUsersMoney(),
         bulkUsersResources = driver.bulkUsersResources(),
-        bulkMarketOrders = driver.bulkMarketOrders();
+        bulkMarketOrders = driver.bulkMarketOrders(),
+        bulkMarketIntershardOrders = driver.bulkMarketIntershardOrders();
 
     var terminalsByRoom = _.indexBy(terminals, 'room');
 
@@ -93,6 +94,8 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
             ordersById = _.indexBy(market.orders, '_id'),
             terminalDeals = [], directDeals = [];
 
+        const nowTimestamp = new Date().getTime();
+
         market.intents.forEach(userIntents => {
 
             var user = usersById[userIntents.user];
@@ -103,10 +106,10 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                     if (!intent.price || !intent.totalAmount) {
                         return;
                     }
-                    if(!_.contains(C.RESOURCES_ALL, intent.resourceType) && intent.resourceType != C.SUBSCRIPTION_TOKEN) {
+                    if(!_.contains(C.RESOURCES_ALL, intent.resourceType) && !_.contains(C.INTERSHARD_RESOURCES, intent.resourceType)) {
                         return;
                     }
-                    if (intent.resourceType != C.SUBSCRIPTION_TOKEN &&
+                    if (!_.contains(C.INTERSHARD_RESOURCES, intent.resourceType) &&
                         (!terminalsByRoom[intent.roomName] || terminalsByRoom[intent.roomName].user != userIntents.user)) {
                         return;
                     }
@@ -120,17 +123,24 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                         return;
                     }
 
-
                     bulkUsers.inc(user, 'money', -fee);
 
-                    bulkMarketOrders.insert(_.extend({
-                        created: gameTime,
+                    const order = _.extend({
+                        createdTimestamp: nowTimestamp,
                         user: userIntents.user,
                         active: false,
                         type: intent.type == C.ORDER_SELL ? C.ORDER_SELL : C.ORDER_BUY,
                         amount: 0,
                         remainingAmount: intent.totalAmount
-                    }, intent));
+                    }, intent);
+
+                    let bulk = bulkMarketIntershardOrders;
+                    if(!_.contains(C.INTERSHARD_RESOURCES, intent.resourceType)) {
+                        bulk = bulkMarketOrders;
+                        order.created = gameTime;
+                    }
+
+                    bulk.insert(order);
 
                     intent.price /= 1000;
 
@@ -150,10 +160,11 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
 
             if (userIntents.intents.changeOrderPrice) {
                 userIntents.intents.changeOrderPrice.forEach(intent => {
-                    var order = ordersById[intent.orderId];
+                    const order = ordersById[intent.orderId];
                     if (!order || order.user != userIntents.user) {
                         return;
                     }
+
                     if (!intent.newPrice || intent.newPrice <= 0) {
                         return;
                     }
@@ -185,13 +196,14 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                         });
                     }
 
-                    bulkMarketOrders.update(order._id, {price: intent.newPrice});
+                    const bulk = _.contains(C.INTERSHARD_RESOURCES, order.resourceType) ? bulkMarketIntershardOrders : bulkMarketOrders;
+                    bulk.update(order._id, {price: intent.newPrice});
                 });
             }
 
             if (userIntents.intents.extendOrder) {
                 userIntents.intents.extendOrder.forEach(intent => {
-                    var order = ordersById[intent.orderId];
+                    const order = ordersById[intent.orderId];
                     if (!order || order.user != userIntents.user) {
                         return;
                     }
@@ -222,7 +234,8 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                         }
                     });
 
-                    bulkMarketOrders.update(order, {
+                    const bulk = _.contains(C.INTERSHARD_RESOURCES, order.resourceType) ? bulkMarketIntershardOrders : bulkMarketOrders;
+                    bulk.update(order, {
                         remainingAmount: order.remainingAmount + intent.addAmount,
                         totalAmount: order.totalAmount + intent.addAmount
                     });
@@ -250,7 +263,7 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                     if(intent.amount <= 0) {
                         return;
                     }
-                    if(ordersById[intent.orderId].resourceType == C.SUBSCRIPTION_TOKEN) {
+                    if(_.contains(C.INTERSHARD_RESOURCES, ordersById[intent.orderId].resourceType)) {
                         directDeals.push(intent);
                         return;
                     }
@@ -368,7 +381,7 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
         directDeals.forEach(deal => {
 
             var order = ordersById[deal.orderId],
-                buyer, seller, userFieldName = 'subscriptionTokens';
+                buyer, seller, userFieldNames = {[C.SUBSCRIPTION_TOKEN]: 'subscriptionTokens'};
 
             if(order.type == C.ORDER_SELL) {
                 buyer = usersById[deal.user];
@@ -385,7 +398,7 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
 
             var amount = Math.min(deal.amount, order.remainingAmount);
             if(seller.user) {
-                amount = Math.min(amount, seller[userFieldName] || 0);
+                amount = Math.min(amount, seller[userFieldNames[order.resourceType]] || 0);
             }
             if(!amount) {
                 return;
@@ -398,7 +411,7 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
             }
 
             bulkUsers.inc(seller, 'money', dealCost);
-            bulkUsers.inc(seller, userFieldName, -amount);
+            bulkUsers.inc(seller, userFieldNames[order.resourceType], -amount);
 
             bulkUsersMoney.insert({
                 date: new Date(),
@@ -418,7 +431,7 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                 resourceType: order.resourceType,
                 user: ""+seller._id,
                 change: -amount,
-                balance: seller[userFieldName],
+                balance: seller[userFieldNames[order.resourceType]],
                 marketOrderId: ""+order._id,
                 market: {
                     orderId: ""+order._id,
@@ -427,7 +440,7 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
             });
 
             bulkUsers.inc(buyer, 'money', -dealCost);
-            bulkUsers.inc(buyer, userFieldName, amount);
+            bulkUsers.inc(buyer, userFieldNames[order.resourceType], amount);
 
             bulkUsersMoney.insert({
                 date: new Date(),
@@ -442,7 +455,8 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                     amount
                 }
             });
-            bulkMarketOrders.update(order, {
+            const bulk = _.contains(C.INTERSHARD_RESOURCES, order.resourceType) ? bulkMarketIntershardOrders : bulkMarketOrders;
+            bulk.update(order, {
                 amount: order.amount - amount,
                 remainingAmount: order.remainingAmount - amount
             });
@@ -451,7 +465,7 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                 resourceType: order.resourceType,
                 user: ""+buyer._id,
                 change: amount,
-                balance: buyer[userFieldName],
+                balance: buyer[userFieldNames[order.resourceType]],
                 market: {
                     orderId: ""+order._id,
                     anotherUser: ""+seller._id
@@ -460,9 +474,10 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
         });
 
         market.orders.forEach(order => {
+            const bulk = _.contains(C.INTERSHARD_RESOURCES, order.resourceType) ? bulkMarketIntershardOrders : bulkMarketOrders;
 
             if (order._cancelled) {
-                bulkMarketOrders.remove(order._id);
+                bulk.remove(order._id);
                 return;
             }
 
@@ -482,16 +497,16 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
 
                 if (order.active) {
                     if (!availableResourceAmount) {
-                        bulkMarketOrders.update(order, {active: false, amount: 0});
+                        bulk.update(order, {active: false, amount: 0});
                         return;
                     }
                     if (order.amount != availableResourceAmount) {
-                        bulkMarketOrders.update(order, {amount: availableResourceAmount});
+                        bulk.update(order, {amount: availableResourceAmount});
                     }
                 }
                 else {
                     if (availableResourceAmount > 0) {
-                        bulkMarketOrders.update(order, {
+                        bulk.update(order, {
                             active: true,
                             amount: availableResourceAmount
                         });
@@ -502,7 +517,7 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
             if (order.type == C.ORDER_BUY) {
 
                 var user = usersById[order.user], userMoney = user.money || 0;
-                var isOwner = order.resourceType == C.SUBSCRIPTION_TOKEN || (!!terminal && terminal.user == order.user);
+                var isOwner = _.contains(C.INTERSHARD_RESOURCES, order.resourceType) || (!!terminal && terminal.user == order.user);
 
                 var newAmount = Math.min(Math.floor(userMoney / order.price), order.remainingAmount);
                 if(terminal && terminal.user) {
@@ -514,7 +529,7 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                 var newActive = isOwner && newAmount > 0;
 
                 if (order.amount != newAmount || order.active != newActive) {
-                    bulkMarketOrders.update(order, {amount: newAmount, active: newActive});
+                    bulk.update(order, {amount: newAmount, active: newActive});
                 }
             }
         });
@@ -523,6 +538,7 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
     return q.all([
         bulkUsers.execute(),
         bulkMarketOrders.execute(),
+        bulkMarketIntershardOrders.execute(),
         bulkUsersMoney.execute(),
         bulkTransactions.execute(),
         bulkUsersResources.execute(),
