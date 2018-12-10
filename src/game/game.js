@@ -65,7 +65,7 @@
         }
     }
 
-    function makeGameObject ({runtimeData, intents, memory, getUsedCpu, globals, sandboxedFunctionWrapper, getHeapStatistics}) {
+    function makeGameObject ({runtimeData, intents, memory, getUsedCpu, globals, sandboxedFunctionWrapper, getHeapStatistics, cpuHalt}) {
 
         var customObjectsInfo = {};
 
@@ -129,7 +129,11 @@
                 bucket: runtimeData.cpuBucket,
                 getHeapStatistics: getHeapStatistics ? function() {
                     return getHeapStatistics();
-                } : undefined
+                } : undefined,
+                halt: cpuHalt ? function() {
+                    cpuHalt.applySync();
+                    throw new Error("No one should ever see this message.");
+                } : undefined,
             },
             map: {},
             gcl: {
@@ -377,7 +381,14 @@
         
         var runCodeCache = {};
 
-        exports.init = function (_globals, _codeModules, _runtimeData, _intents, _memory, _fakeConsole, _consoleCommands, _timeout, _getUsedCpu, _scriptCachedData, _sandboxedFunctionWrapper, _getHeapStatistics) {
+        exports.init = function (
+            _globals, _codeModules, _runtimeData,
+            _intents, _memory,
+            _fakeConsole, _consoleCommands,
+            _timeout, _getUsedCpu,
+            _scriptCachedData, _sandboxedFunctionWrapper,
+            _getHeapStatistics, _cpuHalt
+        ) {
 
             var userId = _runtimeData.user._id;
 
@@ -393,6 +404,7 @@
             runCodeCache[userId].getUsedCpu = _getUsedCpu;
             runCodeCache[userId].scriptCachedData = _scriptCachedData;
             runCodeCache[userId].getHeapStatistics = _getHeapStatistics;
+            runCodeCache[userId].cpuHalt = _cpuHalt;
             runCodeCache[userId].sandboxedFunctionWrapper = _sandboxedFunctionWrapper;
 
             _.extend(runCodeCache[userId].globals, {
