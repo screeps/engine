@@ -1057,6 +1057,12 @@ exports.calcBodyEffectiveness = function(body, bodyPartType, methodName, basePow
     return power;
 };
 
+exports.dist = function(a, b) {
+    if(a.pos) a = a.pos;
+    if(b.pos) b = b.pos;
+    return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
+};
+
 exports.calcRoomsDistance = function(room1, room2, continuous) {
     var [x1,y1] = exports.roomNameToXY(room1);
     var [x2,y2] = exports.roomNameToXY(room2);
