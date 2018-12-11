@@ -36,8 +36,10 @@ module.exports = function(creep, scope) {
     }
 
     if(!source) {
-        source = _(resources).filter(o => utils.dist(creep, o) <= 5).first();
-        bulk.update(creep, {memory_sourceId: source._id.toString()});
+        source = _.find(resources, o => utils.dist(creep, o) <= 5);
+        if(source) {
+            bulk.update(creep, {memory_sourceId: source._id.toString()});
+        }
     }
 
     if(source && utils.dist(source, creep) > 1) {
@@ -49,7 +51,7 @@ module.exports = function(creep, scope) {
         }
     }
 
-    const meleeTarget = _(hostilesInMeleeRange).sortBy('hits').first();
+    const meleeTarget = _.min(hostilesInMeleeRange, 'hits');
     if(meleeTarget) {
         intents.set(creep._id, 'attack', { id: meleeTarget._id, x: meleeTarget.x, y: meleeTarget.y });
     }
@@ -60,7 +62,7 @@ module.exports = function(creep, scope) {
         if(massDamage > 13) {
             intents.set(creep._id, 'rangedMassAttack', {});
         } else {
-            const rangedTarget = _(hostilesInRangedRange).sortBy('hits').first();
+            const rangedTarget = _.min(hostilesInRangedRange, 'hits');
             intents.set(creep._id, 'rangedAttack', { id: rangedTarget._id });
         }
     }

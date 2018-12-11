@@ -159,7 +159,7 @@ const moveTo = function moveTo(creep, target, opts, scope) {
 
     const targetPosition = new RoomPosition(target.x, target.y, target.room);
     if(
-        _.isUndefined(creep['memory_move']) ||
+        !creep['memory_move'] ||
         _.isUndefined(creep['memory_move']['dest']) ||
         (creep['memory_move']['dest'] != targetPosition.sPackLocal()) ||
         _.isUndefined(creep['memory_move']['time']) ||
