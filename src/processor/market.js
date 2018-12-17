@@ -345,6 +345,8 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                             targetRoomName: deal.targetRoomName,
                             price: order.price/1000,
                             npc: !buyer.user,
+                            owner: order.user,
+                            dealer: deal.user,
                             amount
                         }
                     });
@@ -364,6 +366,8 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                             targetRoomName: deal.targetRoomName,
                             price: order.price/1000,
                             npc: !seller.user,
+                            owner: order.user,
+                            dealer: deal.user,
                             amount
                         }
                     });
