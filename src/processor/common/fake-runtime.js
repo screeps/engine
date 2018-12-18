@@ -100,8 +100,7 @@ CostMatrix.prototype.clone = function() {
 
 function packPath(roomPositions) {
     return _.reduce(roomPositions, (path, position) => `${path}${position.sPackLocal()}`, '');
-};
-
+}
 const defaultCostMatrix = function defaultCostMatrix(roomId, opts, creep, roomObjects) {
     if(creep.room != roomId) {
         // disallow movement via unknown terrain
@@ -141,9 +140,55 @@ const defaultCostMatrix = function defaultCostMatrix(roomId, opts, creep, roomOb
     return costs;
 };
 
+const findPath = function findPath(source, target, opts, scope) {
+    const {roomTerrrain, roomObjects} = scope;
+    terrains = {[source.room]: roomTerrrain};
+
+    const roomCallback = function(roomName) {
+        let costMatrix = defaultCostMatrix(roomName, opts, source, roomObjects);
+        if(typeof opts.costCallback == 'function') {
+            costMatrix = costMatrix.clone();
+            const resultMatrix = opts.costCallback(roomName, costMatrix);
+            if(resultMatrix instanceof CostMatrix) {
+                costMatrix = resultMatrix;
+            }
+        }
+
+        return costMatrix;
+    };
+    const searchOpts = _.clone(opts);
+    searchOpts.maxRooms = 1;
+    searchOpts.roomCallback = roomCallback;
+    if(!searchOpts.ignoreRoads) {
+        searchOpts.plainCost = 2;
+        searchOpts.swampCost = 10;
+    }
+
+    return driver.pathFinder.search(
+        new RoomPosition(source.x, source.y, source.room),
+        target,
+        searchOpts
+    );
+};
+
+
+const flee = function flee(creep, hostiles, range, opts, scope) {
+    const danger = hostiles.map(c => { return {
+        pos: new RoomPosition(c.x, c.y, c.room),
+        range: range
+    }});
+
+    const result = findPath(creep, danger, {flee: true}, scope);
+    if(!_.some(result.path)) {
+        return 0;
+    }
+
+    const fleePosition = result.path[0];
+    return utils.getDirection(fleePosition.x - creep.x, fleePosition.y - creep.y);
+};
+
 const moveTo = function moveTo(creep, target, opts, scope) {
-    const {bulk, gameTime, roomTerrrain, roomObjects} = scope;
-    terrains = {[creep.room]: roomTerrrain};
+    const {bulk, gameTime} = scope;
 
     opts = opts || {};
     if(_.isUndefined(opts.reusePath)) {
@@ -165,23 +210,11 @@ const moveTo = function moveTo(creep, target, opts, scope) {
         _.isUndefined(creep['memory_move']['time']) ||
         (gameTime > (creep['memory_move']['time'] + opts.reusePath))) {
 
-        const roomCallback = function(roomName) {
-            let costMatrix = defaultCostMatrix(roomName, opts, creep, roomObjects);
-            if(typeof opts.costCallback == 'function') {
-                costMatrix = costMatrix.clone();
-                const resultMatrix = opts.costCallback(roomName, costMatrix);
-                if(resultMatrix instanceof CostMatrix) {
-                    costMatrix = resultMatrix;
-                }
-            }
-
-            return costMatrix;
-        };
-
-        const result = driver.pathFinder.search(
-            new RoomPosition(creep.x, creep.y, creep.room),
+        const result = findPath(
+            creep,
             { range: opts.range, pos: new RoomPosition(target.x, target.y, target.room) },
-            { maxRooms: 1, roomCallback }
+            opts,
+            scope
         );
         if(!result.path) {
             return 0;
@@ -195,6 +228,52 @@ const moveTo = function moveTo(creep, target, opts, scope) {
     }
 
     return nextDirectionByPath(creep, creep['memory_move']['path']);
+};
+
+const findClosestByPath = function findClosestByPath(fromPos, objects, opts, scope) {
+    if(!_.some(objects)) {
+        return null;
+    }
+
+    const {roomTerrrain} = scope;
+    terrains = {[fromPos.room]: roomTerrrain};
+
+    opts = opts || {};
+    if(_.isUndefined(opts.range)) {
+        opts.range = 0;
+    }
+
+    const objectHere = _.find(objects, obj => utils.dist(fromPos, obj)==0);
+    if(objectHere) {
+        return objectHere;
+    }
+
+    const goals = _.map(objects, i => { return {range: 1, pos: new RoomPosition(i.x, i.y, i.room)}; });
+
+    const ret = findPath(
+        fromPos,
+        goals,
+        opts,
+        scope
+    );
+    if(!ret.path) {
+        return null;
+    }
+
+    let result = null;
+    let lastPos = fromPos;
+
+    if(ret.path.length) {
+        lastPos = ret.path[ret.path.length-1];
+    }
+
+    objects.forEach(obj => {
+        if(utils.dist(lastPos, obj) <= 1) {
+            result = obj;
+        }
+    });
+
+    return result;
 };
 
 const nextDirectionByPath = function(creep, path) {
@@ -220,6 +299,14 @@ const nextDirectionByPath = function(creep, path) {
     return utils.getDirection(nextPosition.x - creep.x, nextPosition.y - creep.y);
 };
 
+const hasActiveBodyparts = function hasActiveBodyparts(creep, part) {
+    return _.some(creep.body, p => (p.hits > 0) && (p.type==part));
+};
+
+module.exports.findPath = findPath;
+module.exports.findClosestByPath = findClosestByPath;
 module.exports.moveTo = moveTo;
+module.exports.flee = flee;
 module.exports.RoomPosition = RoomPosition;
 module.exports.CostMatrix = CostMatrix;
+module.exports.hasActiveBodyparts = hasActiveBodyparts;

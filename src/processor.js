@@ -11,6 +11,7 @@ var q = require('q'),
 var roomsQueue, usersQueue, lastRoomsStatsSaveTime = 0, currentHistoryPromise = q.when();
 
 const KEEPER_ID = "3";
+const INVADER_ID = "2";
 
 function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime, roomInfo, flags}) {
 
@@ -23,7 +24,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             hasNewbieWalls = false,
             stats = driver.getRoomStatsUpdater(roomId),
             objectsToHistory = {},
-            roomSpawns = [], roomExtensions = [], roomNukes = [], keepers = [],
+            roomSpawns = [], roomExtensions = [], roomNukes = [], keepers = [], invaders = [],
             oldRoomInfo = _.clone(roomInfo);
 
         roomInfo.active = false;
@@ -62,6 +63,8 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 };
                 if(object.user == KEEPER_ID) {
                     keepers.push(object);
+                } else if (object.user == INVADER_ID) {
+                    invaders.push(object);
                 }
             }
             if (object.type == 'link') {
@@ -136,10 +139,25 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
 
             intents.users[keeper.user] = intents.users[keeper.user] || {};
             intents.users[keeper.user].objects = intents.users[keeper.user].objects || {};
+            const objectsIntents =  intents.users[keeper.user].objects;
             _.forEach(i, (ii, objId) => {
-                intents.users[keeper.user].objects[objId] = _.assign(
+                objectsIntents[objId] = _.assign(
                     ii,
-                    intents.users[keeper.user].objects[objId] || {}
+                    objectsIntents[objId] || {}
+                );
+            });
+        }
+
+        for(let invader of invaders) {
+            const i = require('./processor/intents/creeps/invaders/pretick')(invader, scope);
+
+            intents.users[invader.user] = intents.users[invader.user] || {};
+            intents.users[invader.user].objects = intents.users[invader.user].objects || {};
+            const objectIntents = intents.users[invader.user].objects;
+            _.forEach(i, (ii, objId) => {
+                objectIntents[objId] = _.assign(
+                    ii,
+                    objectIntents[objId] || {}
                 );
             });
         }
