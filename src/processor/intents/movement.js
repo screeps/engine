@@ -8,6 +8,10 @@ var _ = require('lodash'),
     roomObjects,
     roomTerrain;
 
+function canMove(object) {
+    return !!object._pulled || !object._oldFatigue && _.some(object.body, i => i.hits > 0 && i.type == C.MOVE);
+}
+
 function checkObstacleAtXY(x,y,object, roomIsInSafeMode) {
     var hasObstacle = false, hasRoad = false;
     _.forEach(roomObjects, (i) => {
@@ -175,9 +179,7 @@ exports.check = function(roomIsInSafeMode) {
             }
         }
 
-        var obstacle =  checkObstacleAtXY(x,y, object, roomIsInSafeMode);
-
-        if(obstacle) {
+        if(!canMove(object) || !!checkObstacleAtXY(x,y, object, roomIsInSafeMode)) {
             removeFromMatrix(i);
         }
     }
@@ -192,7 +194,7 @@ exports.execute = function(object, scope) {
         return;
     }
 
-    if(!object._pulled && (!_.some(object.body, i => i.hits > 0 && i.type == C.MOVE) || object._oldFatigue > 0)) {
+    if(!canMove(object)) {
         return;
     }
 

@@ -40,6 +40,18 @@ describe('movement', ()=>{
             expect(damaged.x).toBe(23); expect(damaged.y).toBe(28);
         });
 
+        it('blocks his tile when can not move',()=>{
+            const fullSpeed = creepsEnv.createCreep('fullSpeed', {x: 22, y: 27});
+
+            damaged.move(1);
+            fullSpeed.move(4);
+            movement.check(false);
+            intents.ticks();
+
+            expect(damaged.x).toBe(23); expect(damaged.y).toBe(28);
+            expect(fullSpeed.x).toBe(22); expect(fullSpeed.y).toBe(27);
+        });
+
         describe('Offroad creep', ()=>{
             let scout, scout2;
             beforeEach(()=>{
