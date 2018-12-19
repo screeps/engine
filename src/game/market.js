@@ -93,7 +93,7 @@ exports.make = function(runtimeData, intents, register) {
             if(!amount || amount < 0) {
                 return C.ERR_INVALID_ARGS;
             }
-            if(!_.contains(C.INTERSHARD_RESOURCES, order.resourceType)) {
+            if(_.contains(C.INTERSHARD_RESOURCES, order.resourceType)) {
                 if(order.resourceType == C.SUBSCRIPTION_TOKEN) {
                     if(order.type == C.ORDER_BUY && (runtimeData.user.subscriptionTokens||0) < amount) {
                         return C.ERR_NOT_ENOUGH_RESOURCES;
