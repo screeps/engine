@@ -197,7 +197,7 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                     }
 
                     const bulk = _.contains(C.INTERSHARD_RESOURCES, order.resourceType) ? bulkMarketIntershardOrders : bulkMarketOrders;
-                    bulk.update(order._id, {price: intent.newPrice});
+                    bulk.inc(order, 'price', intent.newPrice - order.price);
                 });
             }
 
@@ -235,10 +235,8 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                     });
 
                     const bulk = _.contains(C.INTERSHARD_RESOURCES, order.resourceType) ? bulkMarketIntershardOrders : bulkMarketOrders;
-                    bulk.update(order, {
-                        remainingAmount: order.remainingAmount + intent.addAmount,
-                        totalAmount: order.totalAmount + intent.addAmount
-                    });
+                    bulk.inc(order, 'remainingAmount', intent.addAmount);
+                    bulk.inc(order, 'totalAmount', intent.addAmount);
                 });
             }
 
@@ -460,10 +458,8 @@ module.exports.execute = function(market, gameTime, terminals, bulkObjects) {
                 }
             });
             const bulk = _.contains(C.INTERSHARD_RESOURCES, order.resourceType) ? bulkMarketIntershardOrders : bulkMarketOrders;
-            bulk.update(order, {
-                amount: order.amount - amount,
-                remainingAmount: order.remainingAmount - amount
-            });
+            bulk.inc(order, 'amount', -amount);
+            bulk.inc(order, 'remainingAmount', -amount);
             bulkUsersResources.insert({
                 date: new Date(),
                 resourceType: order.resourceType,
