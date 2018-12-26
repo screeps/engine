@@ -38,7 +38,7 @@ module.exports = function(object, {bulk, bulkUsers, gameTime, roomInfo, users}) 
         driver.sendNotification(object.user, `Attention! Your Controller in room ${object.room} will be downgraded to level ${object.level-1} in 3000 ticks (~2 hours)! Upgrade it to prevent losing of this room. <a href='http://support.screeps.com/hc/en-us/articles/203086021-Territory-control'>Learn more</a>`);
     }
 
-    while(gameTime >= object.downgradeTime-1) {
+    while((gameTime >= object.downgradeTime-1) && (object.level > 0)) {
         object.level--;
         driver.sendNotification(object.user, `Your Controller in room ${object.room} has been downgraded to level ${object.level} due to absence of upgrading activity!`);
         if(object.level == 0) {
