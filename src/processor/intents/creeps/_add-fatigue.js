@@ -23,7 +23,7 @@ module.exports = function(object, dFatigue, {roomObjects, bulk}) {
         }
     }
 
-    while(object._pulled) {
+    while(!!object._pulled && !!roomObjects[object._pulled]) {
         object = roomObjects[object._pulled];
     }
 
