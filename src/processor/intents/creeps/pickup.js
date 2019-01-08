@@ -5,10 +5,6 @@ var _ = require('lodash'),
 
 module.exports = function(object, intent, {roomObjects, bulk}) {
 
-    if(object.type != 'creep') {
-        return;
-    }
-
     var carry = utils.calcResources(object);
 
     if(object.spawning || carry >= object.energyCapacity) {

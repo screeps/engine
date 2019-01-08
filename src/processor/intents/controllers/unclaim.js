@@ -22,6 +22,7 @@ module.exports = function(object, intent, {bulk, bulkUsers, gameTime, roomInfo, 
         downgradeTime: null,
         safeMode: null,
         safeModeAvailable: 0,
-        safeModeCooldown: roomInfo.novice > Date.now() ? null : gameTime + C.SAFE_MODE_COOLDOWN
+        safeModeCooldown: roomInfo.novice > Date.now() ? null : gameTime + C.SAFE_MODE_COOLDOWN,
+        isPowerEnabled: false,
     });
 };

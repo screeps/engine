@@ -11,6 +11,7 @@
     function populateRegister(reg, spatial) {
         _.extend(reg, {
             creeps: {},
+            powerCreeps: {},
             structures: {},
             ownedStructures: {},
             spawns: {},
@@ -36,6 +37,8 @@
         [C.FIND_CREEPS]: (i) => !i.spawning,
         [C.FIND_MY_CREEPS]: (i) => !i.spawning && i.my,
         [C.FIND_HOSTILE_CREEPS]: (i) => !i.spawning && !i.my,
+        [C.FIND_MY_POWER_CREEPS]: (i) => i.my,
+        [C.FIND_HOSTILE_POWER_CREEPS]: (i) => !i.my,
         [C.FIND_MY_SPAWNS]: (i) =>  i.my === true,
         [C.FIND_HOSTILE_SPAWNS]: (i) =>  i.my === false,
         [C.FIND_SOURCES_ACTIVE]: (i) => i.energy > 0,
@@ -111,8 +114,12 @@
         var gclLevel = Math.floor(Math.pow((runtimeData.user.gcl || 0) / C.GCL_MULTIPLY, 1 / C.GCL_POW)) + 1,
         gclBaseProgress = Math.pow(gclLevel - 1, C.GCL_POW) * C.GCL_MULTIPLY;
 
+        var powerLevel = Math.floor(Math.pow((runtimeData.user.power || 0) / C.POWER_LEVEL_MULTIPLY, 1 / C.POWER_LEVEL_POW)),
+            powerLevelBaseProgress = Math.pow(powerLevel, C.POWER_LEVEL_POW) * C.POWER_LEVEL_MULTIPLY;
+
         var game = {
             creeps: {},
+            powerCreeps: {},
             spawns: {},
             structures: {},
             flags: {},
@@ -140,6 +147,11 @@
                 level: gclLevel,
                 progress: (runtimeData.user.gcl || 0) - gclBaseProgress,
                 progressTotal: Math.pow(gclLevel, C.GCL_POW) * C.GCL_MULTIPLY - gclBaseProgress
+            },
+            power: {
+                level: powerLevel,
+                progress: (runtimeData.user.power || 0) - powerLevelBaseProgress,
+                progressTotal: Math.pow(powerLevel+1, 2) * 1000 - powerLevelBaseProgress
             },
             market: {},
             resources: {
@@ -187,6 +199,7 @@
         require('./tombstones').make(runtimeData, intents, register, globals);
         require('./construction-sites').make(runtimeData, intents, register, globals);
         require('./path-finder').make(runtimeData, intents, register, globals);
+        require('./power-creeps').make(runtimeData, intents, register, globals);
 
         for (var i in runtimeData.rooms) {
             register.rooms[i] = new globals.Room(i);
@@ -223,6 +236,11 @@
 
         var c = {};
 
+        for(var i in runtimeData.userPowerCreeps) {
+            register.powerCreeps[i] = new globals.PowerCreep(i);
+            game.powerCreeps[register.powerCreeps[i].name] = register.powerCreeps[i];
+        }
+
         for(var i in runtimeData.roomObjects) {
             var object = runtimeData.roomObjects[i];
 
@@ -248,6 +266,18 @@
                 addObjectToFindCache(register, C.FIND_CREEPS, register.creeps[i], object);
                 addObjectToFindCache(register, C.FIND_MY_CREEPS, register.creeps[i], object);
                 addObjectToFindCache(register, C.FIND_HOSTILE_CREEPS, register.creeps[i], object);
+            }
+            if (object.type == 'powerCreep') {
+                if(register.powerCreeps[i]) {
+                    register._objects[i] = register.powerCreeps[i];
+                }
+                else {
+                    register._objects[i] = new globals.PowerCreep(i);
+                }
+                addObjectToRegister(register, 'powerCreeps', register._objects[i], object);
+                addObjectToFindCache(register, C.FIND_POWER_CREEPS, register.powerCreeps[i], object);
+                addObjectToFindCache(register, C.FIND_MY_POWER_CREEPS, register.powerCreeps[i], object);
+                addObjectToFindCache(register, C.FIND_HOSTILE_POWER_CREEPS, register.powerCreeps[i], object);
             }
             if (structureTypes[object.type]) {
                 register._objects[i] = new structureTypes[object.type](i);

@@ -20,6 +20,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
         var bulk = driver.bulkObjectsWrite(),
             bulkUsers = driver.bulkUsersWrite(),
             bulkFlags = driver.bulkFlagsWrite(),
+            bulkUsersPowerCreeps = driver.bulkUsersPowerCreeps(),
             oldObjects = {},
             hasNewbieWalls = false,
             stats = driver.getRoomStatsUpdater(roomId),
@@ -36,7 +37,8 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
 
         let eventLog = [];
 
-        let scope = {roomObjects, roomTerrain, bulk, bulkUsers, stats, flags, bulkFlags, gameTime, roomInfo, users, eventLog};
+        let scope = {roomObjects, roomTerrain, bulk, bulkUsers, bulkUsersPowerCreeps, stats, flags,
+            bulkFlags, gameTime, roomInfo, users, eventLog};
 
         _.forEach(roomObjects, (object) => {
             if(!object) {
@@ -122,6 +124,14 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             if(object.type == 'spawn') {
                 roomSpawns.push(object);
             }
+            if (object.type == 'powerCreep') {
+                object._actionLog = object.actionLog;
+                object.actionLog = {
+                    attack: null,
+                    power: null,
+                    say: null,
+                };
+            }
 
             driver.config.emit('processObject',object, roomObjects, roomTerrain, gameTime, roomInfo, bulk, bulkUsers);
 
@@ -191,6 +201,8 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
 
                     if (object.type == 'creep')
                         require('./processor/intents/creeps/intents')(object, objectIntents, scope);
+                    if (object.type == 'powerCreep')
+                        require('./processor/intents/power-creeps/intents')(object, objectIntents, scope);
                     if (object.type == 'link')
                         require('./processor/intents/links/intents')(object, objectIntents, scope);
                     if (object.type == 'tower')
@@ -289,6 +301,8 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 require('./processor/intents/minerals/tick')(object, scope);
             if (object.type == 'creep')
                 require('./processor/intents/creeps/tick')(object, scope);
+            if (object.type == 'powerCreep')
+                require('./processor/intents/power-creeps/tick')(object, scope);
             if (object.type == 'spawn')
                 require('./processor/intents/spawns/tick')(object, scope);
             if (object.type == 'rampart')
@@ -350,7 +364,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             if (object.type != 'flag') {
                 objectsToHistory[object._id] = object;
 
-                if (object.type == 'creep') {
+                if (object.type == 'creep' || object.type == 'powerCreep') {
                     objectsToHistory[object._id] = JSON.parse(JSON.stringify(object));
                     objectsToHistory[object._id]._id = "" + object._id;
                     delete objectsToHistory[object._id]._actionLog;
@@ -469,7 +483,7 @@ driver.connect('processor').then(() => driver.queue.create('rooms', 'read'))
                     driver.getRoomTerrain(_roomId),
                     driver.getGameTime(),
                     driver.getRoomInfo(_roomId),
-                    driver.getRoomFlags(_roomId)
+                    driver.getRoomFlags(_roomId),
                 ])
             })
             .then((result) => {

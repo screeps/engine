@@ -529,14 +529,14 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
             continue;
         }
 
-        if(i == 'market') {
-            var marketIntentsResult = userIntents.market;
+        if(i == 'global') {
+            var globalIntentsResult = userIntents.global;
 
-            if(marketIntentsResult.createOrder) {
-                _.forEach(marketIntentsResult.createOrder, (iCreateOrder) => {
-                    intents.market = intents.market || {};
-                    intents.market.createOrder = intents.market.createOrder || [];
-                    intents.market.createOrder.push({
+            if(globalIntentsResult.createOrder) {
+                _.forEach(globalIntentsResult.createOrder, (iCreateOrder) => {
+                    intents.global = intents.global || {};
+                    intents.global.createOrder = intents.global.createOrder || [];
+                    intents.global.createOrder.push({
                         type: ""+iCreateOrder.type,
                         resourceType: ""+iCreateOrder.resourceType,
                         price: parseInt(iCreateOrder.price*1000),
@@ -545,41 +545,89 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                     })
                 });
             }
-            if(marketIntentsResult.cancelOrder) {
-                _.forEach(marketIntentsResult.cancelOrder, (iCancelOrder) => {
-                    intents.market = intents.market || {};
-                    intents.market.cancelOrder = intents.market.cancelOrder || [];
-                    intents.market.cancelOrder.push({orderId: ""+iCancelOrder.orderId});
+            if(globalIntentsResult.cancelOrder) {
+                _.forEach(globalIntentsResult.cancelOrder, (iCancelOrder) => {
+                    intents.global = intents.global || {};
+                    intents.global.cancelOrder = intents.global.cancelOrder || [];
+                    intents.global.cancelOrder.push({orderId: ""+iCancelOrder.orderId});
                 });
             }
-            if(marketIntentsResult.changeOrderPrice) {
-                _.forEach(marketIntentsResult.changeOrderPrice, (iChangeOrderPrice) => {
-                    intents.market = intents.market || {};
-                    intents.market.changeOrderPrice = intents.market.changeOrderPrice || [];
-                    intents.market.changeOrderPrice.push({
+            if(globalIntentsResult.changeOrderPrice) {
+                _.forEach(globalIntentsResult.changeOrderPrice, (iChangeOrderPrice) => {
+                    intents.global = intents.global || {};
+                    intents.global.changeOrderPrice = intents.global.changeOrderPrice || [];
+                    intents.global.changeOrderPrice.push({
                         orderId: ""+iChangeOrderPrice.orderId,
                         newPrice: parseInt(iChangeOrderPrice.newPrice*1000),
                     });
                 });
             }
-            if(marketIntentsResult.extendOrder) {
-                _.forEach(marketIntentsResult.extendOrder, (iExtendOrder) => {
-                    intents.market = intents.market || {};
-                    intents.market.extendOrder = intents.market.extendOrder || [];
-                    intents.market.extendOrder.push({
+            if(globalIntentsResult.extendOrder) {
+                _.forEach(globalIntentsResult.extendOrder, (iExtendOrder) => {
+                    intents.global = intents.global || {};
+                    intents.global.extendOrder = intents.global.extendOrder || [];
+                    intents.global.extendOrder.push({
                         orderId: ""+iExtendOrder.orderId,
                         addAmount: parseInt(iExtendOrder.addAmount),
                     });
                 });
             }
-            if(marketIntentsResult.deal) {
-                _.forEach(marketIntentsResult.deal, (iDeal) => {
-                    intents.market = intents.market || {};
-                    intents.market.deal = intents.market.deal || [];
-                    intents.market.deal.push({
+            if(globalIntentsResult.deal) {
+                _.forEach(globalIntentsResult.deal, (iDeal) => {
+                    intents.global = intents.global || {};
+                    intents.global.deal = intents.global.deal || [];
+                    intents.global.deal.push({
                         orderId: ""+iDeal.orderId,
                         amount: parseInt(iDeal.amount),
                         targetRoomName: ""+iDeal.targetRoomName
+                    });
+                });
+            }
+            if(globalIntentsResult.spawnPowerCreep) {
+                _.forEach(globalIntentsResult.spawnPowerCreep, (iSpawnPowerCreep) => {
+                    intents.global = intents.global || {};
+                    intents.global.spawnPowerCreep = intents.global.spawnPowerCreep || [];
+                    intents.global.spawnPowerCreep.push({
+                        id: ""+iSpawnPowerCreep.id,
+                        name: ""+iSpawnPowerCreep.name,
+                    });
+                });
+            }
+            if(globalIntentsResult.suicidePowerCreep) {
+                _.forEach(globalIntentsResult.suicidePowerCreep, (iSuicidePowerCreep) => {
+                    intents.global = intents.global || {};
+                    intents.global.suicidePowerCreep = intents.global.suicidePowerCreep || [];
+                    intents.global.suicidePowerCreep.push({
+                        id: ""+iSuicidePowerCreep.id,
+                    });
+                });
+            }
+            if(globalIntentsResult.deletePowerCreep) {
+                _.forEach(globalIntentsResult.deletePowerCreep, (iDeletePowerCreep) => {
+                    intents.global = intents.global || {};
+                    intents.global.deletePowerCreep = intents.global.deletePowerCreep || [];
+                    intents.global.deletePowerCreep.push({
+                        id: ""+iDeletePowerCreep.id,
+                    });
+                });
+            }
+            if(globalIntentsResult.upgradePowerCreep) {
+                _.forEach(globalIntentsResult.upgradePowerCreep, (iUpgradePowerCreep) => {
+                    intents.global = intents.global || {};
+                    intents.global.upgradePowerCreep = intents.global.upgradePowerCreep || [];
+                    intents.global.upgradePowerCreep.push({
+                        id: ""+iUpgradePowerCreep.id,
+                        power: +iUpgradePowerCreep.power
+                    });
+                });
+            }
+            if(globalIntentsResult.createPowerCreep) {
+                _.forEach(globalIntentsResult.createPowerCreep, (iCreatePowerCreep) => {
+                    intents.global = intents.global || {};
+                    intents.global.createPowerCreep = intents.global.createPowerCreep || [];
+                    intents.global.createPowerCreep.push({
+                        name: ""+iCreatePowerCreep.name,
+                        className: ""+iCreatePowerCreep.className,
                     });
                 });
             }
@@ -838,6 +886,17 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
         }
         if(objectIntentsResult.cancelSpawning) {
             objectIntents.cancelSpawning = {};
+        }
+        if(objectIntentsResult.usePower) {
+            objectIntents.usePower = {
+                power: +objectIntentsResult.usePower.power,
+                id: ""+objectIntentsResult.usePower.id
+            };
+        }
+        if(objectIntentsResult.enableRoom) {
+            objectIntents.enableRoom = {
+                id: ""+objectIntentsResult.enableRoom.id
+            };
         }
 
         // for(var iCustomType in driver.config.customIntentTypes) {

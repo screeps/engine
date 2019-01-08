@@ -70,7 +70,7 @@ exports.make = function(runtimeData, intents, register) {
                 return C.ERR_FULL;
             }
             ordersCreatedDuringTick++;
-            intents.pushByName('market', 'createOrder', {
+            intents.pushByName('global', 'createOrder', {
                 type, resourceType, price, totalAmount, roomName
             });
             return C.OK;
@@ -80,7 +80,7 @@ exports.make = function(runtimeData, intents, register) {
             if(!this.orders[orderId]) {
                 return C.ERR_INVALID_ARGS;
             }
-            intents.pushByName('market', 'cancelOrder', {orderId}, 50);
+            intents.pushByName('global', 'cancelOrder', {orderId}, 50);
             return C.OK;
         }),
 
@@ -127,7 +127,7 @@ exports.make = function(runtimeData, intents, register) {
                 return C.ERR_NOT_ENOUGH_RESOURCES;
             }
 
-            if(!intents.pushByName('market', 'deal', {orderId, targetRoomName, amount}, 10)) {
+            if(!intents.pushByName('global', 'deal', {orderId, targetRoomName, amount}, 10)) {
                 return C.ERR_FULL;
             }
             return C.OK;
@@ -146,7 +146,7 @@ exports.make = function(runtimeData, intents, register) {
                 return C.ERR_NOT_ENOUGH_RESOURCES;
             }
 
-            intents.pushByName('market', 'changeOrderPrice', {
+            intents.pushByName('global', 'changeOrderPrice', {
                 orderId, newPrice
             }, 50);
             return C.OK;
@@ -165,7 +165,7 @@ exports.make = function(runtimeData, intents, register) {
                 return C.ERR_NOT_ENOUGH_RESOURCES;
             }
 
-            intents.pushByName('market', 'extendOrder', {
+            intents.pushByName('global', 'extendOrder', {
                 orderId, addAmount
             }, 50);
             return C.OK;

@@ -25,7 +25,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     var Mineral = register.wrapFn(function(id) {
         var _data = data(id);
-        globals.RoomObject.call(this, _data.x, _data.y, _data.room);
+        globals.RoomObject.call(this, _data.x, _data.y, _data.room, _data.effects);
         this.id = id;
     });
 

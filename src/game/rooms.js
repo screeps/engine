@@ -1591,9 +1591,16 @@ exports.makePos = function(_register) {
      * @param y
      * @constructor
      */
-    var RoomObject = register.wrapFn(function(x, y, room) {
+    var RoomObject = register.wrapFn(function(x, y, room, effects) {
         this.room = register.rooms[room];
         this.pos = new globals.RoomPosition(x,y,room);
+        if(effects) {
+            this.effects = _(effects).map(i => ({
+                power: i.power,
+                level: i.level,
+                ticksRemaining: i.endTime - runtimeData.time
+            })).filter(i => i.ticksRemaining > 0).value();
+        }
     });
 
     Object.defineProperty(globals, 'RoomObject', {enumerable: true, value: RoomObject});

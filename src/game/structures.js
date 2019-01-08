@@ -123,7 +123,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     var Structure = register.wrapFn(function(id) {
 
         var _data = data(id);
-        globals.RoomObject.call(this, _data.x, _data.y, _data.room);
+        globals.RoomObject.call(this, _data.x, _data.y, _data.room, _data.effects);
         this.id = id;
 
         var objectData = data(id);
@@ -275,7 +275,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 text: o.sign.text,
                 time: o.sign.time,
                 datetime: new Date(o.sign.datetime)
-            } : undefined
+            } : undefined,
+        isPowerEnabled: o => !!o.isPowerEnabled
     });
 
     StructureController.prototype.unclaim = register.wrapFn(function() {
