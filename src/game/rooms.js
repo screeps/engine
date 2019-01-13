@@ -385,7 +385,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     createdSpawnNames = [];
     privateStore = {};
     createdConstructionSites = 0;
-    
+
     TerrainConstructor || (()=>{
         for(var roomName in runtimeData.staticTerrainData) {
             var array = runtimeData.staticTerrainData[roomName];
@@ -393,11 +393,11 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             break;
         }
     })();
-    
+
     TerrainConstructorSet || (()=>{
         TerrainConstructorSet = TerrainConstructor.prototype.set;
     })();
-    
+
     if(globals.Room) {
         return;
     }
@@ -1137,8 +1137,10 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     });
 
     RoomVisual.prototype.poly = register.wrapFn(function(points,style) {
-        points = points.map(i => i.x !== undefined ? [i.x, i.y] : i);
-        globals.console.addVisual(this.roomName, {t: 'p', points,s:style});
+        if(_.isArray(points) && _.some(points)) {
+            points = points.map(i => i.x !== undefined ? [i.x, i.y] : i);
+            globals.console.addVisual(this.roomName, {t: 'p', points,s:style});
+        }
         return this;
     });
 
@@ -1160,22 +1162,22 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         globals.console.clearVisual(this.roomName);
         return this;
     });
-    
+
     Object.defineProperty(globals, 'RoomVisual', {enumerable: true, value: RoomVisual});
 
-    
+
     Room.Terrain = register.wrapFn(function(roomName){ "use strict";
         roomName = "" + roomName;
-        
+
         const array = (runtimeData.staticTerrainData || {})[roomName];
         if(!array)
             throw new Error(`Could not access room ${roomName}`);
-        
+
         this.get = register.wrapFn(function(x,y){
             const value = array[y * 50 + x];
             return (value & C.TERRAIN_MASK_WALL) || (value & C.TERRAIN_MASK_SWAMP) || 0;
         });
-        
+
         this.getRawBuffer = register.wrapFn(function(destinationArray){
             if(!!destinationArray) {
                 TerrainConstructorSet.call(destinationArray, array);
