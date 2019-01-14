@@ -80,7 +80,9 @@ module.exports = function(creep, context) {
     }
 
     if(!target) {
-        const unreachableSpawns = _.filter(roomObjects, o => o.type == 'spawn' && !checkPath(creep, o, scope));
+        const unreachableSpawns = _.filter(roomObjects, o =>
+            o.type == 'spawn' && !checkPath(creep, new fakeRuntime.RoomPosition(o.x, o.y, o.room), scope)
+        );
         if(!unreachableSpawns.length) {
             intents.set(creep._id, 'suicide', {});
             return;
