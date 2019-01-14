@@ -164,11 +164,21 @@ const findPath = function findPath(source, target, opts, scope) {
         searchOpts.swampCost = 10;
     }
 
-    return driver.pathFinder.search(
-        new RoomPosition(source.x, source.y, source.room),
+    const fromPos = new RoomPosition(source.x, source.y, source.room);
+
+    const ret = driver.pathFinder.search(
+        fromPos,
         target,
         searchOpts
     );
+
+    if(target instanceof RoomPosition && !opts.range &&
+        (ret.path.length && ret.path[ret.path.length-1].getRangeTo(target) === 1 ||
+            !ret.path.length && fromPos.getRangeTo(target) === 1)) {
+        ret.path.push(target);
+    }
+
+    return ret;
 };
 
 
