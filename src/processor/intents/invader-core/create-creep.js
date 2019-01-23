@@ -49,7 +49,8 @@ module.exports = function(object, intent, scope) {
         hitsMax: body.length * 100,
         spawning: true,
         fatigue: 0,
-        notifyWhenAttacked: false
+        notifyWhenAttacked: false,
+        ageTime: object.nextDecayTime
     };
 
     bulk.update(object, {

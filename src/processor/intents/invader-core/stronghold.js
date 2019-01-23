@@ -14,6 +14,14 @@ const range = function(a, b) {
     return Math.max(Math.abs(a.x-b.x), Math.abs(a.y-b.y));
 };
 
+const reserveController = function(context) {
+    const { core, intents, roomController } = context;
+
+    if(roomController) {
+        intents.set(core._id, 'reserveController', {id: roomController._id});
+    }
+};
+
 const refillTowers = function(context) {
     const {core, intents, towers} = context;
     const underchargedTowers = _.filter(towers, t => 2*t.energy <= t.energyCapacity);
@@ -63,6 +71,7 @@ const focusClosest = function(context) {
 module.exports = {
     behaviors: {
         'default': function(context){
+            reserveController(context);
             refillTowers(context);
             focusClosest(context);
         }

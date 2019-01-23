@@ -5,7 +5,7 @@ const _ = require('lodash'),
     stronghold = require('./stronghold');
 
 module.exports = function(object, scope) {
-    const {roomObjects} = scope;
+    const {roomObjects, roomController} = scope;
     const user = object.user;
     const intents = {
         list: {},
@@ -44,7 +44,7 @@ module.exports = function(object, scope) {
         }
     });
 
-    const context = {intents, creeps, defenders, hostiles, towers, ramparts, core: object};
+    const context = {intents, creeps, defenders, hostiles, towers, ramparts, roomController, core: object};
 
     stronghold.behaviors[behavior](context);
 

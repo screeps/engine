@@ -25,7 +25,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             hasNewbieWalls = false,
             stats = driver.getRoomStatsUpdater(roomId),
             objectsToHistory = {},
-            roomSpawns = [], roomExtensions = [], roomNukes = [], keepers = [], invaders = [], invaderCore = null
+            roomSpawns = [], roomExtensions = [], roomNukes = [], keepers = [], invaders = [], invaderCore = null,
             oldRoomInfo = _.clone(roomInfo);
 
         roomInfo.active = false;
@@ -74,9 +74,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 object._actionLog = object.actionLog;
                 object.actionLog = {
                     transferEnergy: null,
-                    repair: null,
                     build: null,
-                    upgradeController: null,
                     reserveController: null
                 };
             }
@@ -192,10 +190,6 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             });
         }
 
-        if(roomSpawns.length || roomExtensions.length) {
-            require('./processor/intents/_calc_spawns')(roomSpawns, roomExtensions, scope);
-        }
-
         if(invaderCore && invaderCore.user) {
             const i = require('./processor/intents/invader-core/pretick')(invaderCore, scope);
 
@@ -207,6 +201,10 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                     intents.users[invaderCore.user].objects[objId] || {}
                 );
             });
+        }
+
+        if(roomSpawns.length || roomExtensions.length) {
+            require('./processor/intents/_calc_spawns')(roomSpawns, roomExtensions, scope);
         }
 
         movement.init(roomObjects, roomTerrain);

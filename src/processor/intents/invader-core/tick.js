@@ -13,4 +13,8 @@ module.exports = function(object, scope) {
         existingStructures.forEach(s => {bulk.remove(s._id); delete roomObjects[s._id]});
         return;
     }
+
+    if(!_.isEqual(object.actionLog, object._actionLog)) {
+        bulk.update(object, {actionLog: object.actionLog});
+    }
 };
