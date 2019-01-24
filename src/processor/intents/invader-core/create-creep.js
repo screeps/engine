@@ -14,20 +14,20 @@ module.exports = function(object, intent, scope) {
     intent.body = intent.body.slice(0, C.MAX_CREEP_SIZE);
 
     const body = [];
-    for(let i = 0; i < intent.body; i++) {
-        if(!_.contains(C.BODYPARTS_ALL, i)) {
+    for(let i = 0; i < intent.body.length; i++) {
+        const type = intent.body[i];
+        if(!_.contains(C.BODYPARTS_ALL, type)) {
             continue;
         }
-        const type = intent.body[i];
         if(intent.boosts && (intent.boosts.length >= i) && C.BOOSTS[type] && C.BOOSTS[type][intent.boosts[i]]){
             body.push({
-                type: i,
+                type,
                 hits: 100,
                 boost: intent.boosts[i]
             });
         } else {
             body.push({
-                type: i,
+                type,
                 hits: 100
             });
         }
@@ -36,13 +36,14 @@ module.exports = function(object, intent, scope) {
     const energyCapacity = utils.calcBodyEffectiveness(body, C.CARRY, 'capacity', C.CARRY_CAPACITY, true);
 
     const creep = {
+        strongholdId: object.strongholdId,
+        type: 'creep',
         name: intent.name,
         x: object.x,
         y: object.y,
         body,
         energy: 0,
         energyCapacity,
-        type: 'creep',
         room: object.room,
         user: object.user,
         hits: body.length * 100,
@@ -53,6 +54,8 @@ module.exports = function(object, intent, scope) {
         ageTime: object.nextDecayTime
     };
 
+    bulk.insert(creep);
+
     bulk.update(object, {
         spawning: {
             name: intent.name,
@@ -60,6 +63,4 @@ module.exports = function(object, intent, scope) {
             remainingTime: C.INVADER_CORE_CREEP_SPAWN_TIME[object.level] * body.length
         }
     });
-
-    bulk.insert(creep);
 };

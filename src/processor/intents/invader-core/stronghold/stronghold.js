@@ -1,7 +1,8 @@
-var _ = require('lodash'),
-    utils = require('../../../utils'),
+const _ = require('lodash'),
+    utils = require('../../../../utils'),
     driver = utils.getDriver(),
-    C = driver.constants;
+    C = driver.constants,
+    creeps = require('./creeps');
 
 const range = function(a, b) {
     if(
@@ -26,9 +27,9 @@ const refillTowers = function(context) {
     const {core, intents, towers} = context;
     const underchargedTowers = _.filter(towers, t => 2*t.energy <= t.energyCapacity);
     if(_.some(underchargedTowers)) {
-        const towerToCharge = _.first(underchargedTowers.sort((a,b)=>a.energy-b.energy));
+        const towerToCharge = _.min(underchargedTowers, 'energy');
         if(towerToCharge) {
-            intents.set(core._id, 'transfer', {id: towerToCharge._id, amount: Math.floor(towerToCharge.energyCapacity/2), resourceType: C.RESOURCE_ENERGY});
+            intents.set(core._id, 'transfer', {id: towerToCharge._id, amount: towerToCharge.energyCapacity - towerToCharge.energy, resourceType: C.RESOURCE_ENERGY});
             return true;
         }
     }
@@ -43,7 +44,7 @@ const focusClosest = function(context) {
         return false;
     }
 
-    const target = _.first(hostiles.sort(utils.comparatorDistance(core)));
+    const target = _.min(hostiles, c => utils.dist(c, core));
     if(!target) {
         return false;
     }
@@ -68,12 +69,30 @@ const focusClosest = function(context) {
     return true;
 };
 
+const maintainPopulation = function(name, setup, context) {
+    const {core, intents, defenders} = context;
+    if(_.some(defenders, {name})) {
+        return;
+    }
+
+    intents.set(core._id, 'createCreep', {
+        name,
+        body: setup.body,
+        boosts: setup.boosts
+    })
+};
+
 module.exports = {
     behaviors: {
         'default': function(context){
             reserveController(context);
             refillTowers(context);
             focusClosest(context);
+        },
+        'bunker5': function(context) {
+            reserveController(context);
+            refillTowers(context);
+            maintainPopulation('fortifier', creeps['fortifier'], context);
         }
     }
 };

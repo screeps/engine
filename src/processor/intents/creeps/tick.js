@@ -35,7 +35,7 @@ module.exports = function(object, scope) {
     if(!object || object.type != 'creep') return;
 
     if(object.spawning) {
-        var spawn = _.find(roomObjects, {type: 'spawn', x: object.x, y: object.y});
+        var spawn = _.find(roomObjects, o => o.x == object.x && o.y == object.y && (o.type == 'spawn' || o.type == 'invaderCore'));
         if(!spawn) {
             bulk.remove(object._id);
             delete roomObjects[object._id];

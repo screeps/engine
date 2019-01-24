@@ -2,7 +2,7 @@ const _ = require('lodash'),
     utils = require('../../../utils'),
     driver = utils.getDriver(),
     C = driver.constants,
-    stronghold = require('./stronghold');
+    stronghold = require('./stronghold/stronghold');
 
 module.exports = function(object, scope) {
     const {roomObjects, roomController} = scope;
@@ -30,7 +30,7 @@ module.exports = function(object, scope) {
             creeps.push(o);
             if(o.user == user) {
                 defenders.push(o);
-            } else {
+            } else if(o.user != '3') {
                 hostiles.push(o);
             }
             return;
