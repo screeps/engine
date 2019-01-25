@@ -2,7 +2,8 @@ const _ = require('lodash'),
     utils = require('../../../../utils'),
     driver = utils.getDriver(),
     C = driver.constants,
-    creeps = require('./creeps');
+    creeps = require('./creeps'),
+    fortifier = require('./fortifier');
 
 const range = function(a, b) {
     if(
@@ -30,6 +31,21 @@ const refillTowers = function(context) {
         const towerToCharge = _.min(underchargedTowers, 'energy');
         if(towerToCharge) {
             intents.set(core._id, 'transfer', {id: towerToCharge._id, amount: towerToCharge.energyCapacity - towerToCharge.energy, resourceType: C.RESOURCE_ENERGY});
+            return true;
+        }
+    }
+
+    return false;
+};
+
+const refillCreeps = function(context) {
+    const {core, intents, defenders} = context;
+
+    const underchargedCreeps = _.filter(defenders, c => (c.energyCapacity > 0) && (2*c.energy <= c.energyCapacity));
+    if(_.some(underchargedCreeps)) {
+        const creep = _.min(underchargedCreeps, 'energy');
+        if(creep) {
+            intents.set(core._id, 'transfer', {id: creep._id, amount: creep.energyCapacity - creep.energy, resourceType: C.RESOURCE_ENERGY});
             return true;
         }
     }
@@ -69,9 +85,11 @@ const focusClosest = function(context) {
     return true;
 };
 
-const maintainPopulation = function(name, setup, context) {
+const maintainCreep = function(name, setup, context, behavior) {
     const {core, intents, defenders} = context;
-    if(_.some(defenders, {name})) {
+    const creep = _.find(defenders, {name});
+    if(creep && behavior) {
+        behavior(creep, context);
         return;
     }
 
@@ -80,6 +98,35 @@ const maintainPopulation = function(name, setup, context) {
         body: setup.body,
         boosts: setup.boosts
     })
+};
+
+const antinuke = function(context) {
+    const { core, ramparts, roomObjects, bulk, gameTime } = context;
+    if(!!(gameTime % 10)) {
+        return;
+    }
+    const nukes = _.filter(roomObjects, {type: 'nuke'});
+    if(!_.some(nukes)) {
+        return;
+    }
+
+    const baseLevel = C.STRONGHOLD_RAMPART_HITS[core.level];
+    for(let rampart of ramparts) {
+        let hitsMax = baseLevel;
+        _.forEach(nukes, n => {
+            const range = utils.dist(rampart, n);
+            if(range == 0) {
+                hitsMax += C.NUKE_DAMAGE[0];
+                return;
+            }
+            if(range <= C.NUKE_RANGE) {
+                hitsMax += C.NUKE_DAMAGE[2];
+            }
+        });
+        if(rampart.hitsMax != hitsMax) {
+            bulk.update(rampart, {hitsMax});
+        }
+    }
 };
 
 module.exports = {
@@ -91,8 +138,10 @@ module.exports = {
         },
         'bunker5': function(context) {
             reserveController(context);
-            refillTowers(context);
-            maintainPopulation('fortifier', creeps['fortifier'], context);
+            refillTowers(context) || refillCreeps(context);
+
+            antinuke(context);
+            maintainCreep('fortifier', creeps['fortifier'], context, fortifier);
         }
     }
 };
