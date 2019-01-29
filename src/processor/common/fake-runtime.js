@@ -141,8 +141,8 @@ const defaultCostMatrix = function defaultCostMatrix(roomId, opts, creep, roomOb
 };
 
 const findPath = function findPath(source, target, opts, scope) {
-    const {roomTerrrain, roomObjects} = scope;
-    terrains = {[source.room]: roomTerrrain};
+    const {roomTerrain, roomObjects} = scope;
+    terrains = {[source.room]: roomTerrain};
 
     const roomCallback = function(roomName) {
         let costMatrix = defaultCostMatrix(roomName, opts, source, roomObjects);
@@ -245,8 +245,8 @@ const findClosestByPath = function findClosestByPath(fromPos, objects, opts, sco
         return null;
     }
 
-    const {roomTerrrain} = scope;
-    terrains = {[fromPos.room]: roomTerrrain};
+    const {roomTerrain} = scope;
+    terrains = {[fromPos.room]: roomTerrain};
 
     opts = opts || {};
     if(_.isUndefined(opts.range)) {

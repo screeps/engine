@@ -45,7 +45,7 @@ module.exports = function(creep, context) {
     if(haveAttack) {
         const nearCreep = _.find(hostiles, c => utils.dist(creep, c) <= 1);
         if(nearCreep) {
-            intents.set(creep._id, 'attack', { _id: nearCreep._id, x: nearCreep.x, y: nearCreep.y });
+            intents.set(creep._id, 'attack', { id: nearCreep._id, x: nearCreep.x, y: nearCreep.y });
         }
     }
 
@@ -98,7 +98,7 @@ module.exports = function(creep, context) {
         return;
     }
 
-    intents.set(creep._id, 'attack', { _id: target._id, x: target.x, y: target.y });
+    intents.set(creep._id, 'attack', { id: target._id, x: target.x, y: target.y });
     if((haveAttack || fakeRuntime.hasActiveBodyparts(creep, C.WORK)) && !!creep['memory_move'] && !!creep['memory_move']['path']) {
         if(!creep['memory_move']['path'].length) {
             return;
@@ -107,8 +107,8 @@ module.exports = function(creep, context) {
         const pos = fakeRuntime.RoomPosition.sUnpackLocal(creep['memory_move']['path'][0], creep.room);
         const structures = _.filter(roomObjects, o => !!C.CONTROLLER_STRUCTURES[o.type] && o.x == pos.x && o.y == pos.y);
         if(structures.length > 0) {
-            intents.set(creep._id, 'attack', { _id: structures[0]._id, x: structures[0].x, y: structures[0].y });
-            intents.set(creep._id, 'dismantle', { _id: structures[0]._id });
+            intents.set(creep._id, 'attack', { id: structures[0]._id, x: structures[0].x, y: structures[0].y });
+            intents.set(creep._id, 'dismantle', { id: structures[0]._id });
         }
     }
 };
