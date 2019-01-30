@@ -3,12 +3,6 @@ const _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-const fortifier = [
-    {part: C.WORK, count: 15, boost: 'XLH2O'},
-    {part: C.CARRY, count: 15},
-    {part: C.MOVE, count: 15}
-];
-
 const makeBody = function(description) {
     return _.reduce(description, (result, segment) => {
         _.times(segment.count, () => {result.body.push(segment.part); result.boosts.push(segment.boost)});
@@ -17,5 +11,13 @@ const makeBody = function(description) {
 };
 
 module.exports = {
-    'fortifier': makeBody(fortifier)
+    'fortifier': makeBody([
+        {part: C.WORK, count: 15, boost: 'XLH2O'},
+        {part: C.CARRY, count: 15},
+        {part: C.MOVE, count: 15}
+    ]),
+    'weakDefender': makeBody([
+        {part: C.ATTACK, count: 15},
+        {part: C.MOVE, count: 15}
+    ])
 };

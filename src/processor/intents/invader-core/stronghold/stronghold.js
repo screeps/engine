@@ -3,7 +3,8 @@ const _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants,
     creeps = require('./creeps'),
-    fortifier = require('./fortifier');
+    fortifier = require('./fortifier'),
+    simpleMelee = require('./simple-melee');
 
 const range = function(a, b) {
     if(
@@ -119,7 +120,7 @@ const antinuke = function(context) {
                 hitsMax += C.NUKE_DAMAGE[0];
                 return;
             }
-            if(range <= C.NUKE_RANGE) {
+            if(range <= 2) {
                 hitsMax += C.NUKE_DAMAGE[2];
             }
         });
@@ -142,6 +143,7 @@ module.exports = {
 
             antinuke(context);
             maintainCreep('fortifier', creeps['fortifier'], context, fortifier);
+            maintainCreep('defender1', creeps['weakDefender'], context, simpleMelee);
         }
     }
 };

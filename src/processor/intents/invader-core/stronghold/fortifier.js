@@ -21,7 +21,7 @@ module.exports = function(creep, context) {
         return;
     }
 
-    fakeRuntime.moveTo(creep, weakestRampart, {}, scope);
+    fakeRuntime.walkTo(creep, weakestRampart, { range: 3}, context);
     const weakestInRange = _.max(_.filter(ramparts, r => utils.dist(creep, r) <= 3), r => r.hitsMax - r.hits);
     intents.set(creep._id, 'repair', {id: weakestInRange._id, x: weakestInRange.x, y: weakestInRange.y});
 };

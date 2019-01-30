@@ -215,9 +215,9 @@ const moveTo = function moveTo(creep, target, opts, scope) {
     const targetPosition = new RoomPosition(target.x, target.y, target.room);
     if(
         !creep['memory_move'] ||
-        _.isUndefined(creep['memory_move']['dest']) ||
+        !creep['memory_move']['dest'] ||
+        !creep['memory_move']['time'] ||
         (creep['memory_move']['dest'] != targetPosition.sPackLocal()) ||
-        _.isUndefined(creep['memory_move']['time']) ||
         (gameTime > (creep['memory_move']['time'] + opts.reusePath))) {
 
         const result = findPath(
@@ -237,7 +237,29 @@ const moveTo = function moveTo(creep, target, opts, scope) {
         bulk.update(creep, {memory_move});
     }
 
-    return nextDirectionByPath(creep, creep['memory_move']['path']);
+    const direction = nextDirectionByPath(creep, creep['memory_move']['path']);
+    if(direction) {
+        bulk.update(creep, { memory_move: { lastMove: gameTime}});
+    }
+    return direction;
+};
+
+const walkTo = function (creep, target, opts, context) {
+    const { scope, intents } = context;
+    const { gameTime, bulk, roomObjects } = scope;
+
+    const direction = moveTo(creep, target, opts, scope);
+    if(!direction) {
+        return direction;
+    }
+
+    const offsets = utils.getOffsetsByDirection(direction);
+    const creepAhead = _.find(roomObjects, {type: 'creep', user: creep.user, x: creep.x+offsets[0], y: creep.y+offsets[1]});
+    if(creepAhead && (!creepAhead['memory_move'] || (creepAhead['memory_move']['lastMove'] && (creepAhead['memory_move']['lastMove']+1<gameTime)))) {
+        intents.set(creepAhead._id, 'move', {direction: utils.getDirection(creep.x-creepAhead.x, creep.y-creepAhead.y)});
+        bulk.update(creepAhead, { memory_move: { dest: null, time: null, path: null, lastMove: gameTime }});
+    }
+    intents.set(creep._id, 'move', {direction});
 };
 
 const findClosestByPath = function findClosestByPath(fromPos, objects, opts, scope) {
@@ -316,6 +338,7 @@ const hasActiveBodyparts = function hasActiveBodyparts(creep, part) {
 module.exports.findPath = findPath;
 module.exports.findClosestByPath = findClosestByPath;
 module.exports.moveTo = moveTo;
+module.exports.walkTo = walkTo;
 module.exports.flee = flee;
 module.exports.RoomPosition = RoomPosition;
 module.exports.CostMatrix = CostMatrix;
