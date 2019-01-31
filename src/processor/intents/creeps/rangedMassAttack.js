@@ -41,6 +41,9 @@ module.exports = function(object, intent, scope) {
         if(!target.hits) {
             continue;
         }
+        if(target.type == 'creep' && target.spawning) {
+            continue;
+        }
 
         var distance = Math.max(Math.abs(object.x - target.x), Math.abs(object.y - target.y));
 
