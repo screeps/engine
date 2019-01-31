@@ -1259,7 +1259,7 @@ exports.makePos = function(_register) {
                 if (val < 0 || val > 49 || val !== val) {
                     throw new Error('Invalid coordinate');
                 }
-                this.__packedPos = this.__packedPos & ~0xff | val << 8;
+                this.__packedPos = this.__packedPos & ~0xff | val;
             },
         },
 
