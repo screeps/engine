@@ -280,6 +280,10 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             if(!this.pos.inRangeTo(target, powerInfo.range)) {
                 return C.ERR_NOT_IN_RANGE;
             }
+            var currentEffect = _.find(target.effects, i => i.power == power);
+            if(currentEffect && currentEffect.level >= powerData.level && currentEffect.ticksRemaining > 0) {
+                return C.ERR_FULL;
+            }
         }
         if(!this.room.controller.isPowerEnabled) {
             return C.ERR_INVALID_ARGS;
@@ -317,6 +321,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
         if(_.any(runtimeData.userPowerCreeps, {name})) {
             return C.ERR_NAME_EXISTS;
+        }
+        if(Object.values(C.POWER_CLASS).indexOf(className) === -1) {
+            return C.ERR_INVALID_ARGS;
         }
         intents.pushByName('global', 'createPowerCreep', {name, className}, 50);
         return C.OK;

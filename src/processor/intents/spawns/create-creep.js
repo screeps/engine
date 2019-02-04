@@ -6,7 +6,7 @@ var _ = require('lodash'),
 
 module.exports = function(spawn, intent, scope) {
 
-    const {roomObjects, bulk, roomController, stats} = scope;
+    const {roomObjects, bulk, roomController, stats, gameTime} = scope;
 
     if(spawn.spawning) {
         return;
@@ -46,11 +46,18 @@ module.exports = function(spawn, intent, scope) {
 
     stats.inc('creepsProduced', spawn.user, intent.body.length);
 
+    var needTime = C.CREEP_SPAWN_TIME * intent.body.length;
+
+    var effect = _.find(spawn.effects, {power: C.PWR_OPERATE_SPAWN});
+    if(effect && effect.endTime > gameTime) {
+        needTime = Math.ceil(needTime * C.POWER_INFO[C.PWR_OPERATE_SPAWN].effect[effect.level-1]);
+    }
+
     bulk.update(spawn, {
         spawning: {
             name: intent.name,
-            needTime: C.CREEP_SPAWN_TIME * intent.body.length,
-            remainingTime: C.CREEP_SPAWN_TIME * intent.body.length,
+            needTime,
+            remainingTime: needTime,
             directions
         }
     });

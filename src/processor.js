@@ -348,6 +348,12 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             if (object.type == 'storage') {
                 if (scope.roomController) {
                     var energyCapacity = scope.roomController.level > 0 && scope.roomController.user == object.user && C.CONTROLLER_STRUCTURES.storage[scope.roomController.level] > 0 ? C.STORAGE_CAPACITY : 0;
+                    if(energyCapacity > 0) {
+                        var effect = _.find(object.effects, {power: C.PWR_OPERATE_STORAGE});
+                        if (effect && effect.endTime > scope.gameTime) {
+                            energyCapacity += C.POWER_INFO[C.PWR_OPERATE_STORAGE].effect[effect.level-1];
+                        }
+                    }
                     if (energyCapacity != object.energyCapacity) {
                         bulk.update(object, {energyCapacity});
                     }

@@ -33,6 +33,10 @@ module.exports = function(object, intent, scope) {
         if(utils.dist(object, target) > powerInfo.range) {
             return;
         }
+        var currentEffect = _.find(target.effects, i => i.power == intent.power);
+        if(currentEffect && currentEffect.level >= creepPower.level && currentEffect.endTime > gameTime) {
+            return;
+        }
     }
 
     var applyEffectOnTarget = false;
@@ -110,7 +114,14 @@ module.exports = function(object, intent, scope) {
             if(target.type != 'spawn') {
                 return;
             }
-            applyEffectOnTarget = true;
+            if(!target.spawning) {
+                return;
+            }
+            bulk.update(target, {
+                spawning: {
+                    remainingTime: target.spawning.remainingTime + powerInfo.effect[creepPower.level-1]
+                }
+            });
             break;
         }
 
@@ -130,7 +141,7 @@ module.exports = function(object, intent, scope) {
             break;
         }
 
-        case C.PWR_EXTEND_SOURCE: {
+        case C.PWR_REGENERATE_SOURCE: {
             if(target.type != 'source') {
                 return;
             }
@@ -138,7 +149,7 @@ module.exports = function(object, intent, scope) {
             break;
         }
 
-        case C.PWR_EXTEND_MINERAL: {
+        case C.PWR_REGENERATE_MINERAL: {
             if(target.type != 'mineral') {
                 return;
             }
