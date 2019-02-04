@@ -6,8 +6,10 @@ var q = require('q'),
 
 module.exports = function(intent, user, {userPowerCreeps, bulkUsersPowerCreeps}) {
 
+    var thisUserPowerCreeps = _.filter(userPowerCreeps, i => i.user == user._id);
+
     var powerLevel = Math.floor(Math.pow((user.power || 0) / C.POWER_LEVEL_MULTIPLY, 1 / C.POWER_LEVEL_POW));
-    var used = Object.keys(userPowerCreeps).length + _.sum(userPowerCreeps, 'level');
+    var used = thisUserPowerCreeps.length + _.sum(thisUserPowerCreeps, 'level');
     if(used >= powerLevel) {
         return;
     }
@@ -18,7 +20,7 @@ module.exports = function(intent, user, {userPowerCreeps, bulkUsersPowerCreeps})
 
     var name = intent.name.substring(0,50);
 
-    if(_.any(userPowerCreeps, {name})) {
+    if(_.any(thisUserPowerCreeps, {name})) {
         return;
     }
 

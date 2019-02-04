@@ -6,13 +6,15 @@ var q = require('q'),
 
 module.exports = function(intent, user, {roomObjectsByType, userPowerCreeps, gameTime, bulkObjects, bulkUsersPowerCreeps}) {
 
+    var thisUserPowerCreeps = _.filter(userPowerCreeps, i => i.user == user._id);
+
     var powerLevel = Math.floor(Math.pow((user.power || 0) / C.POWER_LEVEL_MULTIPLY, 1 / C.POWER_LEVEL_POW));
-    var used = Object.keys(userPowerCreeps).length + _.sum(userPowerCreeps, 'level');
+    var used = thisUserPowerCreeps.length + _.sum(thisUserPowerCreeps, 'level');
     if(used >= powerLevel) {
         return;
     }
 
-    var powerCreep = _.find(userPowerCreeps, i => i.user == user._id && i._id == intent.id);
+    var powerCreep = _.find(thisUserPowerCreeps, i => i._id == intent.id);
     if (!powerCreep) {
         return;
     }
