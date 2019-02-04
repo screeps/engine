@@ -215,7 +215,12 @@ exports.execute = function(object, scope) {
 
     if(road) {
         fatigueRate = 1;
-        road.nextDecayTime -= C.ROAD_WEAROUT * object.body.length;
+        if(object.type == 'powerCreep') {
+            road.nextDecayTime -= C.ROAD_WEAROUT_POWER_CREEP;
+        }
+        else {
+            road.nextDecayTime -= C.ROAD_WEAROUT * object.body.length;
+        }
         bulk.update(road, {nextDecayTime: road.nextDecayTime});
     }
 
