@@ -4,10 +4,10 @@ var q = require('q'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(intent, user, {userPowerCreeps, gameTime, bulkObjects, bulkUsersPowerCreeps}) {
+module.exports = function(intent, user, {userPowerCreeps, bulkObjects, bulkUsersPowerCreeps}) {
 
     var powerCreep = _.find(userPowerCreeps, i => i.user == user._id && i._id == intent.id);
-    if (!powerCreep || powerCreep.spawnCooldownTime === null || powerCreep.spawnCooldownTime > gameTime) {
+    if (!powerCreep || powerCreep.spawnCooldownTime === null || powerCreep.spawnCooldownTime > Date.now()) {
         return;
     }
 

@@ -36,9 +36,9 @@ module.exports = function(object, {bulk, gameTime}) {
         }
     }
 
-    var effect = _.find(object.effects, {power: C.PWR_REGENERATE_MINERAL});
+    var effect = _.find(object.effects, {power: C.PWR_REGEN_MINERAL});
     if(effect && effect.endTime > gameTime) {
-        const powerInfo = C.POWER_INFO[C.PWR_REGENERATE_MINERAL];
+        const powerInfo = C.POWER_INFO[C.PWR_REGEN_MINERAL];
         if(((effect.endTime - gameTime - 1) % powerInfo.period) === 0) {
             bulk.update(object, {
                 mineralAmount: object.mineralAmount + powerInfo.effect[effect.level - 1]

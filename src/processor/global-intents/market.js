@@ -34,6 +34,11 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
         var range = utils.calcRoomsDistance(fromTerminal.room, toTerminal.room, true);
         var transferCost = utils.calcTerminalEnergyCost(amount,range);
 
+        var effect = _.find(transferFeeTerminal.effects, {power: C.PWR_OPERATE_TERMINAL});
+        if(effect && effect.endTime > gameTime) {
+            transferCost = Math.ceil(transferCost * C.POWER_INFO[C.PWR_OPERATE_TERMINAL].effect[effect.level-1]);
+        }
+
         if(transferFeeTerminal === fromTerminal &&
             (resourceType != C.RESOURCE_ENERGY && fromTerminal.energy < transferCost ||
              resourceType == C.RESOURCE_ENERGY && fromTerminal.energy < amount + transferCost) ||
@@ -76,10 +81,16 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
             return;
         }
 
+        var cooldown = C.TERMINAL_COOLDOWN;
+        var effect = _.find(terminal.effects, {power: C.PWR_OPERATE_TERMINAL});
+        if(effect && effect.endTime > gameTime) {
+            cooldown = Math.round(cooldown * C.POWER_INFO[C.PWR_OPERATE_TERMINAL].effect[effect.level-1]);
+        }
+
         if(executeTransfer(terminal, terminalsByRoom[intent.targetRoomName], intent.resourceType, intent.amount, terminal, {
             description: intent.description ? intent.description.replace(/</g, '&lt;') : undefined
         })) {
-            bulkObjects.update(terminal, {cooldownTime: gameTime + C.TERMINAL_COOLDOWN});
+            bulkObjects.update(terminal, {cooldownTime: gameTime + cooldown});
         }
     });
 

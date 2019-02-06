@@ -91,6 +91,19 @@ module.exports = function(object, intent, scope) {
         }
 
         case C.PWR_OPERATE_EXTENSION: {
+            if(target.type != 'storage' && target.type != 'terminal' && target.type !== 'container') {
+                return;
+            }
+            var energyLimit = powerInfo.effect[creepPower.level-1];
+            var extensions = _.filter(roomObjects, {type: 'extension'});
+            extensions.sort(utils.comparatorDistance(target));
+            extensions.every((object) => {
+                var energy = Math.min(energyLimit, target.energy, object.energyCapacity - object.energy);
+                bulk.update(object, {energy: object.energy + energy});
+                bulk.update(target, {energy: target.energy - energy});
+                energyLimit -= energy;
+                return energyLimit > 0 && target.energy > 0;
+            });
             break;
         }
 
@@ -141,7 +154,7 @@ module.exports = function(object, intent, scope) {
             break;
         }
 
-        case C.PWR_REGENERATE_SOURCE: {
+        case C.PWR_REGEN_SOURCE: {
             if(target.type != 'source') {
                 return;
             }
@@ -149,7 +162,7 @@ module.exports = function(object, intent, scope) {
             break;
         }
 
-        case C.PWR_REGENERATE_MINERAL: {
+        case C.PWR_REGEN_MINERAL: {
             if(target.type != 'mineral') {
                 return;
             }
@@ -159,6 +172,30 @@ module.exports = function(object, intent, scope) {
 
         case C.PWR_DISRUPT_TERMINAL: {
             if(target.type != 'terminal') {
+                return;
+            }
+            applyEffectOnTarget = true;
+            break;
+        }
+
+        case C.PWR_OPERATE_CONTROLLER: {
+            if(target.type != 'controller') {
+                return;
+            }
+            applyEffectOnTarget = true;
+            break;
+        }
+
+        case C.PWR_OPERATE_POWER: {
+            if(target.type != 'powerSpawn') {
+                return;
+            }
+            applyEffectOnTarget = true;
+            break;
+        }
+
+        case C.PWR_FORTIFY: {
+            if(target.type != 'rampart' && target.type != 'constructedWall') {
                 return;
             }
             applyEffectOnTarget = true;

@@ -128,6 +128,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 object._actionLog = object.actionLog;
                 object.actionLog = {
                     attack: null,
+                    healed: null,
                     power: null,
                     say: null,
                 };

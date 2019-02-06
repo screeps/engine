@@ -20,9 +20,9 @@ module.exports = function(object, {bulk, roomController, gameTime}) {
             });
         }
 
-        var effect = _.find(object.effects, {power: C.PWR_REGENERATE_SOURCE});
+        var effect = _.find(object.effects, {power: C.PWR_REGEN_SOURCE});
         if(effect && effect.endTime > gameTime) {
-            const powerInfo = C.POWER_INFO[C.PWR_REGENERATE_SOURCE];
+            const powerInfo = C.POWER_INFO[C.PWR_REGEN_SOURCE];
             if(((effect.endTime - gameTime - 1) % powerInfo.period) === 0) {
                 bulk.update(object, {
                     energy: Math.min(object.energyCapacity, object.energy + powerInfo.effect[effect.level - 1])

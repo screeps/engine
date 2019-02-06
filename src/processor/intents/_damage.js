@@ -20,6 +20,12 @@ module.exports = function(object, target, damage, attackType, scope) {
         target._damageToApply = (target._damageToApply || 0) + damage;
     }
     else {
+        if(target.type == 'wall' || target.type == 'rampart') {
+            var effect = _.find(target.effects, {power: C.PWR_FORTIFY});
+            if(effect && effect.endTime > gameTime) {
+                return;
+            }
+        }
         target.hits -= damage;
     }
 

@@ -4,8 +4,8 @@ var q = require('q'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(intent, user, {roomObjectsByType, userPowerCreeps, gameTime, bulkObjects,
-    bulkUsersPowerCreeps, shardName}) {
+module.exports = function(intent, user, {roomObjectsByType, userPowerCreeps, bulkObjects,
+    bulkUsersPowerCreeps, shardName, gameTime}) {
 
     const powerSpawn = _.find(roomObjectsByType.powerSpawn, i => i._id == intent.id);
     if(!powerSpawn || powerSpawn.user != user._id)
@@ -13,7 +13,7 @@ module.exports = function(intent, user, {roomObjectsByType, userPowerCreeps, gam
 
 
     var powerCreep = _.find(userPowerCreeps, i => i.user == user._id && i.name == intent.name);
-    if (!powerCreep || powerCreep.spawnCooldownTime === null || powerCreep.spawnCooldownTime > gameTime) {
+    if (!powerCreep || powerCreep.spawnCooldownTime === null || powerCreep.spawnCooldownTime > Date.now()) {
         return;
     }
 
@@ -23,7 +23,8 @@ module.exports = function(intent, user, {roomObjectsByType, userPowerCreeps, gam
         x: powerSpawn.x,
         y: powerSpawn.y,
         hits: powerCreep.hitsMax,
-        spawnCooldownTime: null
+        spawnCooldownTime: null,
+        ageTime: gameTime + C.CREEP_LIFE_TIME
     }), powerCreep._id);
 
     bulkUsersPowerCreeps.update(powerCreep, {

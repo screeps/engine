@@ -62,7 +62,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         className: (o) => o.className,
         level: (o) => o.level,
         hitsMax: (o) => o.hitsMax,
-        spawnCooldown: (o) => o.spawnCooldownTime !== null ? Math.max(0, o.spawnCooldownTime - runtimeData.time) : undefined,
+        spawnCooldownTime: (o) => o.spawnCooldownTime !== null && o.spawnCooldownTime > Date.now() ? o.spawnCooldownTime : undefined,
         carryCapacity: (o) => o.energyCapacity,
     });
 
@@ -89,6 +89,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
             return result;
         },
+        ticksToLive: (o) => o.ageTime - runtimeData.time,
     });
 
     Object.defineProperty(PowerCreep.prototype, 'memory', {
@@ -192,7 +193,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
 
-        if(this.spawnCooldown !== 0) {
+        if(this.spawnCooldownTime) {
             return C.ERR_BUSY;
         }
 
@@ -295,6 +296,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     PowerCreep.prototype.enableRoom = register.wrapFn(function(target) {
 
+        if(!this.my) {
+            return C.ERR_NOT_OWNER;
+        }
         if(!this.room) {
             return C.ERR_BUSY;
         }
@@ -311,6 +315,26 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
 
         intents.set(this.id, 'enableRoom', {id: target.id});
+        return C.OK;
+    });
+
+    PowerCreep.prototype.renew = register.wrapFn(function(target) {
+
+        if(!this.my) {
+            return C.ERR_NOT_OWNER;
+        }
+        if(!this.room) {
+            return C.ERR_BUSY;
+        }
+
+        if(!target || !target.id || !register.structures[target.id] || !(target instanceof globals.StructurePowerBank)) {
+            register.assertTargetObject(target);
+            return C.ERR_INVALID_TARGET;
+        }
+        if(!target.pos.isNearTo(this.pos)) {
+            return C.ERR_NOT_IN_RANGE;
+        }
+        intents.set(this.id, 'renew', {id: target.id});
         return C.OK;
     });
 

@@ -4,7 +4,7 @@ var _ = require('lodash'),
     C = driver.constants;
 
 
-module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, roomController, stats}) {
+module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, roomController, stats, gameTime}) {
 
     if(object.type != 'powerSpawn')
         return;
@@ -17,10 +17,16 @@ module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, roomCon
         return;
     }
 
-    object.power--;
-    object.energy -= C.POWER_SPAWN_ENERGY_RATIO;
+    var amount = 1;
+    var effect = _.find(object.effects, {power: C.PWR_OPERATE_POWER});
+    if(effect && effect.endTime >= gameTime) {
+        amount = Math.min(object.power, amount + C.POWER_INFO[C.PWR_OPERATE_POWER].effect[effect.level-1]);
+    }
 
-    stats.inc('powerProcessed', object.user, 1);
+    object.power -= amount;
+    object.energy -= amount * C.POWER_SPAWN_ENERGY_RATIO;
+
+    stats.inc('powerProcessed', object.user, amount);
 
     bulk.update(object, {
         energy: object.energy,
@@ -28,6 +34,6 @@ module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, roomCon
     });
 
     if(bulkUsers.inc) {
-        bulkUsers.inc(object.user, 'power', 1);
+        bulkUsers.inc(object.user, 'power', amount);
     }
 };
