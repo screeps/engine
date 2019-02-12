@@ -8,12 +8,16 @@ module.exports = function(intent, user, {roomObjectsByType, userPowerCreeps, bul
     bulkUsersPowerCreeps, shardName, gameTime}) {
 
     const powerSpawn = _.find(roomObjectsByType.powerSpawn, i => i._id == intent.id);
-    if(!powerSpawn || powerSpawn.user != user._id)
+    if(!powerSpawn || powerSpawn.user != user._id || powerSpawn._justSpawned)
         return;
 
 
     var powerCreep = _.find(userPowerCreeps, i => i.user == user._id && i.name == intent.name);
     if (!powerCreep || powerCreep.spawnCooldownTime === null || powerCreep.spawnCooldownTime > Date.now()) {
+        return;
+    }
+
+    if(_.any(roomObjectsByType.powerCreep, {room: powerSpawn.room, x: powerSpawn.x, y: powerSpawn.y})) {
         return;
     }
 
@@ -24,11 +28,14 @@ module.exports = function(intent, user, {roomObjectsByType, userPowerCreeps, bul
         y: powerSpawn.y,
         hits: powerCreep.hitsMax,
         spawnCooldownTime: null,
-        ageTime: gameTime + C.CREEP_LIFE_TIME
+        ageTime: gameTime + C.POWER_CREEP_LIFE_TIME
     }), powerCreep._id);
 
     bulkUsersPowerCreeps.update(powerCreep, {
         shard: shardName,
-        spawnCooldownTime: null
+        spawnCooldownTime: null,
+        deleteTime: null
     });
+
+    powerSpawn._justSpawned = true;
 };

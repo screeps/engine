@@ -63,6 +63,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         level: (o) => o.level,
         hitsMax: (o) => o.hitsMax,
         spawnCooldownTime: (o) => o.spawnCooldownTime !== null && o.spawnCooldownTime > Date.now() ? o.spawnCooldownTime : undefined,
+        deleteTime: (o) => o.deleteTime || undefined,
         carryCapacity: (o) => o.energyCapacity,
     });
 
@@ -327,7 +328,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_BUSY;
         }
 
-        if(!target || !target.id || !register.structures[target.id] || !(target instanceof globals.StructurePowerBank)) {
+        if(!target || !target.id || !register.structures[target.id] || !(target instanceof globals.StructurePowerBank) && !(target instanceof globals.StructurePowerSpawn)) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }

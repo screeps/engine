@@ -701,28 +701,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    StructurePowerSpawn.prototype.renewPowerCreep = register.wrapFn(function(target) {
-
-        if(!target || !target.id || !(target instanceof globals.PowerCreep)) {
-            register.assertTargetObject(target);
-            return C.ERR_INVALID_TARGET;
-        }
-        if(!this.my) {
-            return C.ERR_NOT_OWNER;
-        }
-        if(!target.room) {
-            return C.ERR_BUSY;
-        }
-        if(runtimeData.roomObjects[this.id].off) {
-            return C.ERR_RCL_NOT_ENOUGH;
-        }
-        if(!target.pos.isNearTo(this.pos)) {
-            return C.ERR_NOT_IN_RANGE;
-        }
-        intents.set(this.id, 'renewPowerCreep', {id: target.id});
-        return C.OK;
-    });
-
     Object.defineProperty(globals, 'StructurePowerSpawn', {enumerable: true, value: StructurePowerSpawn});
 
     /**

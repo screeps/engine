@@ -898,11 +898,6 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                 id: ""+objectIntentsResult.enableRoom.id
             };
         }
-        if(objectIntentsResult.renewPowerCreep) {
-            objectIntents.renewPowerCreep = {
-                id: ""+objectIntentsResult.renewPowerCreep.id
-            };
-        }
         if(objectIntentsResult.renew) {
             objectIntents.renew = {
                 id: ""+objectIntentsResult.renew.id
