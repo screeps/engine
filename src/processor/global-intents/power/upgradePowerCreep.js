@@ -9,7 +9,7 @@ module.exports = function(intent, user, {roomObjectsByType, userPowerCreeps, gam
     var thisUserPowerCreeps = _.filter(userPowerCreeps, i => i.user == user._id);
 
     var powerLevel = Math.floor(Math.pow((user.power || 0) / C.POWER_LEVEL_MULTIPLY, 1 / C.POWER_LEVEL_POW));
-    var used = thisUserPowerCreeps.length + _.sum(thisUserPowerCreeps, 'level');
+    var used = thisUserPowerCreeps.length + _.sum(thisUserPowerCreeps, 'level') + (user._usedPowerLevels||0);
     if(used >= powerLevel) {
         return;
     }
@@ -33,6 +33,9 @@ module.exports = function(intent, user, {roomObjectsByType, userPowerCreeps, gam
     let level = powerCreep.level;
     if(!powerCreep.powers[intent.power]) {
         powerCreep.powers[intent.power] = {level: 0};
+    }
+    if(powerCreep.powers[intent.power].level == 5) {
+        return;
     }
 
     if(level < powerInfo.level[powerCreep.powers[intent.power].level]) {

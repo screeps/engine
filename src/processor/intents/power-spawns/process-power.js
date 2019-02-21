@@ -13,14 +13,14 @@ module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, roomCon
         return;
     }
 
-    if(!object.power || object.energy < C.POWER_SPAWN_ENERGY_RATIO) {
-        return;
-    }
-
     var amount = 1;
     var effect = _.find(object.effects, {power: C.PWR_OPERATE_POWER});
     if(effect && effect.endTime >= gameTime) {
         amount = Math.min(object.power, amount + C.POWER_INFO[C.PWR_OPERATE_POWER].effect[effect.level-1]);
+    }
+
+    if(object.power < amount || object.energy < amount * C.POWER_SPAWN_ENERGY_RATIO) {
+        return;
     }
 
     object.power -= amount;

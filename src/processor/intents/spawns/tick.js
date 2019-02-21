@@ -5,11 +5,13 @@ var _ = require('lodash'),
 
 module.exports = function(object, scope) {
 
-    const {roomObjects, bulk, roomController, energyAvailable} = scope;
+    const {roomObjects, bulk, roomController, energyAvailable, gameTime} = scope;
 
     if(!object || object.type != 'spawn') return;
 
-    if(object.spawning) {
+    var effect = _.find(object.effects, {power: C.PWR_DISRUPT_SPAWN});
+
+    if(object.spawning && (!effect || effect.endTime <= gameTime)) {
         object.spawning.remainingTime--;
 
         if(object.spawning.remainingTime <= 0) {

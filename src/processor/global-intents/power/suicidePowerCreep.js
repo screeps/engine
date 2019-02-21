@@ -4,17 +4,14 @@ var q = require('q'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(intent, user, {userPowerCreeps, bulkObjects, bulkUsersPowerCreeps}) {
+module.exports = function(intent, user, scope) {
 
-    var powerCreep = _.find(userPowerCreeps, i => i.user == user._id && i._id == intent.id);
-    if (!powerCreep || powerCreep.spawnCooldownTime !== null) {
+    const {roomObjectsByType} = scope;
+
+    var powerCreep = _.find(roomObjectsByType.powerCreep, i => i.user == user._id && i._id == intent.id);
+    if (!powerCreep) {
         return;
     }
 
-    bulkObjects.remove(powerCreep._id);
-
-    bulkUsersPowerCreeps.update(powerCreep, {
-        shard: null,
-        spawnCooldownTime: Date.now() + C.POWER_CREEP_SPAWN_COOLDOWN
-    });
+    require('./_diePowerCreep')(powerCreep, scope);
 };

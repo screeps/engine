@@ -1,6 +1,6 @@
 var _ = require('lodash');
 
-var creepActions = ['move','usePower','withdraw','transfer','say','withdraw','transfer','drop','pickup','enableRoom','renew'];
+var creepActions = ['move','usePower','withdraw','transfer','say','drop','pickup','enableRoom','renew'];
 
 var modules = require('bulk-require')(__dirname, ['*.js']);
 

@@ -41,6 +41,26 @@ module.exports = function(object, scope) {
         eventLog.push({event: C.EVENT_EXIT, objectId: object._id, data: {room, x, y}});
     }
 
+    let hits = object.hits;
+
+    if (object._damageToApply) {
+        hits -= object._damageToApply;
+        delete object._damageToApply;
+    }
+
+    if (object._healToApply) {
+        hits += object._healToApply;
+        delete object._healToApply;
+    }
+
+    if(hits > object.hitsMax) {
+        hits = object.hitsMax;
+    }
+
+    if(hits != object.hits) {
+        bulk.update(object, {hits});
+    }
+
     if(!_.isEqual(object.actionLog, object._actionLog)) {
         bulk.update(object, {actionLog: object.actionLog});
     }

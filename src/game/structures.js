@@ -636,7 +636,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         var [tx,ty] = utils.roomNameToXY(roomName);
         var [x,y] = utils.roomNameToXY(data(this.id).room);
 
-        if(Math.abs(tx-x) > C.OBSERVER_RANGE || Math.abs(ty-y) > C.OBSERVER_RANGE) {
+        var effect = _.find(this.effects, i => i.power == C.PWR_OPERATE_OBSERVER);
+        if(!effect || effect.ticksRemaining <= 0 &&
+            (Math.abs(tx-x) > C.OBSERVER_RANGE || Math.abs(ty-y) > C.OBSERVER_RANGE)) {
             return C.ERR_NOT_IN_RANGE;
         }
 
@@ -846,8 +848,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
-        if(!target || !target.id || !register.creeps[target.id] && !register.structures[target.id] ||
-        !(target instanceof globals.Creep) && !(target instanceof globals.StructureSpawn) && !(target instanceof globals.Structure)) {
+        if(!target || !target.id || !register.creeps[target.id] && !register.powerCreeps[target.id] && !register.structures[target.id] ||
+        !(target instanceof globals.Creep) && !(target instanceof globals.PowerCreep) && !(target instanceof globals.StructureSpawn) && !(target instanceof globals.Structure)) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
@@ -866,7 +868,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
-        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
+        if(!target || !target.id || !register.creeps[target.id] && !register.powerCreeps[target.id] ||
+            !(target instanceof globals.Creep) && !(target instanceof globals.PowerCreep)) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }

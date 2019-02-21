@@ -10,6 +10,10 @@ module.exports = function(object, intent, scope) {
         return;
     }
 
+    if(roomController.user != object.user && roomController.safeMode > gameTime) {
+        return;
+    }
+
     const powerInfo = C.POWER_INFO[intent.power];
     if(!powerInfo) {
         return;
@@ -34,7 +38,7 @@ module.exports = function(object, intent, scope) {
             return;
         }
         var currentEffect = _.find(target.effects, i => i.power == intent.power);
-        if(currentEffect && currentEffect.level >= creepPower.level && currentEffect.endTime > gameTime) {
+        if(currentEffect && currentEffect.level > creepPower.level && currentEffect.endTime > gameTime) {
             return;
         }
     }
@@ -94,6 +98,10 @@ module.exports = function(object, intent, scope) {
             if(target.type != 'storage' && target.type != 'terminal' && target.type !== 'container') {
                 return;
             }
+            var effect = _.find(target.effects, {power: C.PWR_DISRUPT_TERMINAL});
+            if(effect && effect.endTime > gameTime) {
+                return;
+            }
             var energyLimit = powerInfo.effect[creepPower.level-1];
             var extensions = _.filter(roomObjects, {type: 'extension'});
             extensions.sort(utils.comparatorDistance(target));
@@ -127,14 +135,7 @@ module.exports = function(object, intent, scope) {
             if(target.type != 'spawn') {
                 return;
             }
-            if(!target.spawning) {
-                return;
-            }
-            bulk.update(target, {
-                spawning: {
-                    remainingTime: target.spawning.remainingTime + powerInfo.effect[creepPower.level-1]
-                }
-            });
+            applyEffectOnTarget = true;
             break;
         }
 
@@ -199,6 +200,33 @@ module.exports = function(object, intent, scope) {
                 return;
             }
             applyEffectOnTarget = true;
+            break;
+        }
+
+        case C.PWR_SHIELD: {
+            if(_.any(roomObjects, i => i.type == 'rampart' && i.x == object.x && i.y == object.y)) {
+                return;
+            }
+            if(object.x >= 49 || object.y >= 49 || object.x <= 0 || object.y <= 0) {
+                return;
+            }
+            bulk.insert({
+                type: 'rampart',
+                room: object.room,
+                x: object.x,
+                y: object.y,
+                user: object.user,
+                hits: powerInfo.effect[creepPower.level-1],
+                hitsMax: 0,
+                nextDecayTime: gameTime + powerInfo.duration,
+                effects: [
+                    {
+                        power: C.PWR_SHIELD,
+                        level: creepPower.level,
+                        endTime: gameTime + powerInfo.duration
+                    }
+                ]
+            });
             break;
         }
     }

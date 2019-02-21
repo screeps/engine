@@ -127,7 +127,9 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             if (object.type == 'powerCreep') {
                 object._actionLog = object.actionLog;
                 object.actionLog = {
+                    spawned: null,
                     attack: null,
+                    attacked: null,
                     healed: null,
                     power: null,
                     say: null,

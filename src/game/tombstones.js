@@ -48,91 +48,189 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         store: _storeGetter,
         ticksToDecay: (o) => o.decayTime - runtimeData.time,
         creep: (o) => {
-            let creep = new globals.Creep();
-            globals.RoomObject.call(creep, o.x, o.y, o.room);
-            Object.defineProperties(creep, {
-                id: {
-                    enumerable: true,
-                    get() {
-                        return o.creepId;
-                    }
-                },
-                name: {
-                    enumerable: true,
-                    get() {
-                        return o.creepName;
-                    }
-                },
-                spawning: {
-                    enumerable: true,
-                    get() {
-                        return false;
-                    }
-                },
-                my: {
-                    enumerable: true,
-                    get() {
-                        return o.user == runtimeData.user._id;
-                    }
-                },
-                body: {
-                    enumerable: true,
-                    get() {
-                        return _.map(o.creepBody, type => ({ type, hits: 0 }))
-                    }
-                },
-                owner: {
-                    enumerable: true,
-                    get() {
-                        return _.isUndefined(o.user) || o.user === null ? undefined : {
-                            username: runtimeData.users[o.user].username
+            if(o.creepId) {
+                let creep = new globals.Creep();
+                globals.RoomObject.call(creep, o.x, o.y, o.room);
+                Object.defineProperties(creep, {
+                    id: {
+                        enumerable: true,
+                        get() {
+                            return o.creepId;
+                        }
+                    },
+                    name: {
+                        enumerable: true,
+                        get() {
+                            return o.creepName;
+                        }
+                    },
+                    spawning: {
+                        enumerable: true,
+                        get() {
+                            return false;
+                        }
+                    },
+                    my: {
+                        enumerable: true,
+                        get() {
+                            return o.user == runtimeData.user._id;
+                        }
+                    },
+                    body: {
+                        enumerable: true,
+                        get() {
+                            return _.map(o.creepBody, type => ({type, hits: 0}))
+                        }
+                    },
+                    owner: {
+                        enumerable: true,
+                        get() {
+                            return _.isUndefined(o.user) || o.user === null ? undefined : {
+                                username: runtimeData.users[o.user].username
+                            }
+                        }
+                    },
+                    ticksToLive: {
+                        enumerable: true,
+                        get() {
+                            return o.creepTicksToLive;
+                        }
+                    },
+                    carryCapacity: {
+                        enumerable: true,
+                        get() {
+                            return _.reduce(o.creepBody,
+                                (result, type) => result += type === C.CARRY ? C.CARRY_CAPACITY : 0, 0);
+                        }
+                    },
+                    carry: {
+                        enumerable: true,
+                        get() {
+                            return {energy: 0};
+                        }
+                    },
+                    fatigue: {
+                        enumerable: true,
+                        get() {
+                            return 0;
+                        }
+                    },
+                    hits: {
+                        enumerable: true,
+                        get() {
+                            return 0;
+                        }
+                    },
+                    hitsMax: {
+                        enumerable: true,
+                        get() {
+                            return o.creepBody.length * 100;
+                        }
+                    },
+                    saying: {
+                        enumerable: true,
+                        get() {
+                            return o.creepSaying;
                         }
                     }
-                },
-                ticksToLive: {
-                    enumerable: true,
-                    get() {
-                        return o.creepTicksToLive;
+                });
+                return creep;
+            }
+
+            if(o.powerCreepId) {
+
+                let powerCreep = new globals.PowerCreep();
+                globals.RoomObject.call(powerCreep, o.x, o.y, o.room);
+                Object.defineProperties(powerCreep, {
+                    id: {
+                        enumerable: true,
+                        get() {
+                            return o.powerCreepId;
+                        }
+                    },
+                    name: {
+                        enumerable: true,
+                        get() {
+                            return o.powerCreepName;
+                        }
+                    },
+                    className: {
+                        enumerable: true,
+                        get() {
+                            return o.powerCreepClassName;
+                        }
+                    },
+                    level: {
+                        enumerable: true,
+                        get() {
+                            return o.powerCreepLevel;
+                        }
+                    },
+                    my: {
+                        enumerable: true,
+                        get() {
+                            return o.user == runtimeData.user._id;
+                        }
+                    },
+                    body: {
+                        enumerable: true,
+                        get() {
+                            return _.map(o.creepBody, type => ({type, hits: 0}))
+                        }
+                    },
+                    owner: {
+                        enumerable: true,
+                        get() {
+                            return _.isUndefined(o.user) || o.user === null ? undefined : {
+                                username: runtimeData.users[o.user].username
+                            }
+                        }
+                    },
+                    ticksToLive: {
+                        enumerable: true,
+                        get() {
+                            return o.powerCreepTicksToLive;
+                        }
+                    },
+                    carryCapacity: {
+                        enumerable: true,
+                        get() {
+                            return o.powerCreepLevel * 100;
+                        }
+                    },
+                    carry: {
+                        enumerable: true,
+                        get() {
+                            return {energy: 0};
+                        }
+                    },
+                    hits: {
+                        enumerable: true,
+                        get() {
+                            return 0;
+                        }
+                    },
+                    hitsMax: {
+                        enumerable: true,
+                        get() {
+                            return o.powerCreepLevel * 1000;
+                        }
+                    },
+                    saying: {
+                        enumerable: true,
+                        get() {
+                            return o.powerCreepSaying;
+                        }
+                    },
+                    powers: {
+                        enumerable: true,
+                        get() {
+                            return o.powerCreepPowers;
+                        }
                     }
-                },
-                carryCapacity: {
-                    enumerable: true,
-                    get() {
-                        return _.reduce(o.creepBody, (result, type) => result += type === C.CARRY ? C.CARRY_CAPACITY : 0, 0);
-                    }
-                },
-                carry: {
-                    enumerable: true,
-                    get() {
-                        return { energy: 0 };
-                    }
-                },
-                fatigue: {
-                    enumerable: true,
-                    get() {
-                        return 0;
-                    }
-                },
-                hits: {
-                    enumerable: true,
-                    get() {
-                        return 0;
-                    }
-                },
-                hitsMax: {
-                    enumerable: true,
-                    get() {
-                        return o.creepBody.length * 100;
-                    }
-                },
-                saying: {
-                    enumerable: true,
-                    get() {
-                        return o.creepSaying;
-                    }
-                }
-            });
-            return creep;
+                });
+                return powerCreep;
+            }
         },
     });
 

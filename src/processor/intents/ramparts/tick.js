@@ -7,6 +7,15 @@ module.exports = function(object, {roomObjects, bulk, roomController, gameTime})
 
     if(!object || object.type != 'rampart') return;
 
+    var effect = _.find(object.effects, {power: C.PWR_SHIELD});
+    if(effect) {
+        if(effect.endTime <= gameTime) {
+            bulk.remove(object._id);
+            delete roomObjects[object._id];
+        }
+        return;
+    }
+
     if(roomController) {
         var hitsMax = C.RAMPART_HITS_MAX[roomController.level] || 0;
         if(hitsMax != object.hitsMax) {

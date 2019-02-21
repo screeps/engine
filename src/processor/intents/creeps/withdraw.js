@@ -69,6 +69,14 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ga
         }
     }
     else {
+
+        if(target.type == 'terminal') {
+            var effect = _.find(target.effects, {power: C.PWR_DISRUPT_TERMINAL});
+            if(effect && effect.endTime > gameTime) {
+                return;
+            }
+        }
+
         if (amount > target[intent.resourceType]) {
             amount = target[intent.resourceType];
         }

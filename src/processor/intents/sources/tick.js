@@ -13,6 +13,14 @@ module.exports = function(object, {bulk, roomController, gameTime}) {
             object.nextRegenerationTime = gameTime + C.ENERGY_REGEN_TIME;
             bulk.update(object, {nextRegenerationTime: object.nextRegenerationTime});
         }
+
+        var effect = _.find(object.effects, {power: C.PWR_DISRUPT_SOURCE});
+        if(effect && effect.endTime > gameTime) {
+            bulk.update(object, {
+                nextRegenerationTime: object.nextRegenerationTime+1
+            });
+        }
+
         if(gameTime >= object.nextRegenerationTime-1) {
             bulk.update(object, {
                 nextRegenerationTime: null,
@@ -20,7 +28,7 @@ module.exports = function(object, {bulk, roomController, gameTime}) {
             });
         }
 
-        var effect = _.find(object.effects, {power: C.PWR_REGEN_SOURCE});
+        effect = _.find(object.effects, {power: C.PWR_REGEN_SOURCE});
         if(effect && effect.endTime > gameTime) {
             const powerInfo = C.POWER_INFO[C.PWR_REGEN_SOURCE];
             if(((effect.endTime - gameTime - 1) % powerInfo.period) === 0) {
@@ -29,7 +37,11 @@ module.exports = function(object, {bulk, roomController, gameTime}) {
                 });
             }
         }
+
+
     }
+
+
 
     if(roomController) {
         if (!roomController.user && !roomController.reservation && object.energyCapacity != C.SOURCE_ENERGY_NEUTRAL_CAPACITY) {

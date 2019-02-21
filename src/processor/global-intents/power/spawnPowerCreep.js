@@ -21,21 +21,21 @@ module.exports = function(intent, user, {roomObjectsByType, userPowerCreeps, bul
         return;
     }
 
+    bulkUsersPowerCreeps.update(powerCreep, {
+        shard: shardName,
+        spawnCooldownTime: null,
+        deleteTime: null
+    });
+
     bulkObjects.insert(Object.assign({}, powerCreep, {
         type: 'powerCreep',
         room: powerSpawn.room,
         x: powerSpawn.x,
         y: powerSpawn.y,
         hits: powerCreep.hitsMax,
-        spawnCooldownTime: null,
-        ageTime: gameTime + C.POWER_CREEP_LIFE_TIME
+        ageTime: gameTime + C.POWER_CREEP_LIFE_TIME,
+        actionLog: {spawned: true}
     }), powerCreep._id);
-
-    bulkUsersPowerCreeps.update(powerCreep, {
-        shard: shardName,
-        spawnCooldownTime: null,
-        deleteTime: null
-    });
 
     powerSpawn._justSpawned = true;
 };

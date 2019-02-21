@@ -12,17 +12,8 @@ function calcFreePowerLevels() {
     return level - used;
 }
 
-function roomData(id) {
-    if(!runtimeData.roomObjects[id]) {
-        return {};
-    }
-    return runtimeData.roomObjects[id];
-}
-function userData(id) {
-    if(!runtimeData.userPowerCreeps[id]) {
-        throw new Error("Could not find an object with ID "+id);
-    }
-    return runtimeData.userPowerCreeps[id];
+function data(id) {
+    return Object.assign({}, runtimeData.userPowerCreeps[id], runtimeData.roomObjects[id]);
 }
 
 exports.make = function(_runtimeData, _intents, _register, _globals) {
@@ -37,16 +28,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     }
 
     var PowerCreep = register.wrapFn(function(id) {
-        var _roomData = roomData(id);
-        var _userData = userData(id);
-        if(_roomData.room) {
-            globals.RoomObject.call(this, _roomData.x, _roomData.y, _roomData.room);
-        }
-        this.powers = _userData.powers;
-        if(_roomData.powers) {
-            for(var i in _roomData.powers) {
-                this.powers[i].cooldown = Math.max(0, (_roomData.powers[i].cooldownTime || 0) - runtimeData.time)
-            }
+        var _data = data(id);
+        if(_data.room) {
+            globals.RoomObject.call(this, _data.x, _data.y, _data.room);
         }
         this.id = id;
     });
@@ -54,21 +38,21 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     PowerCreep.prototype = Object.create(globals.RoomObject.prototype);
     PowerCreep.prototype.constructor = PowerCreep;
 
-    utils.defineGameObjectProperties(PowerCreep.prototype, userData, {
+    utils.defineGameObjectProperties(PowerCreep.prototype, data, {
         name: (o) => o.name,
         my: (o) => o.user == runtimeData.user._id,
         owner: (o) => new Object({username: runtimeData.users[o.user].username}),
-        shard: (o) => o.shard,
-        className: (o) => o.className,
         level: (o) => o.level,
+        className: (o) => o.className,
         hitsMax: (o) => o.hitsMax,
+        hits: (o) => o.hits,
+        shard: (o) => o.shard || undefined,
         spawnCooldownTime: (o) => o.spawnCooldownTime !== null && o.spawnCooldownTime > Date.now() ? o.spawnCooldownTime : undefined,
         deleteTime: (o) => o.deleteTime || undefined,
-        carryCapacity: (o) => o.energyCapacity,
-    });
-
-    utils.defineGameObjectProperties(PowerCreep.prototype, roomData, {
-        hits: (o) => o.hits,
+        powers: (o) => _.mapValues(o.powers, i => ({
+            level: i.level,
+            cooldown: Math.max(0, (i.cooldownTime || 0) - runtimeData.time)
+        })),
         saying: o => {
             if(!o.actionLog || !o.actionLog.say) {
                 return undefined;
@@ -90,6 +74,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
             return result;
         },
+        carryCapacity: (o) => o.energyCapacity,
         ticksToLive: (o) => o.ageTime - runtimeData.time,
     });
 
@@ -190,12 +175,12 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my || !powerSpawn.my) {
             return C.ERR_NOT_OWNER;
         }
-        if(!utils.checkStructureAgainstController(roomData(powerSpawn.id), register.objectsByRoom[roomData(powerSpawn.id).room], roomData(powerSpawn.room.controller.id))) {
+        if(!utils.checkStructureAgainstController(data(powerSpawn.id), register.objectsByRoom[data(powerSpawn.id).room], data(powerSpawn.room.controller.id))) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
 
         if(this.spawnCooldownTime) {
-            return C.ERR_BUSY;
+            return C.ERR_TIRED;
         }
 
         intents.pushByName('global', 'spawnPowerCreep', {id: powerSpawn.id, name: this.name}, 50);
@@ -243,9 +228,11 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!powerInfo || powerInfo.className !== this.className) {
             return C.ERR_INVALID_ARGS;
         }
-
-        var powerData = userData(this.id).powers[power];
+        var powerData = data(this.id).powers[power];
         var powerLevel = powerData ? powerData.level : 0;
+        if(powerLevel == 5) {
+            return C.ERR_FULL;
+        }
 
         if(this.level < powerInfo.level[powerLevel]) {
             return C.ERR_FULL;
@@ -263,8 +250,14 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.room) {
             return C.ERR_BUSY;
         }
+        if(!this.room.controller || !this.room.controller.isPowerEnabled) {
+            return C.ERR_INVALID_ARGS;
+        }
+        if(!this.room.controller.my && this.room.controller.safeMode) {
+            return C.ERR_INVALID_ARGS;
+        }
 
-        var powerData = roomData(this.id).powers[power];
+        var powerData = data(this.id).powers[power];
         var powerInfo = C.POWER_INFO[power];
         if(!powerData || !powerData.level || !powerInfo) {
             return C.ERR_NO_BODYPART;
@@ -272,7 +265,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(powerData.cooldownTime > runtimeData.time) {
             return C.ERR_TIRED;
         }
-        if(powerInfo.ops && (roomData(this.id).ops || 0) < powerInfo.ops) {
+        if(powerInfo.ops && (data(this.id).ops || 0) < powerInfo.ops) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
         if(powerInfo.range) {
@@ -283,12 +276,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 return C.ERR_NOT_IN_RANGE;
             }
             var currentEffect = _.find(target.effects, i => i.power == power);
-            if(currentEffect && currentEffect.level >= powerData.level && currentEffect.ticksRemaining > 0) {
+            if(currentEffect && currentEffect.level > powerData.level && currentEffect.ticksRemaining > 0) {
                 return C.ERR_FULL;
             }
-        }
-        if(!this.room.controller.isPowerEnabled) {
-            return C.ERR_INVALID_ARGS;
         }
 
         intents.set(this.id, 'usePower', {power, id: target ? target.id : undefined});
@@ -311,7 +301,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!target.pos.isNearTo(this.pos)) {
             return C.ERR_NOT_IN_RANGE;
         }
-        if(target.structureType != 'controller') {
+        if(target.structureType != 'controller' || target.safeMode) {
             return C.ERR_INVALID_TARGET;
         }
 

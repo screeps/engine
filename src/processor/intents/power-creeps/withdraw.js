@@ -4,6 +4,5 @@ var _ = require('lodash'),
     C = driver.constants;
 
 module.exports = function(object, intent, scope) {
-
     require('../creeps/withdraw')(object, intent, scope);
 };

@@ -29,12 +29,8 @@ module.exports = function(scope) {
 
     if(roomObjectsByType.powerCreep) {
         roomObjectsByType.powerCreep.forEach(creep => {
-            if(gameTime >= creep.ageTime-1) {
-                bulkObjects.remove(creep._id);
-                bulkUsersPowerCreeps.update(creep, {
-                    shard: null,
-                    spawnCooldownTime: Date.now()
-                });
+            if(gameTime >= creep.ageTime-1 || creep.hits <= 0) {
+               require('./power/_diePowerCreep')(creep, scope);
             }
         })
     }
