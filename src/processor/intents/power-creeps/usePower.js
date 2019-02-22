@@ -25,7 +25,12 @@ module.exports = function(object, intent, scope) {
         return;
     }
 
-    if(powerInfo.ops && (object.ops || 0) < powerInfo.ops) {
+    var ops = powerInfo.ops || 0;
+    if(_.isArray(ops)) {
+        ops = ops[creepPower.level-1];
+    }
+
+    if((object.ops || 0) < ops) {
         return;
     }
 
@@ -248,7 +253,7 @@ module.exports = function(object, intent, scope) {
                 cooldownTime: gameTime + powerInfo.cooldown
             }
         },
-        ops: (object.ops || 0) - (powerInfo.ops || 0)
+        ops: (object.ops || 0) - ops
     });
 
     eventLog.push({event: C.EVENT_POWER, objectId: object._id, data: {

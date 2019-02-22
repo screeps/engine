@@ -265,7 +265,11 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(powerData.cooldownTime > runtimeData.time) {
             return C.ERR_TIRED;
         }
-        if(powerInfo.ops && (data(this.id).ops || 0) < powerInfo.ops) {
+        var ops = powerInfo.ops || 0;
+        if(_.isArray(ops)) {
+            ops = ops[powerData.level-1];
+        }
+        if((data(this.id).ops || 0) < ops) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
         if(powerInfo.range) {
