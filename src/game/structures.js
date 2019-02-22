@@ -637,7 +637,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         var [x,y] = utils.roomNameToXY(data(this.id).room);
 
         var effect = _.find(this.effects, i => i.power == C.PWR_OPERATE_OBSERVER);
-        if(!effect || effect.ticksRemaining <= 0 &&
+        if((!effect || effect.ticksRemaining <= 0) &&
             (Math.abs(tx-x) > C.OBSERVER_RANGE || Math.abs(ty-y) > C.OBSERVER_RANGE)) {
             return C.ERR_NOT_IN_RANGE;
         }

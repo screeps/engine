@@ -4,7 +4,7 @@ var _ = require('lodash'),
     C = driver.constants;
 
 module.exports = function(object, intent, scope) {
-    const {roomObjects, gameTime, bulk, eventLog, roomController} = scope;
+    const {roomObjects, roomTerrain, gameTime, bulk, eventLog, roomController} = scope;
 
     if(!roomController || !roomController.isPowerEnabled) {
         return;
@@ -204,10 +204,8 @@ module.exports = function(object, intent, scope) {
         }
 
         case C.PWR_SHIELD: {
-            if(_.any(roomObjects, i => i.type == 'rampart' && i.x == object.x && i.y == object.y)) {
-                return;
-            }
-            if(object.x >= 49 || object.y >= 49 || object.x <= 0 || object.y <= 0) {
+            if(!utils.checkConstructionSite(roomObjects, 'rampart', object.x, object.y) ||
+                !utils.checkConstructionSite(roomTerrain, 'rampart', object.x, object.y)) {
                 return;
             }
             bulk.insert({
