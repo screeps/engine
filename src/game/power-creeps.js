@@ -305,7 +305,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!target.pos.isNearTo(this.pos)) {
             return C.ERR_NOT_IN_RANGE;
         }
-        if(target.structureType != 'controller' || target.safeMode) {
+        if(target.structureType != 'controller' || target.safeMode && !target.my) {
             return C.ERR_INVALID_TARGET;
         }
 
