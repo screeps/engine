@@ -7,9 +7,18 @@ var q = require('q'),
 module.exports = function(intent, user, {userPowerCreeps, bulkObjects, bulkUsersPowerCreeps}) {
 
     var powerCreep = _.find(userPowerCreeps, i => i.user == user._id && i._id == intent.id);
-    if (!powerCreep || powerCreep.spawnCooldownTime === null || powerCreep.deleteTime) {
+
+    if (!powerCreep || powerCreep.spawnCooldownTime === null) {
         return;
     }
 
-    bulkUsersPowerCreeps.update(powerCreep._id, {deleteTime: Date.now() + C.POWER_CREEP_DELETE_COOLDOWN});
+    if(intent.cancel) {
+        bulkUsersPowerCreeps.update(powerCreep._id, {deleteTime: null});
+    }
+    else {
+        if (powerCreep.deleteTime) {
+            return;
+        }
+        bulkUsersPowerCreeps.update(powerCreep._id, {deleteTime: Date.now() + C.POWER_CREEP_DELETE_COOLDOWN});
+    }
 };

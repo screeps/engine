@@ -200,7 +200,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    PowerCreep.prototype.delete = register.wrapFn(function() {
+    PowerCreep.prototype.delete = register.wrapFn(function(cancel) {
 
         if(this.room) {
             return C.ERR_BUSY;
@@ -209,7 +209,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NOT_OWNER;
         }
 
-        intents.pushByName('global', 'deletePowerCreep', {id: this.id}, 50);
+        intents.pushByName('global', 'deletePowerCreep', {id: this.id, cancel}, 50);
         return C.OK;
     });
 

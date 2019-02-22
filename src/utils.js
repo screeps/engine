@@ -608,6 +608,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                     intents.global.deletePowerCreep = intents.global.deletePowerCreep || [];
                     intents.global.deletePowerCreep.push({
                         id: ""+iDeletePowerCreep.id,
+                        cancel: !!iDeletePowerCreep.cancel
                     });
                 });
             }
