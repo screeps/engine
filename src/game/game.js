@@ -114,8 +114,8 @@
         var gclLevel = Math.floor(Math.pow((runtimeData.user.gcl || 0) / C.GCL_MULTIPLY, 1 / C.GCL_POW)) + 1,
         gclBaseProgress = Math.pow(gclLevel - 1, C.GCL_POW) * C.GCL_MULTIPLY;
 
-        var powerLevel = Math.floor(Math.pow((runtimeData.user.power || 0) / C.POWER_LEVEL_MULTIPLY, 1 / C.POWER_LEVEL_POW)),
-            powerLevelBaseProgress = Math.pow(powerLevel, C.POWER_LEVEL_POW) * C.POWER_LEVEL_MULTIPLY;
+        var gplLevel = Math.floor(Math.pow((runtimeData.user.power || 0) / C.POWER_LEVEL_MULTIPLY, 1 / C.POWER_LEVEL_POW)),
+            gplBaseProgress = Math.pow(gplLevel, C.POWER_LEVEL_POW) * C.POWER_LEVEL_MULTIPLY;
 
         var game = {
             creeps: {},
@@ -148,10 +148,10 @@
                 progress: (runtimeData.user.gcl || 0) - gclBaseProgress,
                 progressTotal: Math.pow(gclLevel, C.GCL_POW) * C.GCL_MULTIPLY - gclBaseProgress
             },
-            power: {
-                level: powerLevel,
-                progress: (runtimeData.user.power || 0) - powerLevelBaseProgress,
-                progressTotal: Math.pow(powerLevel+1, 2) * 1000 - powerLevelBaseProgress
+            gpl: {
+                level: gplLevel,
+                progress: (runtimeData.user.power || 0) - gplBaseProgress,
+                progressTotal: Math.pow(gplLevel+1, 2) * 1000 - gplBaseProgress
             },
             market: {},
             resources: {
