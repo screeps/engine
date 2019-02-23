@@ -457,7 +457,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 register.structures[target.id].structureType != 'terminal' &&
                 register.structures[target.id].structureType != 'container' &&
                 register.structures[target.id].structureType != 'lab' &&
-                register.structures[target.id].structureType != 'nuker') {
+                register.structures[target.id].structureType != 'nuker' &&
+                register.structures[target.id].structureType != 'factory') {
                 return C.ERR_INVALID_TARGET;
             }
         }
@@ -476,7 +477,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 register.structures[target.id].structureType != 'terminal' &&
                 register.structures[target.id].structureType != 'container' &&
                 register.structures[target.id].structureType != 'lab' &&
-                register.structures[target.id].structureType != 'nuker') {
+                register.structures[target.id].structureType != 'nuker' &&
+                register.structures[target.id].structureType != 'factory') {
                 return C.ERR_INVALID_TARGET;
             }
         }
@@ -599,7 +601,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             register.structures[target.id].structureType != 'powerSpawn' &&
             register.structures[target.id].structureType != 'terminal' &&
             register.structures[target.id].structureType != 'container' &&
-            register.structures[target.id].structureType != 'lab') {
+            register.structures[target.id].structureType != 'lab' &&
+            register.structures[target.id].structureType != 'factory') {
                 return C.ERR_INVALID_TARGET;
             }
         }
@@ -617,7 +620,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             register.structures[target.id].structureType != 'storage' &&
             register.structures[target.id].structureType != 'terminal' &&
             register.structures[target.id].structureType != 'container' &&
-            register.structures[target.id].structureType != 'lab') {
+            register.structures[target.id].structureType != 'lab' &&
+            register.structures[target.id].structureType != 'factory') {
                 return C.ERR_INVALID_TARGET;
             }
         }

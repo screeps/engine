@@ -914,6 +914,12 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                 id: ""+objectIntentsResult.renew.id
             };
         }
+        if(objectIntentsResult.produce) {
+            objectIntents.produce = {
+                id: ""+objectIntentsResult.produce.id,
+                resourceType: ""+objectIntentsResult.produce.resourceType
+            };
+        }
 
         // for(var iCustomType in driver.config.customIntentTypes) {
         //     if(objectIntentsResult[iCustomType]) {

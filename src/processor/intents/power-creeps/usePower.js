@@ -251,6 +251,23 @@ module.exports = function(object, intent, scope) {
             });
             break;
         }
+
+        case C.PWR_OPERATE_FACTORY: {
+            if(target.type != 'factory') {
+                return;
+            }
+
+            if(target.level == 0) {
+                bulk.update(target, {level: creepPower.level});
+            } else {
+                if(target.level > creepPower.level) {
+                    return;
+                }
+            }
+
+            applyEffectOnTarget = true;
+            break;
+        }
     }
 
     if(applyEffectOnTarget) {

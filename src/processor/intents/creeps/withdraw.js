@@ -31,7 +31,7 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ga
     }
 
     if(intent.resourceType == 'energy') {
-        if(!_.contains(['spawn','creep','powerCreep','extension','link','storage','tower','powerSpawn','lab','terminal','container','tombstone'], target.type)) {
+        if(!_.contains(['spawn','creep','powerCreep','extension','link','storage','tower','powerSpawn','lab','terminal','container','tombstone','factory'], target.type)) {
             return;
         }
     }
@@ -42,7 +42,7 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ga
 
     }
     else {
-        if(!_.contains(['creep','powerCreep','storage','lab','terminal','container','tombstone'], target.type)) {
+        if(!_.contains(['creep','powerCreep','storage','lab','terminal','container','tombstone','factory'], target.type)) {
             return;
         }
     }

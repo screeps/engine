@@ -135,6 +135,12 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                     say: null,
                 };
             }
+            if(object.type == 'factory') {
+                object._actionLog = object.actionLog;
+                object.actionLog = {
+                    produce: null
+                };
+            }
 
             driver.config.emit('processObject',object, roomObjects, roomTerrain, gameTime, roomInfo, bulk, bulkUsers);
 
@@ -246,6 +252,12 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                         require('./processor/intents/power-spawns/intents')(object, objectIntents, scope);
                     }
 
+                    if (object.type == 'factory') {
+                        if (objectIntents.produce) {
+                            require('./processor/intents/factories/produce')(object, objectIntents.produce, scope);
+                        }
+                    }
+
                     if (object.type == 'extension' || object.type == 'storage' || object.type == 'powerSpawn' || object.type == 'terminal' || object.type == 'container') {
                         if (objectIntents.transfer) {
                             require('./processor/intents/extensions/transfer')(object, objectIntents.transfer, scope);
@@ -338,6 +350,8 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 require('./processor/intents/terminal/tick')(object, scope);
             if (object.type == 'tombstone')
                 require('./processor/intents/tombstones/tick')(object, scope);
+            if (object.type == 'factory')
+                require('./processor/intents/factories/tick')(object, scope);
 
             if (object.type == 'nuke') {
                 require('./processor/intents/nukes/tick')(object, scope);

@@ -1521,4 +1521,67 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     Object.defineProperty(globals, 'StructurePortal', {enumerable: true, value: StructurePortal});
 
+    const StructureFactory = register.wrapFn(function (id) {
+        OwnedStructure.call(this, id);
+    });
+    StructureFactory.prototype = Object.create(OwnedStructure.prototype);
+    StructureFactory.prototype.constructor = StructureFactory;
+
+    utils.defineGameObjectProperties(StructureFactory.prototype, data, {
+        level: o => o.level,
+        store: _storeGetter,
+        storeCapacity: o => o.energyCapacity,
+        cooldown: o => o.cooldown,
+        operationalTicks: o => {
+            if(o.level == 0) {
+                return undefined;
+            }
+
+            const effect = _.find(o.effects, {power: C.PWR_OPERATE_FACTORY});
+            if(!effect) {
+                return 0;
+            }
+            return effect.endTime < runtimeData.time ? 0 : effect.endTime - runtimeData.time;
+        }
+    });
+
+    StructureFactory.prototype.produce = register.wrapFn(function(resourceType){
+        if(!this.my) {
+            return C.ERR_NOT_OWNER;
+        }
+
+        if(this.cooldown > 0) {
+            return C.ERR_TIRED;
+        }
+
+        if(!C.COMMODITIES[resourceType]) {
+            return C.ERR_INVALID_ARGS;
+        }
+
+        const rawFactory = data(this.id);
+        if(!!C.COMMODITIES[resourceType].level && C.COMMODITIES[resourceType].level != rawFactory.level) {
+            return C.ERR_INVALID_TARGET;
+        }
+
+        if(!utils.checkStructureAgainstController(rawFactory, register.objectsByRoom[rawFactory.room], data(this.room.controller.id))) {
+            return C.ERR_RCL_NOT_ENOUGH;
+        }
+
+        if(!!C.COMMODITIES[resourceType].level && (rawFactory.level > 0) && !_.some(rawFactory.effects, e => e.power == C.PWR_OPERATE_FACTORY && e.endTime >= runtimeData.time)) {
+            return C.ERR_BUSY;
+        }
+
+        if(_.some(_.keys(C.COMMODITIES[resourceType].components), p => (rawFactory[p]||0)<C.COMMODITIES[resourceType].components[p])) {
+            return C.ERR_NOT_ENOUGH_RESOURCES;
+        }
+
+        if (!rawFactory.energyCapacity || (utils.calcResources(rawFactory) - utils.calcResources(C.COMMODITIES[resourceType].components) + (C.COMMODITIES[resourceType].amount||1) > rawFactory.energyCapacity)) {
+            return C.ERR_FULL;
+        }
+
+        intents.set(this.id, 'produce', {resourceType});
+        return C.OK;
+    });
+
+    Object.defineProperty(globals, 'StructureFactory', {enumerable: true, value: StructureFactory});
 };

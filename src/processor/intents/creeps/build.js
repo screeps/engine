@@ -267,6 +267,17 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
             });
         }
 
+        if (target.structureType == 'factory') {
+            _.extend(newObject, {
+                user: target.user,
+                energy: 0,
+                energyCapacity: C.FACTORY_CAPACITY,
+                hits: C.FACTORY_HITS,
+                hitsMax: C.FACTORY_HITS,
+                cooldown: 0
+            });
+        }
+
         bulk.insert(newObject);
 
         roomObjects['createdStructure'+createdStructureCounter] = newObject;

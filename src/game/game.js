@@ -231,7 +231,8 @@
             container: globals.StructureContainer,
             spawn: globals.StructureSpawn,
             nuker: globals.StructureNuker,
-            portal: globals.StructurePortal
+            portal: globals.StructurePortal,
+            factory: globals.StructureFactory
         };
 
         var c = {};
