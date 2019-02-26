@@ -12,7 +12,10 @@ module.exports = function(spawn, intent, {bulk}) {
         directions = _.uniq(_.map(directions, e => +e));
         // bail if any numbers are out of bounds or non-integers
         if(!_.any(directions, (direction)=>direction < 1 || direction > 8 || direction !== (direction | 0))) {
-            bulk.update(spawn, {spawning:{directions}});
+            const spawning = _.clone(spawn.spawning);
+            spawning.directions = directions;
+            bulk.update(spawn, {spawning: null});
+            bulk.update(spawn, {spawning});
         }
     }
 };
