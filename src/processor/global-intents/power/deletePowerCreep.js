@@ -16,6 +16,11 @@ module.exports = function(intent, user, {userPowerCreeps, bulkObjects, bulkUsers
         bulkUsersPowerCreeps.update(powerCreep._id, {deleteTime: null});
     }
     else {
+        console.log(user.powerExperimentationTime);
+        if(user.powerExperimentationTime > Date.now()) {
+            bulkUsersPowerCreeps.remove(powerCreep._id);
+            return;
+        }
         if (powerCreep.deleteTime) {
             return;
         }

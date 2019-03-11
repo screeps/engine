@@ -337,7 +337,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     PowerCreep.prototype.cancelOrder = register.wrapFn(function(name) {
 
-        if(this.room) {
+        if(!this.room) {
             return C.ERR_BUSY;
         }
         if(!this.my) {
@@ -367,7 +367,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     PowerCreep.prototype.notifyWhenAttacked = register.wrapFn(function(enabled) {
 
-        if(this.room) {
+        if(!this.room) {
             return C.ERR_BUSY;
         }
         if(!this.my) {
