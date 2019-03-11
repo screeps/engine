@@ -261,7 +261,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                         }
                     }
 
-                    if (objectIntents.notifyWhenAttacked && (C.CONSTRUCTION_COST[object.type] || object.type == 'creep')) {
+                    if (objectIntents.notifyWhenAttacked && (C.CONSTRUCTION_COST[object.type] || object.type == 'creep' || object.type == 'powerCreep')) {
                         bulk.update(object, {notifyWhenAttacked: !!objectIntents.notifyWhenAttacked.enabled});
                     }
 

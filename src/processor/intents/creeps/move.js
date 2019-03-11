@@ -36,7 +36,9 @@ module.exports = function(object, intent, {roomObjects}) {
     var targetObjects = _.filter(roomObjects, {x: object.x+dx, y: object.y+dy});
 
     if(!_.any(targetObjects, (target) => _.contains(C.OBSTACLE_OBJECT_TYPES, target.type) &&
-        target.type != 'creep' && target.type != 'powerCreep' || target.type == 'rampart' && !target.isPublic && object.user != target.user)) {
+        target.type != 'creep' && target.type != 'powerCreep' ||
+        target.type == 'rampart' && !target.isPublic && object.user != target.user ||
+        object.type == 'powerCreep' && target.type == 'portal' && target.destination.shard)) {
 
         movement.add(object, dx, dy);
     }

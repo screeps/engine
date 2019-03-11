@@ -6,12 +6,13 @@ var _ = require('lodash'),
 module.exports = function(object, intent, scope) {
     const {roomObjects, roomTerrain, gameTime, bulk, eventLog, roomController} = scope;
 
-    if(!roomController || !roomController.isPowerEnabled) {
-        return;
-    }
-
-    if(roomController.user != object.user && roomController.safeMode > gameTime) {
-        return;
+    if(roomController) {
+        if(!roomController.isPowerEnabled) {
+            return;
+        }
+        if(roomController.user != object.user && roomController.safeMode > gameTime) {
+            return;
+        }
     }
 
     const powerInfo = C.POWER_INFO[intent.power];
@@ -170,6 +171,9 @@ module.exports = function(object, intent, scope) {
 
         case C.PWR_REGEN_MINERAL: {
             if(target.type != 'mineral') {
+                return;
+            }
+            if(target.mineralAmount == 0) {
                 return;
             }
             applyEffectOnTarget = true;

@@ -41,6 +41,11 @@ module.exports = function(object, scope) {
         eventLog.push({event: C.EVENT_EXIT, objectId: object._id, data: {room, x, y}});
     }
 
+    var portal = _.find(roomObjects, i => i.type == 'portal' && i.x == object.x && i.y == object.y);
+    if (portal && !portal.destination.shard) {
+        bulk.update(object, {interRoom: portal.destination});
+    }
+
     let hits = object.hits;
 
     if (object._damageToApply) {

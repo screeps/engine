@@ -13,7 +13,7 @@ module.exports = function(object, intent, {roomObjects, bulk, eventLog, gameTime
     }
 
     var target = roomObjects[intent.id];
-    if(!target || target.type != 'creep') {
+    if(!target || target.type != 'creep' && target.type !== 'powerCreep') {
         return;
     }
     if(target.spawning) {

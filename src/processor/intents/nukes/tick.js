@@ -22,6 +22,9 @@ module.exports = function(object, scope) {
             if (target.type == 'creep') {
                 require('../creeps/_die')(target, 0, true, scope);
             }
+            if (target.type == 'powerCreep') {
+                bulk.update(target, {hits: 0});
+            }
             if(target.type == 'constructionSite' || target.type == 'energy') {
                 bulk.remove(target._id);
                 delete roomObjects[target._id];

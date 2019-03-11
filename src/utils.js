@@ -632,6 +632,16 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                     });
                 });
             }
+            if(globalIntentsResult.renamePowerCreep) {
+                _.forEach(globalIntentsResult.renamePowerCreep, (iRenamePowerCreep) => {
+                    intents.global = intents.global || {};
+                    intents.global.renamePowerCreep = intents.global.renamePowerCreep || [];
+                    intents.global.renamePowerCreep.push({
+                        id: ""+iRenamePowerCreep.id,
+                        name: ""+iRenamePowerCreep.name
+                    });
+                });
+            }
             continue;
         }
 

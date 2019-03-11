@@ -250,11 +250,13 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.room) {
             return C.ERR_BUSY;
         }
-        if(!this.room.controller || !this.room.controller.isPowerEnabled) {
-            return C.ERR_INVALID_ARGS;
-        }
-        if(!this.room.controller.my && this.room.controller.safeMode) {
-            return C.ERR_INVALID_ARGS;
+        if(this.room.controller) {
+            if (!this.room.controller.isPowerEnabled) {
+                return C.ERR_INVALID_ARGS;
+            }
+            if (!this.room.controller.my && this.room.controller.safeMode) {
+                return C.ERR_INVALID_ARGS;
+            }
         }
 
         var powerData = data(this.id).powers[power];
@@ -330,6 +332,56 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NOT_IN_RANGE;
         }
         intents.set(this.id, 'renew', {id: target.id});
+        return C.OK;
+    });
+
+    PowerCreep.prototype.cancelOrder = register.wrapFn(function(name) {
+
+        if(this.room) {
+            return C.ERR_BUSY;
+        }
+        if(!this.my) {
+            return C.ERR_NOT_OWNER;
+        }
+        if(intents.remove(this.id, name)) {
+            return C.OK;
+        }
+        return C.ERR_NOT_FOUND;
+    });
+
+    PowerCreep.prototype.rename = register.wrapFn(function(name) {
+
+        if(this.room) {
+            return C.ERR_BUSY;
+        }
+        if(!this.my) {
+            return C.ERR_NOT_OWNER;
+        }
+        if(_.any(runtimeData.userPowerCreeps, {name})) {
+            return C.ERR_NAME_EXISTS;
+        }
+
+        intents.pushByName('global', 'renamePowerCreep', {id: this.id, name}, 50);
+        return C.OK;
+    });
+
+    PowerCreep.prototype.notifyWhenAttacked = register.wrapFn(function(enabled) {
+
+        if(this.room) {
+            return C.ERR_BUSY;
+        }
+        if(!this.my) {
+            return C.ERR_NOT_OWNER;
+        }
+        if(!_.isBoolean(enabled)) {
+            return C.ERR_INVALID_ARGS;
+        }
+
+        if(enabled != data(this.id).notifyWhenAttacked) {
+
+            intents.set(this.id, 'notifyWhenAttacked', {enabled});
+        }
+
         return C.OK;
     });
 

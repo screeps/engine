@@ -5,13 +5,13 @@ var q = require('q'),
     path = require('path'),
     C = driver.constants;
 
-const intentTypes = ['spawnPowerCreep','suicidePowerCreep','deletePowerCreep','upgradePowerCreep','createPowerCreep'];
+const intentTypes = ['spawnPowerCreep','suicidePowerCreep','deletePowerCreep','upgradePowerCreep','createPowerCreep','renamePowerCreep'];
 
 var modules = require('bulk-require')(path.resolve(__dirname, 'power'), ['*.js']);
 
 module.exports = function(scope) {
 
-    const {usersById, userIntents, roomObjectsByType, gameTime, bulkObjects, bulkUsersPowerCreeps} = scope;
+    const {usersById, userIntents, roomObjectsByType, gameTime} = scope;
 
     if(userIntents) {
         userIntents.forEach(iUserIntents => {

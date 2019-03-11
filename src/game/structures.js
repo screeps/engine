@@ -159,7 +159,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NOT_OWNER;
         }
 
-        if(this.room.find(C.FIND_HOSTILE_CREEPS).length > 0) {
+        if(this.room.find(C.FIND_HOSTILE_CREEPS).length > 0 ||
+            this.room.find(C.FIND_HOSTILE_POWER_CREEPS).length > 0) {
             return C.ERR_BUSY;
         }
 

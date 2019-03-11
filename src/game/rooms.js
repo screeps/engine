@@ -40,7 +40,7 @@ function makePathfindingGrid(id, opts, endNodesKey) {
         obstacleTypes = _.without(obstacleTypes, 'constructedWall','spawn','extension', 'link','storage','observer','tower','powerBank','powerSpawn','lab','terminal');
     }
     if(opts.ignoreCreeps) {
-        obstacleTypes = _.without(obstacleTypes, 'creep');
+        obstacleTypes = _.without(obstacleTypes, 'creep', 'powerCreep');
     }
 
     for(var y=0; y<50; y++) {
@@ -167,7 +167,7 @@ function makePathfindingGrid2(id, opts) {
         obstacleTypes = _.without(obstacleTypes, 'constructedWall','spawn','extension', 'link','storage','observer','tower','powerBank','powerSpawn','lab','terminal');
     }
     if(opts.ignoreCreeps || register.rooms[id].controller && register.rooms[id].controller.safeMode && register.rooms[id].controller.my) {
-        obstacleTypes = _.without(obstacleTypes, 'creep');
+        obstacleTypes = _.without(obstacleTypes, 'creep', 'powerCreep');
     }
 
     if(register.objectsByRoomKeys[id]) {
@@ -175,7 +175,7 @@ function makePathfindingGrid2(id, opts) {
             var object = register.objectsByRoom[id][key];
 
             if (_.contains(obstacleTypes, object.type) ||
-            !opts.ignoreCreeps && register.rooms[id].controller && register.rooms[id].controller.safeMode && register.rooms[id].controller.my && object.type == 'creep' && object.user == runtimeData.user._id ||
+            !opts.ignoreCreeps && register.rooms[id].controller && register.rooms[id].controller.safeMode && register.rooms[id].controller.my && (object.type == 'creep' || object.type == 'powerCreep') && object.user == runtimeData.user._id ||
             !opts.ignoreDestructibleStructures && object.type == 'rampart' && !object.isPublic && object.user != runtimeData.user._id ||
             !opts.ignoreDestructibleStructures && object.type == 'constructionSite' && object.user == runtimeData.user._id && _.contains(C.OBSTACLE_OBJECT_TYPES, object.structureType)) {
 

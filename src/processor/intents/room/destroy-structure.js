@@ -15,7 +15,7 @@ module.exports = function(userId, intent, scope) {
 
     if(object.type == C.STRUCTURE_WALL && object.decayTime && !object.user) return;
 
-    if(_.any(roomObjects, i => i.type == 'creep' && i.user != userId)) return;
+    if(_.any(roomObjects, i => (i.type == 'creep' || i.type == 'powerCreep') && i.user != userId)) return;
 
     bulk.remove(object._id);
 
