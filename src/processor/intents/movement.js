@@ -19,7 +19,7 @@ function checkObstacleAtXY(x,y,object, roomIsInSafeMode) {
         if (i.x != x || i.y != y) {
             return;
         }
-        if (i.type == 'creep' && !objects[i._id] && (!roomIsInSafeMode || roomIsInSafeMode != object.user || roomIsInSafeMode == object.user && object.user == i.user) ||
+        if ((i.type == 'creep' || i.type == 'powerCreep') && !objects[i._id] && (!roomIsInSafeMode || roomIsInSafeMode != object.user || roomIsInSafeMode == object.user && object.user == i.user) ||
             i.type != 'creep' && _.contains(C.OBSTACLE_OBJECT_TYPES, i.type) ||
             i.type == 'rampart' && !i.isPublic && i.user != object.user ||
             i.type == 'constructionSite' && i.user == object.user && _.contains(C.OBSTACLE_OBJECT_TYPES,

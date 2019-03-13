@@ -491,7 +491,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 flag: register.byRoom[id].flags,
                 constructionSite: register.byRoom[id].constructionSites,
                 tombstone: register.byRoom[id].tombstones,
-                nuke: register.byRoom[id].nukes
+                nuke: register.byRoom[id].nukes,
+                powerCreep: register.byRoom[id].powerCreeps
             },
             lookTypeSpatialRegisters: {
                 creep: register.byRoom[id].spatial.creeps,
@@ -503,7 +504,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 flag: register.byRoom[id].spatial.flags,
                 constructionSite: register.byRoom[id].spatial.constructionSites,
                 tombstone: register.byRoom[id].spatial.tombstones,
-                nuke: register.byRoom[id].spatial.nukes
+                nuke: register.byRoom[id].spatial.nukes,
+                powerCreep: register.byRoom[id].spatial.powerCreeps
             }
         };
 
@@ -769,6 +771,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         _lookSpatialRegister(this.name, C.LOOK_TERRAIN, x,y, result);
         _lookSpatialRegister(this.name, C.LOOK_NUKES, x,y, result);
         _lookSpatialRegister(this.name, C.LOOK_TOMBSTONES, x,y, result);
+        _lookSpatialRegister(this.name, C.LOOK_POWER_CREEPS, x,y, result);
 
         return result;
     });

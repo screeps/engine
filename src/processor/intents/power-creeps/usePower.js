@@ -213,6 +213,12 @@ module.exports = function(object, intent, scope) {
         }
 
         case C.PWR_SHIELD: {
+            var constructionSite = _.find(roomObjects, i => i.x == object.x && i.y == object.y &&
+                i.type == 'constructionSite');
+            if(constructionSite) {
+                bulk.remove(constructionSite._id);
+                delete roomObjects[constructionSite._id];
+            }
             if(!utils.checkConstructionSite(roomObjects, 'rampart', object.x, object.y) ||
                 !utils.checkConstructionSite(roomTerrain, 'rampart', object.x, object.y)) {
                 return;

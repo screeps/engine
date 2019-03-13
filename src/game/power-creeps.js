@@ -183,6 +183,13 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_TIRED;
         }
 
+        if(_.isUndefined(globals.Memory.powerCreeps)) {
+            globals.Memory.powerCreeps = {};
+        }
+        if(_.isObject(globals.Memory.powerCreeps) && _.isUndefined(globals.Memory.powerCreeps[this.name])) {
+            globals.Memory.powerCreeps[this.name] = {};
+        }
+
         intents.pushByName('global', 'spawnPowerCreep', {id: powerSpawn.id, name: this.name}, 50);
         return C.OK;
     });

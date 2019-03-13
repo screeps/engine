@@ -11,7 +11,6 @@
     function populateRegister(reg, spatial) {
         _.extend(reg, {
             creeps: {},
-            powerCreeps: {},
             structures: {},
             ownedStructures: {},
             spawns: {},
@@ -21,7 +20,8 @@
             constructionSites: {},
             minerals: {},
             tombstones: {},
-            nukes: {}
+            nukes: {},
+            powerCreeps: {},
         });
 
         if(spatial) {
