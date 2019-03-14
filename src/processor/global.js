@@ -45,7 +45,7 @@ module.exports = () => {
         powerProcessor({userIntents, usersById, roomObjectsByType, userPowerCreeps, gameTime,
             bulkObjects, bulkUsers, bulkUsersPowerCreeps, shardName});
 
-        marketProcessor({orders, usersById, gameTime, roomObjectsByType, bulkObjects, bulkUsers, bulkTransactions,
+        marketProcessor({orders, userIntents, usersById, gameTime, roomObjectsByType, bulkObjects, bulkUsers, bulkTransactions,
             bulkUsersMoney, bulkUsersResources, bulkMarketOrders, bulkMarketIntershardOrders});
 
         return q.all([

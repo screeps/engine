@@ -31,10 +31,15 @@ module.exports = function(object, intent, scope) {
 
 
     var power = utils.calcBodyEffectiveness(object.body, C.WORK, 'dismantle', C.DISMANTLE_POWER),
-    effect = Math.min(power, target.hits),
-    energyGain = Math.floor(effect * C.DISMANTLE_COST);
+    amount = Math.min(power, target.hits),
+    energyGain = Math.floor(amount * C.DISMANTLE_COST);
 
-    if(effect) {
+    var effect = _.find(target.effects, {power: C.PWR_SHIELD});
+    if(effect && effect.endTime >= gameTime) {
+        energyGain = 0;
+    }
+
+    if(amount) {
 
         object.energy += energyGain;
         bulk.update(object, {energy: object.energy});
@@ -43,6 +48,6 @@ module.exports = function(object, intent, scope) {
             require('./drop')(object, {amount: object.energy - object.energyCapacity, resourceType: 'energy'}, scope);
         }
 
-        require('../_damage')(object, target, effect, C.EVENT_ATTACK_TYPE_DISMANTLE, scope);
+        require('../_damage')(object, target, amount, C.EVENT_ATTACK_TYPE_DISMANTLE, scope);
     }
 };
