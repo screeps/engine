@@ -108,12 +108,12 @@ module.exports = function(object, intent, scope) {
             if(effect && effect.endTime > gameTime) {
                 return;
             }
-            var energyLimit = powerInfo.effect[creepPower.level-1];
-            var extensions = _.filter(roomObjects, {type: 'extension'});
+            var extensions = _.filter(roomObjects, i => i.type == 'extension' && i.user == target.user && !i.off);
+            var energyLimit = powerInfo.effect[creepPower.level-1] * _.sum(extensions, 'energyCapacity');
             extensions.sort(utils.comparatorDistance(target));
-            extensions.every((object) => {
-                var energy = Math.min(energyLimit, target.energy, object.energyCapacity - object.energy);
-                bulk.update(object, {energy: object.energy + energy});
+            extensions.every((extension) => {
+                var energy = Math.min(energyLimit, target.energy, extension.energyCapacity - extension.energy);
+                bulk.update(extension, {energy: extension.energy + energy});
                 bulk.update(target, {energy: target.energy - energy});
                 energyLimit -= energy;
                 return energyLimit > 0 && target.energy > 0;
