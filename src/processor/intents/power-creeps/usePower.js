@@ -109,15 +109,21 @@ module.exports = function(object, intent, scope) {
                 return;
             }
             var extensions = _.filter(roomObjects, i => i.type == 'extension' && i.user == target.user && !i.off);
-            var energyLimit = powerInfo.effect[creepPower.level-1] * _.sum(extensions, 'energyCapacity');
+            var energySent = 0;
+            var energyLimit = Math.min(
+                target.energy,
+                powerInfo.effect[creepPower.level-1] * _.sum(extensions, 'energyCapacity'));
             extensions.sort(utils.comparatorDistance(target));
             extensions.every((extension) => {
-                var energy = Math.min(energyLimit, target.energy, extension.energyCapacity - extension.energy);
+                var energy = Math.min(energyLimit - energySent, extension.energyCapacity - extension.energy);
                 bulk.update(extension, {energy: extension.energy + energy});
-                bulk.update(target, {energy: target.energy - energy});
-                energyLimit -= energy;
-                return energyLimit > 0 && target.energy > 0;
+                energySent += energy;
+                return energySent < energyLimit;
             });
+            if(energySent === 0) {
+                return;
+            }
+            bulk.update(target, {energy: target.energy - energySent});
             break;
         }
 
