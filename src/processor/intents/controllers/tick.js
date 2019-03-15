@@ -51,6 +51,7 @@ module.exports = function(object, {bulk, bulkUsers, gameTime, roomInfo, users}) 
             object.safeMode = null;
             object.safeModeAvailable = 0;
             object.safeModeCooldown = roomInfo.novice > Date.now() ? null : gameTime + C.SAFE_MODE_COOLDOWN
+            object.isPowerEnabled = false;
         }
         else {
             object.downgradeTime += C.CONTROLLER_DOWNGRADE[object.level]/2 + 1;
@@ -67,7 +68,8 @@ module.exports = function(object, {bulk, bulkUsers, gameTime, roomInfo, users}) 
             upgradeBlocked: object.upgradeBlocked,
             safeMode: object.safeMode,
             safeModeCooldown: object.safeModeCooldown,
-            safeModeAvailable: object.safeModeAvailable
+            safeModeAvailable: object.safeModeAvailable,
+            isPowerEnabled: object.isPowerEnabled
         });
     }
 
