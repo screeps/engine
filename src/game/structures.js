@@ -452,10 +452,15 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.pos.getRangeTo(lab1) > 2 || this.pos.getRangeTo(lab2) > 2) {
             return C.ERR_NOT_IN_RANGE;
         }
-        if(this.mineralAmount > this.mineralCapacity - C.LAB_REACTION_AMOUNT) {
+        var reactionAmount = C.LAB_REACTION_AMOUNT;
+        var effect = _.find(this.effects, i => i.power == C.PWR_OPERATE_LAB);
+        if(effect && effect.ticksRemaining > 0) {
+            reactionAmount += C.POWER_INFO[C.PWR_OPERATE_LAB].effect[effect.level-1];
+        }
+        if(this.mineralAmount > this.mineralCapacity - reactionAmount) {
             return C.ERR_FULL;
         }
-        if(lab1.mineralAmount < C.LAB_REACTION_AMOUNT || lab2.mineralAmount < C.LAB_REACTION_AMOUNT) {
+        if(lab1.mineralAmount < reactionAmount || lab2.mineralAmount < reactionAmount) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
         if(!(lab1.mineralType in C.REACTIONS) || !C.REACTIONS[lab1.mineralType][lab2.mineralType] ||
@@ -696,7 +701,12 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
-        if(!this.power || this.energy < C.POWER_SPAWN_ENERGY_RATIO) {
+        var amount = 1;
+        var effect = _.find(this.effects, i => i.power == C.PWR_OPERATE_POWER);
+        if(effect && effect.ticksRemaining > 0) {
+            amount += C.POWER_INFO[C.PWR_OPERATE_POWER].effect[effect.level-1];
+        }
+        if(this.power < amount || this.energy < amount * C.POWER_SPAWN_ENERGY_RATIO) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
 
