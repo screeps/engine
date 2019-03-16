@@ -310,7 +310,7 @@ const nextDirectionByPath = function(creep, path) {
 };
 
 const hasActiveBodyparts = function hasActiveBodyparts(creep, part) {
-    return _.some(creep.body, p => (p.hits > 0) && (p.type==part));
+    return !!creep.body && _.some(creep.body, p => (p.hits > 0) && (p.type==part));
 };
 
 module.exports.findPath = findPath;

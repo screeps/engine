@@ -24,7 +24,7 @@ module.exports = function(creep, scope) {
         if((object.type == 'source') || (object.type == 'mineral')) {
             resources.push(object);
         }
-        if((object.type == 'creep') && (object.user != 2) && (object.user != 3)) {
+        if((object.type == 'creep' || object.type == 'powerCreep') && (object.user != 2) && (object.user != 3)) {
             const distance = utils.dist(creep, object);
             if(distance <= 1) { hostilesInMeleeRange.push(object); }
             if(distance <= 3) { hostilesInRangedRange.push(object); }
