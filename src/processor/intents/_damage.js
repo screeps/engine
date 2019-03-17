@@ -19,7 +19,16 @@ module.exports = function(object, target, damage, attackType, scope) {
         }
         target._damageToApply = (target._damageToApply || 0) + damage;
     }
+    else if(target.type == 'powerCreep') {
+        target._damageToApply = (target._damageToApply || 0) + damage;
+    }
     else {
+        if(attackType != C.EVENT_ATTACK_TYPE_NUKE && (target.type == 'constructedWall' || target.type == 'rampart')) {
+            var effect = _.find(target.effects, {power: C.PWR_FORTIFY});
+            if(effect && effect.endTime > gameTime) {
+                return;
+            }
+        }
         target.hits -= damage;
     }
 
@@ -35,7 +44,7 @@ module.exports = function(object, target, damage, attackType, scope) {
         require('./creeps/_clear-newbie-walls')(scope);
     }
     else if (target.hits <= 0) {
-        if (target.type != 'creep') {
+        if (target.type != 'creep' && target.type != 'powerCreep') {
             C.RESOURCES_ALL.forEach(resourceType => {
                 if (target[resourceType] > 0) {
                     require('./creeps/_create-energy')(target.x, target.y, target.room,
@@ -59,7 +68,7 @@ module.exports = function(object, target, damage, attackType, scope) {
         }
     }
     else {
-        if (target.type != 'creep') {
+        if (target.type != 'creep' && target.type != 'powerCreep') {
             bulk.update(target, {hits: target.hits});
         }
     }

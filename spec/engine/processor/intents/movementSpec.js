@@ -40,6 +40,18 @@ describe('movement', ()=>{
             expect(damaged.x).toBe(23); expect(damaged.y).toBe(28);
         });
 
+        it('blocks his tile when can not move',()=>{
+            const fullSpeed = creepsEnv.createCreep('fullSpeed', {x: 22, y: 27});
+
+            damaged.move(1);
+            fullSpeed.move(4);
+            movement.check(false);
+            intents.ticks();
+
+            expect(damaged.x).toBe(23); expect(damaged.y).toBe(28);
+            expect(fullSpeed.x).toBe(22); expect(fullSpeed.y).toBe(27);
+        });
+
         describe('Offroad creep', ()=>{
             let scout, scout2;
             beforeEach(()=>{
@@ -238,17 +250,6 @@ describe('movement', ()=>{
             movement.init(scope.roomObjects, roomsEnv.terrain.E2S7);
         });
 
-        it("must have MOVE part(s)",()=>{
-            noMove.pull(halfSpeed._id);
-            noMove.move(halfSpeed._id);
-            halfSpeed.move(noMove._id);
-            movement.check(false);
-            intents.ticks();
-
-            expect(noMove.x).toBe(23); expect(noMove.y).toBe(25);
-            expect(halfSpeed.x).toBe(24); expect(halfSpeed.y).toBe(24);
-        });
-
         it("receives another creep's fatigue if he follows (direction syntax)",()=>{
             fullSpeed.move(5);
             fullSpeed.pull(halfSpeed._id);
@@ -259,7 +260,7 @@ describe('movement', ()=>{
             expect(fullSpeed.x).toBe(24); expect(fullSpeed.y).toBe(26);
             expect(halfSpeed.x).toBe(24); expect(halfSpeed.y).toBe(25);
             expect(halfSpeed.fatigue).toBe(0);
-            expect(fullSpeed.fatigue).toBe(4); // he carries 1 his own tough plus 2 tough of halfSpeed using 1 his move part
+            expect(fullSpeed.fatigue).toBe(2); // he carries 1 his own TOUGH plus 2 TOUGH of halfSpeed using 1 his MOVE part plus 1 MOVE part of halfSpeed
         });
 
         it("receives another creep's fatigue if he follows (creep syntax)",()=>{
@@ -272,7 +273,7 @@ describe('movement', ()=>{
             expect(fullSpeed.x).toBe(24); expect(fullSpeed.y).toBe(26);
             expect(halfSpeed.x).toBe(24); expect(halfSpeed.y).toBe(25);
             expect(halfSpeed.fatigue).toBe(0);
-            expect(fullSpeed.fatigue).toBe(4); // he carries 1 his own tough plus 2 tough of halfSpeed using 1 his move part
+            expect(fullSpeed.fatigue).toBe(2); // he carries 1 his own tough plus 2 tough of halfSpeed using 1 his MOVE part plus 1 MOVE part of halfSpeed
         });
 
         it("does not receive another creep's fatigue if he does not follow",()=>{
@@ -301,6 +302,21 @@ describe('movement', ()=>{
             expect(fullSpeed.fatigue).toBeGreaterThan(0);
         });
 
+        it("moves a creep with fatigue",()=>{
+            halfSpeed.fatigue = 2;
+
+            halfSpeed.move(fullSpeed._id);
+            fullSpeed.move(5);
+            fullSpeed.pull(halfSpeed._id);
+            movement.check(false);
+            intents.ticks();
+
+            expect(fullSpeed.x).toBe(24); expect(fullSpeed.y).toBe(26);
+            expect(halfSpeed.x).toBe(24); expect(halfSpeed.y).toBe(25);
+            expect(halfSpeed.fatigue).toBe(0);
+            expect(fullSpeed.fatigue).toBe(4); // TOUGH parts: 3, MOVE parts: 1 (halfspeed's MOVE can't be used because of fatigue)
+        });
+
         it("prevents circular/sequental pulls (2 creeps)",()=>{
             halfSpeed.move(2);
             halfSpeed.pull(halfSpeed2._id);
@@ -327,7 +343,7 @@ describe('movement', ()=>{
             movement.init(scope.roomObjects, roomsEnv.terrain.E2S7);
         });
 
-        it('should receive fatigue for all of them',()=>{
+        it('receives fatigue for all of them',()=>{
             fullSpeed.move(5);
             fullSpeed.pull(halfSpeed._id);
             halfSpeed.move(fullSpeed._id);
@@ -339,7 +355,44 @@ describe('movement', ()=>{
             expect(fullSpeed.x).toBe(24); expect(fullSpeed.y).toBe(26);
             expect(halfSpeed.x).toBe(24); expect(halfSpeed.y).toBe(25);
             expect(halfSpeed2.x).toBe(24); expect(halfSpeed2.y).toBe(24);
-            expect(fullSpeed.fatigue).toBe(8); // he carries 1 his own tough plus 2 tough of halfSpeed using 1 his move part
+            expect(fullSpeed.fatigue).toBe(4); // total TOUGH parts: 5, total MOVE parts: 3
+            expect(halfSpeed.fatigue).toBe(0);
+            expect(halfSpeed2.fatigue).toBe(0);
+        });
+
+        it('receives MOVE parts contribution of all pulled creeps', ()=>{
+            fullSpeed.move(5);
+            fullSpeed.pull(halfSpeed._id);
+            halfSpeed.move(fullSpeed._id);
+            halfSpeed.pull(halfSpeed2._id);
+            halfSpeed2.move(halfSpeed._id);
+            movement.check(false);
+            intents.ticks();
+
+            expect(fullSpeed.x).toBe(24); expect(fullSpeed.y).toBe(26);
+            expect(halfSpeed.x).toBe(24); expect(halfSpeed.y).toBe(25);
+            expect(halfSpeed2.x).toBe(24); expect(halfSpeed2.y).toBe(24);
+            expect(fullSpeed.fatigue).toBe(4); // total TOUGH parts: 5, total MOVE parts: 1 (pulled moves can't be used)
+            expect(halfSpeed.fatigue).toBe(0);
+            expect(halfSpeed2.fatigue).toBe(0);
+        });
+
+        it('receives MOVE parts contribution of all pulled creeps except fatigued', ()=>{
+            halfSpeed.fatigue = 2;
+            halfSpeed2.fatigue = 2;
+
+            fullSpeed.move(5);
+            fullSpeed.pull(halfSpeed._id);
+            halfSpeed.move(fullSpeed._id);
+            halfSpeed.pull(halfSpeed2._id);
+            halfSpeed2.move(halfSpeed._id);
+            movement.check(false);
+            intents.ticks();
+
+            expect(fullSpeed.x).toBe(24); expect(fullSpeed.y).toBe(26);
+            expect(halfSpeed.x).toBe(24); expect(halfSpeed.y).toBe(25);
+            expect(halfSpeed2.x).toBe(24); expect(halfSpeed2.y).toBe(24);
+            expect(fullSpeed.fatigue).toBe(8); // total TOUGH parts: 5, total MOVE parts: 1 (pulled moves can't be used)
             expect(halfSpeed.fatigue).toBe(0);
             expect(halfSpeed2.fatigue).toBe(0);
         });

@@ -23,7 +23,7 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ev
     }
     var targetTotal;
     if(target.type == 'creep') {
-        if(Math.abs(target.x - object.x) > 1 || Math.abs(target.y - object.y) > 1) {
+        if(target.spawning || Math.abs(target.x - object.x) > 1 || Math.abs(target.y - object.y) > 1) {
             return;
         }
         targetTotal = utils.calcResources(target);

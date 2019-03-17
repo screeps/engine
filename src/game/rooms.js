@@ -40,7 +40,7 @@ function makePathfindingGrid(id, opts, endNodesKey) {
         obstacleTypes = _.without(obstacleTypes, 'constructedWall','spawn','extension', 'link','storage','observer','tower','powerBank','powerSpawn','lab','terminal');
     }
     if(opts.ignoreCreeps) {
-        obstacleTypes = _.without(obstacleTypes, 'creep');
+        obstacleTypes = _.without(obstacleTypes, 'creep', 'powerCreep');
     }
 
     for(var y=0; y<50; y++) {
@@ -167,7 +167,7 @@ function makePathfindingGrid2(id, opts) {
         obstacleTypes = _.without(obstacleTypes, 'constructedWall','spawn','extension', 'link','storage','observer','tower','powerBank','powerSpawn','lab','terminal');
     }
     if(opts.ignoreCreeps || register.rooms[id].controller && register.rooms[id].controller.safeMode && register.rooms[id].controller.my) {
-        obstacleTypes = _.without(obstacleTypes, 'creep');
+        obstacleTypes = _.without(obstacleTypes, 'creep', 'powerCreep');
     }
 
     if(register.objectsByRoomKeys[id]) {
@@ -175,7 +175,7 @@ function makePathfindingGrid2(id, opts) {
             var object = register.objectsByRoom[id][key];
 
             if (_.contains(obstacleTypes, object.type) ||
-            !opts.ignoreCreeps && register.rooms[id].controller && register.rooms[id].controller.safeMode && register.rooms[id].controller.my && object.type == 'creep' && object.user == runtimeData.user._id ||
+            !opts.ignoreCreeps && register.rooms[id].controller && register.rooms[id].controller.safeMode && register.rooms[id].controller.my && (object.type == 'creep' || object.type == 'powerCreep') && object.user == runtimeData.user._id ||
             !opts.ignoreDestructibleStructures && object.type == 'rampart' && !object.isPublic && object.user != runtimeData.user._id ||
             !opts.ignoreDestructibleStructures && object.type == 'constructionSite' && object.user == runtimeData.user._id && _.contains(C.OBSTACLE_OBJECT_TYPES, object.structureType)) {
 
@@ -385,7 +385,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     createdSpawnNames = [];
     privateStore = {};
     createdConstructionSites = 0;
-    
+
     TerrainConstructor || (()=>{
         for(var roomName in runtimeData.staticTerrainData) {
             var array = runtimeData.staticTerrainData[roomName];
@@ -393,11 +393,11 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             break;
         }
     })();
-    
+
     TerrainConstructorSet || (()=>{
         TerrainConstructorSet = TerrainConstructor.prototype.set;
     })();
-    
+
     if(globals.Room) {
         return;
     }
@@ -491,7 +491,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 flag: register.byRoom[id].flags,
                 constructionSite: register.byRoom[id].constructionSites,
                 tombstone: register.byRoom[id].tombstones,
-                nuke: register.byRoom[id].nukes
+                nuke: register.byRoom[id].nukes,
+                powerCreep: register.byRoom[id].powerCreeps
             },
             lookTypeSpatialRegisters: {
                 creep: register.byRoom[id].spatial.creeps,
@@ -503,7 +504,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 flag: register.byRoom[id].spatial.flags,
                 constructionSite: register.byRoom[id].spatial.constructionSites,
                 tombstone: register.byRoom[id].spatial.tombstones,
-                nuke: register.byRoom[id].spatial.nukes
+                nuke: register.byRoom[id].spatial.nukes,
+                powerCreep: register.byRoom[id].spatial.powerCreeps
             }
         };
 
@@ -769,6 +771,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         _lookSpatialRegister(this.name, C.LOOK_TERRAIN, x,y, result);
         _lookSpatialRegister(this.name, C.LOOK_NUKES, x,y, result);
         _lookSpatialRegister(this.name, C.LOOK_TOMBSTONES, x,y, result);
+        _lookSpatialRegister(this.name, C.LOOK_POWER_CREEPS, x,y, result);
 
         return result;
     });
@@ -1137,8 +1140,10 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     });
 
     RoomVisual.prototype.poly = register.wrapFn(function(points,style) {
-        points = points.map(i => i.x !== undefined ? [i.x, i.y] : i);
-        globals.console.addVisual(this.roomName, {t: 'p', points,s:style});
+        if(_.isArray(points) && _.some(points)) {
+            points = points.map(i => i.x !== undefined ? [i.x, i.y] : i);
+            globals.console.addVisual(this.roomName, {t: 'p', points,s:style});
+        }
         return this;
     });
 
@@ -1160,22 +1165,22 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         globals.console.clearVisual(this.roomName);
         return this;
     });
-    
+
     Object.defineProperty(globals, 'RoomVisual', {enumerable: true, value: RoomVisual});
 
-    
+
     Room.Terrain = register.wrapFn(function(roomName){ "use strict";
         roomName = "" + roomName;
-        
+
         const array = (runtimeData.staticTerrainData || {})[roomName];
         if(!array)
             throw new Error(`Could not access room ${roomName}`);
-        
+
         this.get = register.wrapFn(function(x,y){
             const value = array[y * 50 + x];
             return (value & C.TERRAIN_MASK_WALL) || (value & C.TERRAIN_MASK_SWAMP) || 0;
         });
-        
+
         this.getRawBuffer = register.wrapFn(function(destinationArray){
             if(!!destinationArray) {
                 TerrainConstructorSet.call(destinationArray, array);
@@ -1201,18 +1206,102 @@ exports.makePos = function(_register) {
      * @param roomName
      * @constructor
      */
-    var RoomPosition = register.wrapFn(function(x, y, roomName) {
+    const kMaxWorldSize = 256;
+    const kMaxWorldSize2 = kMaxWorldSize >> 1;
+    const roomNames = [];
+    utils.getRoomNameFromXY = function(slowFn) {
+        return function(xx, yy) {
+            let id = (xx + kMaxWorldSize2) << 8 | (yy + kMaxWorldSize2);
+            let roomName = roomNames[id];
+            if (roomName === undefined) {
+                return roomNames[id] = slowFn(xx, yy);
+            } else {
+                return roomName;
+            }
+        };
+    }(utils.getRoomNameFromXY);
+    roomNames[0] = 'sim';
 
-        x = +x;
-        y = +y;
-
-        if(_.isNaN(x) || _.isNaN(y) || !_.isString(roomName)) {
-            throw new Error('invalid arguments in RoomPosition constructor');
+    let RoomPosition = register.wrapFn(function RoomPosition(xx, yy, roomName) {
+        let xy = roomName === 'sim' ? [-kMaxWorldSize2, -kMaxWorldSize2] : utils.roomNameToXY(roomName);
+        xy[0] += kMaxWorldSize2;
+        xy[1] += kMaxWorldSize2;
+        if (
+            xy[0] < 0 || xy[0] > kMaxWorldSize || xy[0] !== xy[0] ||
+            xy[1] < 0 || xy[1] > kMaxWorldSize || xy[1] !== xy[1] ||
+            xx < 0 || xx > 49 || xx !== xx ||
+            yy < 0 || yy > 49 || yy !== yy
+        ) {
+            throw new Error('Invalid arguments in RoomPosition constructor');
         }
+        Object.defineProperty(this, '__packedPos', {
+            enumerable: false,
+            value: xy[0] << 24 | xy[1] << 16 | xx << 8 | yy,
+            writable: true,
+        });
+    });
 
-        this.x = x;
-        this.y = y;
-        this.roomName = roomName;
+    Object.defineProperties(RoomPosition.prototype, {
+        x: {
+            enumerable: true,
+            get() {
+                return (this.__packedPos >> 8) & 0xff;
+            },
+            set(val) {
+                if (val < 0 || val > 49 || val !== val) {
+                    throw new Error('Invalid coordinate');
+                }
+                this.__packedPos = this.__packedPos & ~(0xff << 8) | val << 8;
+            },
+        },
+
+        y: {
+            enumerable: true,
+            get() {
+                return this.__packedPos & 0xff;
+            },
+            set(val) {
+                if (val < 0 || val > 49 || val !== val) {
+                    throw new Error('Invalid coordinate');
+                }
+                this.__packedPos = this.__packedPos & ~0xff | val;
+            },
+        },
+
+        roomName: {
+            enumerable: true,
+            get() {
+                let roomName = roomNames[this.__packedPos >>> 16];
+                if (roomName === undefined) {
+                    return utils.getRoomNameFromXY(
+                        (this.__packedPos >>> 24) - kMaxWorldSize2,
+                        (this.__packedPos >>> 16 & 0xff) - kMaxWorldSize2
+                    );
+                } else {
+                    return roomName;
+                }
+            },
+            set(val) {
+                let xy = val === 'sim' ? [-kMaxWorldSize2, -kMaxWorldSize2] : utils.roomNameToXY(val);
+                xy[0] += kMaxWorldSize2;
+                xy[1] += kMaxWorldSize2;
+                if (
+                    xy[0] < 0 || xy[0] > kMaxWorldSize || xy[0] !== xy[0] ||
+                    xy[1] < 0 || xy[1] > kMaxWorldSize || xy[1] !== xy[1]
+                ) {
+                    throw new Error('Invalid roomName');
+                }
+                this.__packedPos = this.__packedPos & ~(0xffff << 16) | xy[0] << 24 | xy[1] << 16;
+            },
+        },
+    });
+
+    RoomPosition.prototype.toJSON = register.wrapFn(function() {
+        return Object.assign({
+            x: this.x,
+            y: this.y,
+            roomName: this.roomName,
+        }, this);
     });
 
     RoomPosition.prototype.toString = register.wrapFn(function() {
@@ -1250,7 +1339,7 @@ exports.makePos = function(_register) {
         var [thisRoomX, thisRoomY] = utils.roomNameToXY(this.roomName);
         var [thatRoomX, thatRoomY] = utils.roomNameToXY(roomName);
 
-	return utils.getDirection(thatRoomX*50 + x - thisRoomX*50 - this.x, thatRoomY*50 + y - thisRoomY*50 - this.y);
+        return utils.getDirection(thatRoomX*50 + x - thisRoomX*50 - this.x, thatRoomY*50 + y - thisRoomY*50 - this.y);
     });
 
     RoomPosition.prototype.findPathTo = register.wrapFn(function(firstArg, secondArg, opts) {
@@ -1436,6 +1525,9 @@ exports.makePos = function(_register) {
     });
 
     RoomPosition.prototype.isEqualTo = register.wrapFn(function(firstArg, secondArg) {
+        if (firstArg.__packedPos !== undefined) {
+            return firstArg.__packedPos === this.__packedPos;
+        }
         var [x,y,roomName] = utils.fetchXYArguments(firstArg, secondArg, globals);
         return x == this.x && y == this.y && (!roomName || roomName == this.roomName);
     });
@@ -1502,9 +1594,16 @@ exports.makePos = function(_register) {
      * @param y
      * @constructor
      */
-    var RoomObject = register.wrapFn(function(x, y, room) {
+    var RoomObject = register.wrapFn(function(x, y, room, effects) {
         this.room = register.rooms[room];
         this.pos = new globals.RoomPosition(x,y,room);
+        if(effects) {
+            this.effects = _(effects).map(i => ({
+                power: i.power,
+                level: i.level,
+                ticksRemaining: i.endTime - runtimeData.time
+            })).filter(i => i.ticksRemaining > 0).value();
+        }
     });
 
     Object.defineProperty(globals, 'RoomObject', {enumerable: true, value: RoomObject});

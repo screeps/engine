@@ -29,7 +29,7 @@ function _transfer(target, resourceType, amount) {
 
     register.deprecated('`Structure*.transfer` is considered deprecated and will be removed soon. Please use `Creep.withdraw` instead.');
 
-    if (!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
+    if (!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning) {
         register.assertTargetObject(target);
         return C.ERR_INVALID_TARGET;
     }
@@ -66,7 +66,7 @@ function _transferEnergy(target, amount) {
 
     register.deprecated('`Structure*.transferEnergy` is considered deprecated and will be removed soon. Please use `Creep.withdraw` instead.');
 
-    if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
+    if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning) {
         register.assertTargetObject(target);
         return C.ERR_INVALID_TARGET;
     }
@@ -123,7 +123,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     var Structure = register.wrapFn(function(id) {
 
         var _data = data(id);
-        globals.RoomObject.call(this, _data.x, _data.y, _data.room);
+        globals.RoomObject.call(this, _data.x, _data.y, _data.room, _data.effects);
         this.id = id;
 
         var objectData = data(id);
@@ -159,7 +159,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NOT_OWNER;
         }
 
-        if(this.room.find(C.FIND_HOSTILE_CREEPS).length > 0) {
+        if(this.room.find(C.FIND_HOSTILE_CREEPS).length > 0 ||
+            this.room.find(C.FIND_HOSTILE_POWER_CREEPS).length > 0) {
             return C.ERR_BUSY;
         }
 
@@ -276,7 +277,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 text: o.sign.text,
                 time: o.sign.time,
                 datetime: new Date(o.sign.datetime)
-            } : undefined
+            } : undefined,
+        isPowerEnabled: o => !!o.isPowerEnabled
     });
 
     StructureController.prototype.unclaim = register.wrapFn(function() {
@@ -394,7 +396,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     StructureLab.prototype.transfer = register.wrapFn(function(target, resourceType, amount) {
 
-        if (!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
+        if (!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
@@ -451,10 +453,15 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.pos.getRangeTo(lab1) > 2 || this.pos.getRangeTo(lab2) > 2) {
             return C.ERR_NOT_IN_RANGE;
         }
-        if(this.mineralAmount > this.mineralCapacity - C.LAB_REACTION_AMOUNT) {
+        var reactionAmount = C.LAB_REACTION_AMOUNT;
+        var effect = _.find(this.effects, i => i.power == C.PWR_OPERATE_LAB);
+        if(effect && effect.ticksRemaining > 0) {
+            reactionAmount += C.POWER_INFO[C.PWR_OPERATE_LAB].effect[effect.level-1];
+        }
+        if(this.mineralAmount > this.mineralCapacity - reactionAmount) {
             return C.ERR_FULL;
         }
-        if(lab1.mineralAmount < C.LAB_REACTION_AMOUNT || lab2.mineralAmount < C.LAB_REACTION_AMOUNT) {
+        if(lab1.mineralAmount < reactionAmount || lab2.mineralAmount < reactionAmount) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
         if(!(lab1.mineralType in C.REACTIONS) || !C.REACTIONS[lab1.mineralType][lab2.mineralType] ||
@@ -547,7 +554,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_INVALID_ARGS;
         }
         if (!target || !target.id || !register.structures[target.id] && !register.creeps[target.id] ||
-            !(target instanceof globals.Structure) && !(target instanceof globals.Creep) ||
+            !(target instanceof globals.Structure) && !((target instanceof globals.Creep) && target.spawning) ||
             target === this) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
@@ -636,7 +643,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         var [tx,ty] = utils.roomNameToXY(roomName);
         var [x,y] = utils.roomNameToXY(data(this.id).room);
 
-        if(Math.abs(tx-x) > C.OBSERVER_RANGE || Math.abs(ty-y) > C.OBSERVER_RANGE) {
+        var effect = _.find(this.effects, i => i.power == C.PWR_OPERATE_OBSERVER);
+        if((!effect || effect.ticksRemaining <= 0) &&
+            (Math.abs(tx-x) > C.OBSERVER_RANGE || Math.abs(ty-y) > C.OBSERVER_RANGE)) {
             return C.ERR_NOT_IN_RANGE;
         }
 
@@ -693,7 +702,12 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(data(this.id).off) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
-        if(!this.power || this.energy < C.POWER_SPAWN_ENERGY_RATIO) {
+        var amount = 1;
+        var effect = _.find(this.effects, i => i.power == C.PWR_OPERATE_POWER);
+        if(effect && effect.ticksRemaining > 0) {
+            amount += C.POWER_INFO[C.PWR_OPERATE_POWER].effect[effect.level-1];
+        }
+        if(this.power < amount || this.energy < amount * C.POWER_SPAWN_ENERGY_RATIO) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
 
@@ -846,8 +860,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
-        if(!target || !target.id || !register.creeps[target.id] && !register.structures[target.id] ||
-        !(target instanceof globals.Creep) && !(target instanceof globals.StructureSpawn) && !(target instanceof globals.Structure)) {
+        if(!target || !target.id || !register.creeps[target.id] && !register.powerCreeps[target.id] && !register.structures[target.id] ||
+        !(target instanceof globals.Creep) && !(target instanceof globals.PowerCreep) && !(target instanceof globals.StructureSpawn) && !(target instanceof globals.Structure)) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
@@ -866,7 +880,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
-        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
+        if(!target || !target.id || !register.creeps[target.id] && !register.powerCreeps[target.id] ||
+            !(target instanceof globals.Creep) && !(target instanceof globals.PowerCreep)) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
@@ -1280,7 +1295,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
-        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
+        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }

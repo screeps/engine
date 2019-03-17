@@ -7,7 +7,7 @@ let C = driver.constants;
 
 exports.make = function(runtimeData, intents, register, globals) {
 
-    driver.pathFinder.make(runtimeData, intents, register, globals);
+    driver.pathFinder.make(globals);
 
     if(globals.PathFinder) {
         return;

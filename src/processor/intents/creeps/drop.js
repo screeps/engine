@@ -7,9 +7,6 @@ module.exports = function(object, intent, scope) {
 
     const {bulk} = scope;
 
-    if(object.type != 'creep') {
-        return;
-    }
     if(!_.contains(C.RESOURCES_ALL, intent.resourceType)) {
         return;
     }

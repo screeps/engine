@@ -362,6 +362,8 @@ exports.checkControllerAvailability = function(type, roomObjects, roomController
     return structuresCnt < availableCnt;
 };
 
+// Note that game/rooms.js will swap this function out for a faster version, but may call back to
+// this function.
 exports.getRoomNameFromXY = function(x,y) {
     if(x < 0) {
         x = 'W'+(-x-1);
@@ -379,28 +381,23 @@ exports.getRoomNameFromXY = function(x,y) {
 };
 
 exports.roomNameToXY = function(name) {
-
-    name = name.toUpperCase();
-
-    var match = name.match(/^(\w)(\d+)(\w)(\d+)$/);
-    if(!match) {
-        return [undefined, undefined];
+    let xx = parseInt(name.substr(1), 10);
+    let verticalPos = 2;
+    if (xx >= 100) {
+        verticalPos = 4;
+    } else if (xx >= 10) {
+        verticalPos = 3;
     }
-    var [,hor,x,ver,y] = match;
-
-    if(hor == 'W') {
-        x = -x-1;
+    let yy = parseInt(name.substr(verticalPos + 1), 10);
+    let horizontalDir = name.charAt(0);
+    let verticalDir = name.charAt(verticalPos);
+    if (horizontalDir === 'W' || horizontalDir === 'w') {
+        xx = -xx - 1;
     }
-    else {
-        x = +x;
+    if (verticalDir === 'N' || verticalDir === 'n') {
+        yy = -yy - 1;
     }
-    if(ver == 'N') {
-        y = -y-1;
-    }
-    else {
-        y = +y;
-    }
-    return [x,y];
+    return [xx, yy];
 };
 
 exports.comparatorDistance = function(target) {
@@ -532,14 +529,14 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
             continue;
         }
 
-        if(i == 'market') {
-            var marketIntentsResult = userIntents.market;
+        if(i == 'global') {
+            var globalIntentsResult = userIntents.global;
 
-            if(marketIntentsResult.createOrder) {
-                _.forEach(marketIntentsResult.createOrder, (iCreateOrder) => {
-                    intents.market = intents.market || {};
-                    intents.market.createOrder = intents.market.createOrder || [];
-                    intents.market.createOrder.push({
+            if(globalIntentsResult.createOrder) {
+                _.forEach(globalIntentsResult.createOrder, (iCreateOrder) => {
+                    intents.global = intents.global || {};
+                    intents.global.createOrder = intents.global.createOrder || [];
+                    intents.global.createOrder.push({
                         type: ""+iCreateOrder.type,
                         resourceType: ""+iCreateOrder.resourceType,
                         price: parseInt(iCreateOrder.price*1000),
@@ -548,41 +545,100 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                     })
                 });
             }
-            if(marketIntentsResult.cancelOrder) {
-                _.forEach(marketIntentsResult.cancelOrder, (iCancelOrder) => {
-                    intents.market = intents.market || {};
-                    intents.market.cancelOrder = intents.market.cancelOrder || [];
-                    intents.market.cancelOrder.push({orderId: ""+iCancelOrder.orderId});
+            if(globalIntentsResult.cancelOrder) {
+                _.forEach(globalIntentsResult.cancelOrder, (iCancelOrder) => {
+                    intents.global = intents.global || {};
+                    intents.global.cancelOrder = intents.global.cancelOrder || [];
+                    intents.global.cancelOrder.push({orderId: ""+iCancelOrder.orderId});
                 });
             }
-            if(marketIntentsResult.changeOrderPrice) {
-                _.forEach(marketIntentsResult.changeOrderPrice, (iChangeOrderPrice) => {
-                    intents.market = intents.market || {};
-                    intents.market.changeOrderPrice = intents.market.changeOrderPrice || [];
-                    intents.market.changeOrderPrice.push({
+            if(globalIntentsResult.changeOrderPrice) {
+                _.forEach(globalIntentsResult.changeOrderPrice, (iChangeOrderPrice) => {
+                    intents.global = intents.global || {};
+                    intents.global.changeOrderPrice = intents.global.changeOrderPrice || [];
+                    intents.global.changeOrderPrice.push({
                         orderId: ""+iChangeOrderPrice.orderId,
                         newPrice: parseInt(iChangeOrderPrice.newPrice*1000),
                     });
                 });
             }
-            if(marketIntentsResult.extendOrder) {
-                _.forEach(marketIntentsResult.extendOrder, (iExtendOrder) => {
-                    intents.market = intents.market || {};
-                    intents.market.extendOrder = intents.market.extendOrder || [];
-                    intents.market.extendOrder.push({
+            if(globalIntentsResult.extendOrder) {
+                _.forEach(globalIntentsResult.extendOrder, (iExtendOrder) => {
+                    intents.global = intents.global || {};
+                    intents.global.extendOrder = intents.global.extendOrder || [];
+                    intents.global.extendOrder.push({
                         orderId: ""+iExtendOrder.orderId,
                         addAmount: parseInt(iExtendOrder.addAmount),
                     });
                 });
             }
-            if(marketIntentsResult.deal) {
-                _.forEach(marketIntentsResult.deal, (iDeal) => {
-                    intents.market = intents.market || {};
-                    intents.market.deal = intents.market.deal || [];
-                    intents.market.deal.push({
+            if(globalIntentsResult.deal) {
+                _.forEach(globalIntentsResult.deal, (iDeal) => {
+                    intents.global = intents.global || {};
+                    intents.global.deal = intents.global.deal || [];
+                    intents.global.deal.push({
                         orderId: ""+iDeal.orderId,
                         amount: parseInt(iDeal.amount),
                         targetRoomName: ""+iDeal.targetRoomName
+                    });
+                });
+            }
+            if(globalIntentsResult.spawnPowerCreep) {
+                _.forEach(globalIntentsResult.spawnPowerCreep, (iSpawnPowerCreep) => {
+                    intents.global = intents.global || {};
+                    intents.global.spawnPowerCreep = intents.global.spawnPowerCreep || [];
+                    intents.global.spawnPowerCreep.push({
+                        id: ""+iSpawnPowerCreep.id,
+                        name: ""+iSpawnPowerCreep.name,
+                    });
+                });
+            }
+            if(globalIntentsResult.suicidePowerCreep) {
+                _.forEach(globalIntentsResult.suicidePowerCreep, (iSuicidePowerCreep) => {
+                    intents.global = intents.global || {};
+                    intents.global.suicidePowerCreep = intents.global.suicidePowerCreep || [];
+                    intents.global.suicidePowerCreep.push({
+                        id: ""+iSuicidePowerCreep.id,
+                    });
+                });
+            }
+            if(globalIntentsResult.deletePowerCreep) {
+                _.forEach(globalIntentsResult.deletePowerCreep, (iDeletePowerCreep) => {
+                    intents.global = intents.global || {};
+                    intents.global.deletePowerCreep = intents.global.deletePowerCreep || [];
+                    intents.global.deletePowerCreep.push({
+                        id: ""+iDeletePowerCreep.id,
+                        cancel: !!iDeletePowerCreep.cancel
+                    });
+                });
+            }
+            if(globalIntentsResult.upgradePowerCreep) {
+                _.forEach(globalIntentsResult.upgradePowerCreep, (iUpgradePowerCreep) => {
+                    intents.global = intents.global || {};
+                    intents.global.upgradePowerCreep = intents.global.upgradePowerCreep || [];
+                    intents.global.upgradePowerCreep.push({
+                        id: ""+iUpgradePowerCreep.id,
+                        power: +iUpgradePowerCreep.power
+                    });
+                });
+            }
+            if(globalIntentsResult.createPowerCreep) {
+                _.forEach(globalIntentsResult.createPowerCreep, (iCreatePowerCreep) => {
+                    intents.global = intents.global || {};
+                    intents.global.createPowerCreep = intents.global.createPowerCreep || [];
+                    intents.global.createPowerCreep.push({
+                        name: ""+iCreatePowerCreep.name,
+                        className: ""+iCreatePowerCreep.className,
+                    });
+                });
+            }
+            if(globalIntentsResult.renamePowerCreep) {
+                _.forEach(globalIntentsResult.renamePowerCreep, (iRenamePowerCreep) => {
+                    intents.global = intents.global || {};
+                    intents.global.renamePowerCreep = intents.global.renamePowerCreep || [];
+                    intents.global.renamePowerCreep.push({
+                        id: ""+iRenamePowerCreep.id,
+                        name: ""+iRenamePowerCreep.name
                     });
                 });
             }
@@ -842,6 +898,22 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
         if(objectIntentsResult.cancelSpawning) {
             objectIntents.cancelSpawning = {};
         }
+        if(objectIntentsResult.usePower) {
+            objectIntents.usePower = {
+                power: +objectIntentsResult.usePower.power,
+                id: ""+objectIntentsResult.usePower.id
+            };
+        }
+        if(objectIntentsResult.enableRoom) {
+            objectIntents.enableRoom = {
+                id: ""+objectIntentsResult.enableRoom.id
+            };
+        }
+        if(objectIntentsResult.renew) {
+            objectIntents.renew = {
+                id: ""+objectIntentsResult.renew.id
+            };
+        }
 
         // for(var iCustomType in driver.config.customIntentTypes) {
         //     if(objectIntentsResult[iCustomType]) {
@@ -1004,6 +1076,12 @@ exports.calcBodyEffectiveness = function(body, bodyPartType, methodName, basePow
         power += iPower;
     });
     return power;
+};
+
+exports.dist = function(a, b) {
+    if(a.pos) a = a.pos;
+    if(b.pos) b = b.pos;
+    return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
 };
 
 exports.calcRoomsDistance = function(room1, room2, continuous) {

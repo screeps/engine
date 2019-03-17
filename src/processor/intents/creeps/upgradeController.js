@@ -39,10 +39,15 @@ module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, stats, 
         });
 
     if(target.level == 8) {
-        if(target._upgraded >= C.CONTROLLER_MAX_UPGRADE_PER_TICK) {
+        var limit = C.CONTROLLER_MAX_UPGRADE_PER_TICK;
+        var effect = _.find(object.effects, {power: C.PWR_OPERATE_CONTROLLER});
+        if(effect && effect.endTime >= gameTime) {
+            limit += C.POWER_INFO[C.PWR_OPERATE_CONTROLLER].effect[effect.level-1];
+        }
+        if(target._upgraded >= limit) {
             return;
         }
-        buildEffect = Math.min(buildEffect, C.CONTROLLER_MAX_UPGRADE_PER_TICK - target._upgraded);
+        buildEffect = Math.min(buildEffect, limit - target._upgraded);
     }
 
     boostedParts.sort((a,b) => b-a);

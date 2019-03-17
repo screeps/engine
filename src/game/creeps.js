@@ -18,6 +18,9 @@ function _getActiveBodyparts(body, type) {
 }
 
 function _hasActiveBodypart(body, type) {
+    if(!body) {
+        return true;
+    }
     for(var i = body.length-1; i>=0; i--) {
         if (body[i].hits <= 0)
             break;
@@ -53,7 +56,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     var Creep = register.wrapFn(function(id) {
         if(id) {
             var _data = data(id);
-            globals.RoomObject.call(this, _data.x, _data.y, _data.room);
+            globals.RoomObject.call(this, _data.x, _data.y, _data.room, _data.effects);
             this.id = id;
         }
     });
@@ -433,8 +436,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!_.contains(C.RESOURCES_ALL, resourceType)) {
             return C.ERR_INVALID_ARGS;
         }
-        if(!target || !target.id || (!register.spawns[target.id] && !register.creeps[target.id] && !register.structures[target.id]) ||
-            !(target instanceof globals.StructureSpawn) && !(target instanceof globals.Structure) && !(target instanceof globals.Creep)) {
+        if(!target || !target.id || (!register.spawns[target.id] && !register.powerCreeps[target.id] && !register.creeps[target.id] && !register.structures[target.id]) ||
+            !(target instanceof globals.StructureSpawn) && !(target instanceof globals.Structure) && !(target instanceof globals.Creep) && !(target instanceof globals.PowerCreep) && !target.spawning) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
@@ -718,8 +721,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.room.controller && !this.room.controller.my && this.room.controller.safeMode) {
             return C.ERR_NO_BODYPART;
         }
-        if(!target || !target.id || !register.creeps[target.id] && !register.structures[target.id] ||
-            !(target instanceof globals.Creep) && !(target instanceof globals.StructureSpawn) && !(target instanceof globals.Structure)) {
+        if(!target || !target.id || !register.creeps[target.id] && !register.powerCreeps[target.id] && !register.structures[target.id] ||
+            !(target instanceof globals.Creep) && !(target instanceof globals.PowerCreep) && !(target instanceof globals.StructureSpawn) && !(target instanceof globals.Structure)) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
@@ -746,8 +749,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.room.controller && !this.room.controller.my && this.room.controller.safeMode) {
             return C.ERR_NO_BODYPART;
         }
-        if(!target || !target.id || !register.creeps[target.id] && !register.structures[target.id] ||
-            !(target instanceof globals.Creep) && !(target instanceof globals.StructureSpawn) && !(target instanceof globals.Structure)) {
+        if(!target || !target.id || !register.creeps[target.id] && !register.powerCreeps[target.id] && !register.structures[target.id] ||
+            !(target instanceof globals.Creep) && !(target instanceof globals.PowerCreep) && !(target instanceof globals.StructureSpawn) && !(target instanceof globals.Structure)) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
@@ -791,7 +794,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!_hasActiveBodypart(this.body, C.HEAL)) {
             return C.ERR_NO_BODYPART;
         }
-        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
+        if(!target || !target.id || !register.creeps[target.id] && !register.powerCreeps[target.id] ||
+            !(target instanceof globals.Creep) && !(target instanceof globals.PowerCreep)) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
@@ -818,7 +822,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!_hasActiveBodypart(this.body, C.HEAL)) {
             return C.ERR_NO_BODYPART;
         }
-        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep)) {
+        if(!target || !target.id || !register.creeps[target.id] && !register.powerCreeps[target.id] ||
+            !(target instanceof globals.Creep) && !(target instanceof globals.PowerCreep)) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
@@ -1192,13 +1197,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
         if(this.spawning) {
             return C.ERR_BUSY;
-        }
-
-        if(data(this.id).fatigue > 0) {
-            return C.ERR_TIRED;
-        }
-        if(!_hasActiveBodypart(this.body, C.MOVE)) {
-            return C.ERR_NO_BODYPART;
         }
 
         if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning || target.id == this.id) {

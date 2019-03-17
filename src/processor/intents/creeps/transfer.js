@@ -5,9 +5,6 @@ var _ = require('lodash'),
 
 module.exports = function(object, intent, {roomObjects, bulk, eventLog}) {
 
-    if(object.type != 'creep') {
-        return;
-    }
     if(!_.contains(C.RESOURCES_ALL, intent.resourceType)) {
         return;
     }
@@ -16,7 +13,7 @@ module.exports = function(object, intent, {roomObjects, bulk, eventLog}) {
     }
 
     var target = roomObjects[intent.id];
-    if(!target) {
+    if(!target || target.type == 'creep' && target.spawning) {
         return;
     }
     if(Math.abs(target.x - object.x) > 1 || Math.abs(target.y - object.y) > 1) {
@@ -24,18 +21,18 @@ module.exports = function(object, intent, {roomObjects, bulk, eventLog}) {
     }
 
     if(intent.resourceType == 'energy') {
-        if(!_.contains(['spawn','creep','extension','link','storage','tower','powerSpawn','lab','terminal','container','nuker'], target.type)) {
+        if(!_.contains(['spawn','creep','powerCreep','extension','link','storage','tower','powerSpawn','lab','terminal','container','nuker'], target.type)) {
             return;
         }
     }
     else if(intent.resourceType == 'power') {
-        if(!_.contains(['creep','storage','powerSpawn','terminal','container'], target.type)) {
+        if(!_.contains(['creep','powerCreep','storage','powerSpawn','terminal','container'], target.type)) {
             return;
         }
 
     }
     else {
-        if(!_.contains(['creep','storage','lab','terminal','container','nuker'], target.type)) {
+        if(!_.contains(['creep','powerCreep','storage','lab','terminal','container','nuker'], target.type)) {
             return;
         }
     }

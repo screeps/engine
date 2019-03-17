@@ -20,7 +20,8 @@
             constructionSites: {},
             minerals: {},
             tombstones: {},
-            nukes: {}
+            nukes: {},
+            powerCreeps: {},
         });
 
         if(spatial) {
@@ -36,6 +37,8 @@
         [C.FIND_CREEPS]: (i) => !i.spawning,
         [C.FIND_MY_CREEPS]: (i) => !i.spawning && i.my,
         [C.FIND_HOSTILE_CREEPS]: (i) => !i.spawning && !i.my,
+        [C.FIND_MY_POWER_CREEPS]: (i) => i.my,
+        [C.FIND_HOSTILE_POWER_CREEPS]: (i) => !i.my,
         [C.FIND_MY_SPAWNS]: (i) =>  i.my === true,
         [C.FIND_HOSTILE_SPAWNS]: (i) =>  i.my === false,
         [C.FIND_SOURCES_ACTIVE]: (i) => i.energy > 0,
@@ -65,7 +68,7 @@
         }
     }
 
-    function makeGameObject ({runtimeData, intents, memory, getUsedCpu, globals, sandboxedFunctionWrapper, getHeapStatistics}) {
+    function makeGameObject ({runtimeData, intents, memory, getUsedCpu, globals, sandboxedFunctionWrapper, getHeapStatistics, cpuHalt}) {
 
         var customObjectsInfo = {};
 
@@ -111,8 +114,12 @@
         var gclLevel = Math.floor(Math.pow((runtimeData.user.gcl || 0) / C.GCL_MULTIPLY, 1 / C.GCL_POW)) + 1,
         gclBaseProgress = Math.pow(gclLevel - 1, C.GCL_POW) * C.GCL_MULTIPLY;
 
+        var gplLevel = Math.floor(Math.pow((runtimeData.user.power || 0) / C.POWER_LEVEL_MULTIPLY, 1 / C.POWER_LEVEL_POW)),
+            gplBaseProgress = Math.pow(gplLevel, C.POWER_LEVEL_POW) * C.POWER_LEVEL_MULTIPLY;
+
         var game = {
             creeps: {},
+            powerCreeps: {},
             spawns: {},
             structures: {},
             flags: {},
@@ -129,13 +136,22 @@
                 bucket: runtimeData.cpuBucket,
                 getHeapStatistics: getHeapStatistics ? function() {
                     return getHeapStatistics();
-                } : undefined
+                } : undefined,
+                halt: cpuHalt ? function() {
+                    cpuHalt.applySync();
+                    throw new Error("No one should ever see this message.");
+                } : undefined,
             },
             map: {},
             gcl: {
                 level: gclLevel,
                 progress: (runtimeData.user.gcl || 0) - gclBaseProgress,
                 progressTotal: Math.pow(gclLevel, C.GCL_POW) * C.GCL_MULTIPLY - gclBaseProgress
+            },
+            gpl: {
+                level: gplLevel,
+                progress: (runtimeData.user.power || 0) - gplBaseProgress,
+                progressTotal: Math.pow(gplLevel+1, 2) * 1000 - gplBaseProgress
             },
             market: {},
             resources: {
@@ -183,6 +199,7 @@
         require('./tombstones').make(runtimeData, intents, register, globals);
         require('./construction-sites').make(runtimeData, intents, register, globals);
         require('./path-finder').make(runtimeData, intents, register, globals);
+        require('./power-creeps').make(runtimeData, intents, register, globals);
 
         for (var i in runtimeData.rooms) {
             register.rooms[i] = new globals.Room(i);
@@ -218,6 +235,12 @@
         };
 
         var c = {};
+
+        for(var i in runtimeData.userPowerCreeps) {
+            register.powerCreeps[i] = new globals.PowerCreep(i);
+            game.powerCreeps[register.powerCreeps[i].name] = register.powerCreeps[i];
+        }
+
         for(var i in runtimeData.roomObjects) {
             var object = runtimeData.roomObjects[i];
 
@@ -243,6 +266,18 @@
                 addObjectToFindCache(register, C.FIND_CREEPS, register.creeps[i], object);
                 addObjectToFindCache(register, C.FIND_MY_CREEPS, register.creeps[i], object);
                 addObjectToFindCache(register, C.FIND_HOSTILE_CREEPS, register.creeps[i], object);
+            }
+            if (object.type == 'powerCreep') {
+                if(register.powerCreeps[i]) {
+                    register._objects[i] = register.powerCreeps[i];
+                }
+                else {
+                    register._objects[i] = new globals.PowerCreep(i);
+                }
+                addObjectToRegister(register, 'powerCreeps', register._objects[i], object);
+                addObjectToFindCache(register, C.FIND_POWER_CREEPS, register.powerCreeps[i], object);
+                addObjectToFindCache(register, C.FIND_MY_POWER_CREEPS, register.powerCreeps[i], object);
+                addObjectToFindCache(register, C.FIND_HOSTILE_POWER_CREEPS, register.powerCreeps[i], object);
             }
             if (structureTypes[object.type]) {
                 register._objects[i] = new structureTypes[object.type](i);
@@ -373,10 +408,17 @@
     };
 
     (function() {
-        
+
         var runCodeCache = {};
 
-        exports.init = function (_globals, _codeModules, _runtimeData, _intents, _memory, _fakeConsole, _consoleCommands, _timeout, _getUsedCpu, _scriptCachedData, _sandboxedFunctionWrapper, _getHeapStatistics) {
+        exports.init = function (
+            _globals, _codeModules, _runtimeData,
+            _intents, _memory,
+            _fakeConsole, _consoleCommands,
+            _timeout, _getUsedCpu,
+            _scriptCachedData, _sandboxedFunctionWrapper,
+            _getHeapStatistics, _cpuHalt
+        ) {
 
             var userId = _runtimeData.user._id;
 
@@ -392,6 +434,7 @@
             runCodeCache[userId].getUsedCpu = _getUsedCpu;
             runCodeCache[userId].scriptCachedData = _scriptCachedData;
             runCodeCache[userId].getHeapStatistics = _getHeapStatistics;
+            runCodeCache[userId].cpuHalt = _cpuHalt;
             runCodeCache[userId].sandboxedFunctionWrapper = _sandboxedFunctionWrapper;
 
             _.extend(runCodeCache[userId].globals, {
@@ -427,26 +470,6 @@
             });
 
             runCodeCache[userId].globals.Game = makeGameObject(runCodeCache[userId]);
-
-            if (runCodeCache[userId].runtimeData.user._id == '2') {
-                runCodeCache[userId].codeModules = {
-                    main: "PathFinder.use(true);  var  healer  =  require('healer'),  findAttack  =  require('findAttack');  for  (var  i  in  Game.creeps)  {  var  creep  =  Game.creeps[i];  if  (!creep.room)  {  continue;  }  if  (creep.getActiveBodyparts('heal')  >  0)  {  healer(creep);  }  else  {  findAttack(Game.creeps[i]);  }  require('shootAtWill')(creep);  }  for  (var  i  in  Memory.creeps)  {  if  (!Game.creeps[i])  {  delete  Memory.creeps[i];  }  }",
-                    findAttack: "var flee = require('flee'); function checkPath(pos1, pos2) { var path = pos1.findPathTo(pos2); if (!path.length) { return false; } return path[path.length - 1].x == pos2.x && path[path.length - 1].y == pos2.y; } function costCallbackIgnoreRamparts(roomName, cm) { var ramparts = Game.rooms[roomName].find(FIND_STRUCTURES, {filter: i => i.structureType == STRUCTURE_RAMPART || i.structureType == STRUCTURE_WALL}); ramparts.forEach(i => cm.set(i.pos.x, i.pos.y, 0)); } module.exports = function (creep) { if (!creep.getActiveBodyparts(ATTACK) && creep.getActiveBodyparts(RANGED_ATTACK) && flee(creep, 3)) { return; } var target, healers = creep.room.find(FIND_MY_CREEPS, { filter: function (i) { return i.getActiveBodyparts('heal') > 0; } }); if (creep.hits < creep.hitsMax / 2 && healers.length > 0 && !creep.getActiveBodyparts(ATTACK)) { target = creep.pos.findClosestByPath(FIND_MY_CREEPS, { ignoreRoads: true, filter: function (i) { return i.getActiveBodyparts('heal') > 0; } }); if (!target || creep.moveTo(target, {maxRooms: 1, ignoreRoads: true}) != OK) { target = null; } } var nearCreeps = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 1, { filter: function (i) { return i.owner.username != 'Source Keeper' } }); if (nearCreeps) { creep.attack(nearCreeps[0]); } if (!target) { target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, { ignoreRoads: true, ignoreCreeps: true, filter: function (i) { return i.owner.username != 'Source Keeper' } }); if (target && (creep.getActiveBodyparts(ATTACK) || !creep.pos.inRangeTo(target, 3))) { creep.moveTo(target, {maxRooms: 1, ignoreRoads: true, ignoreCreeps: true}); } } if (!target) { target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, { ignoreRoads: true, filter: function (i) { return i.owner.username != 'Source Keeper' }, costCallback: costCallbackIgnoreRamparts }); if (target && (creep.getActiveBodyparts(ATTACK) || !creep.pos.inRangeTo(target, 3))) { creep.moveTo(target, {maxRooms: 1, ignoreRoads: true, costCallback: costCallbackIgnoreRamparts}); } } if (!target) { target = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS, { ignoreDestructibleStructures: true, ignoreRoads: true, filter: function (i) { return i.owner.username != 'Source Keeper' } }); if (target && (creep.getActiveBodyparts(ATTACK) || !creep.pos.inRangeTo(target, 3))) { creep.moveTo(target, {ignoreDestructibleStructures: true, maxRooms: 1, ignoreRoads: true}); } } if (!target) { if (creep.room.controller && creep.room.controller.level > 0 && !creep.room.find(FIND_HOSTILE_CREEPS).length) { var spawns = _.filter(creep.room.find(FIND_HOSTILE_SPAWNS), spawn => !checkPath(creep.pos, spawn.pos)); if (!spawns.length) { creep.suicide(); return; } target = spawns[0]; if (target) { creep.moveTo(target, {ignoreDestructibleStructures: true, maxRooms: 1, ignoreRoads: true}); } } return; } creep.attack(target); if ((creep.getActiveBodyparts(WORK) > 0 || creep.getActiveBodyparts(ATTACK) > 0) && creep.memory._move && creep.memory._move.path) { var path = Room.deserializePath(creep.memory._move.path); if (path.length && creep.pos.isNearTo(path[0].x, path[0].y)) { var structures = creep.room.lookForAt('structure', path[0].x, path[0].y); if (structures.length > 0) { creep.attack(structures[0]); creep.dismantle(structures[0]); } } } }",
-                    flee: "var rooms = require('rooms'); module.exports = function(creep, range) { var nearCreeps = creep.pos.findInRange(FIND_HOSTILE_CREEPS, range-1, {filter: i => i.getActiveBodyparts(ATTACK) > 0 || i.getActiveBodyparts(RANGED_ATTACK) > 0}); if(nearCreeps.length > 0) { var ret = PathFinder.search(creep.pos, _.map(nearCreeps, i => ({pos: i.pos, range: range})), { maxRooms: 1, flee: true, roomCallback(roomName) { if(!rooms.rooms[roomName] || rooms.rooms[roomName].time < Game.time) { rooms.rooms[roomName] = {costMatrix: rooms.createCostMatrix(roomName), time: Game.time}; } return rooms.rooms[roomName].costMatrix; } }); if(ret.path.length) { creep.moveTo(ret.path[0]); creep.say('flee'); return true; } } return false; }",
-                    healer: "var flee = require('flee'); module.exports = function (creep) { var target; var healTargets = creep.pos.findInRange(FIND_MY_CREEPS, 3); if(healTargets.length > 0) { healTargets = healTargets.sort((a,b) => (b.hitsMax - b.hits) - (a.hitsMax - a.hits)); if (creep.pos.isNearTo(healTargets[0])) { creep.heal(healTargets[0]); } else { creep.rangedHeal(healTargets[0]); } } if (creep.hits < creep.hitsMax / 2) { if (!flee(creep)) { target = creep.pos.findClosestByPath(FIND_MY_CREEPS, {filter: i => i.getActiveBodyparts('heal') > 0}); if (target) { creep.moveTo(target, {maxRooms: 1, ignoreRoads: true}); } } return; } target = creep.pos.findClosestByRange(FIND_MY_CREEPS, {filter: i => i.hits < i.hitsMax}); if (!target) { if (flee(creep, 4)) { return; } target = creep.pos.findClosestByRange(FIND_MY_CREEPS, {filter: i => i != creep && i.getActiveBodyparts(HEAL) == 0}); } if (!target) { creep.suicide(); return; } if (creep.pos.isNearTo(target)) { creep.move(creep.pos.getDirectionTo(target)); } else { creep.moveTo(target, {maxRooms: 1, ignoreRoads: true, reusePath: 0}); } if (creep.getActiveBodyparts(RANGED_ATTACK)) { require('shootAtWill')(creep); } }",
-                    rooms: "module.exports = { rooms: {}, createCostMatrix(roomName) { var cm = new PathFinder.CostMatrix; Game.rooms[roomName].find(FIND_CREEPS).forEach(i => cm.set(i.pos.x, i.pos.y, 255)); Game.rooms[roomName].find(FIND_STRUCTURES).forEach(i => { if(i.structureType != STRUCTURE_ROAD && i.structureType != STRUCTURE_CONTAINER) { cm.set(i.pos.x, i.pos.y, 255); } }); return cm; } } ",
-                    shootAtWill: "module.exports = function (creep) { if(!creep.getActiveBodyparts(RANGED_ATTACK)) { return; } var targets = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 3, { filter: function (i) { return i.owner.username != 'Source Keeper' } }); if (!targets.length) { targets = creep.pos.findInRange(FIND_STRUCTURES, 3, { filter: function (i) { return i.structureType == STRUCTURE_RAMPART || i.structureType == STRUCTURE_WALL; } }); } var min = -1, target; for (var i in targets) { if (min == -1 || min > targets[i].hits) { target = targets[i]; min = targets[i].hits; } } creep.rangedAttack(target); }"
-                };
-                runCodeCache[userId].runtimeData.userCodeTimestamp = 2;
-            }
-
-            if (runCodeCache[userId].runtimeData.user._id == '3') {
-                runCodeCache[userId].codeModules = {
-                    main: "PathFinder.use(true); /*console.log('start',Game.getUsedCpu(), _.size(_.filter(Game.creeps, {my: true}))); */ for (var i in Game.creeps) { var creep = Game.creeps[i], source = undefined; if (!creep.room) { continue; } if (creep.memory.sourceId) { source = Game.getObjectById(creep.memory.sourceId); } if(!source) { source = creep.pos.findInRange(FIND_SOURCES, 5)[0] || creep.pos.findInRange(FIND_MINERALS, 5)[0]; if (source) { creep.memory.sourceId = source.id; } } if (source) { if (!creep.pos.isNearTo(source)) { if (creep.moveTo(source, {reusePath: 50}) == ERR_NO_PATH) { delete creep.memory._move; creep.moveTo(source, {reusePath: 50, ignoreDestructibleStructures: true}); } } } var enemies = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 1, { filter: function (i) { return i.owner.username != 'Invader' } }); if (enemies.length) { enemies.sort(function (a, b) { return a.hits - b.hits; }); creep.attack(enemies[0]); } var enemies = creep.pos.findInRange(FIND_HOSTILE_CREEPS, 3, { filter: function (i) { return i.owner.username != 'Invader' } }); if (enemies.length) { var massDmg = 0, distanceDmg = {1: 10, 2: 4, 3: 1}; for (var i in enemies) { var distance = Math.max(Math.abs(enemies[i].pos.x - creep.pos.x), Math.abs(enemies[i].pos.y - creep.pos.y)); massDmg += distanceDmg[distance]; } if (massDmg > 13) { creep.rangedMassAttack(); } else { enemies.sort(function (a, b) { return a.hits - b.hits; }); creep.rangedAttack(enemies[0]); } } for (var i in Memory.creeps) { if (!Game.creeps[i]) { delete Memory.creeps[i]; } } }"
-                };
-                runCodeCache[userId].runtimeData.userCodeTimestamp = 2;
-            }
-
 
             if (!runCodeCache[userId].globals.require ||
                 runCodeCache[userId].runtimeData.userCodeTimestamp != runCodeCache[userId].globals.require.timestamp ||

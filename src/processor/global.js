@@ -3,7 +3,8 @@ var q = require('q'),
     utils = require('../utils'),
     driver = utils.getDriver(),
     C = driver.constants,
-    marketProcessor = require('./market');
+    marketProcessor = require('./global-intents/market'),
+    powerProcessor = require('./global-intents/power');
 
 module.exports = () => {
 
@@ -12,11 +13,20 @@ module.exports = () => {
             return;
         }
 
-        var [gameTime,creeps,accessibleRooms,terminals,market] = data;
+        var [gameTime,creeps,accessibleRooms,roomObjects,{orders,users,userPowerCreeps,userIntents,shardName}={}] = data;
 
-        var bulk = driver.bulkObjectsWrite(),
+        var bulkObjects = driver.bulkObjectsWrite(),
             bulkRooms = driver.bulkRoomsWrite(),
-            activateRooms = {};
+            bulkUsers = driver.bulkUsersWrite(),
+            bulkTransactions = driver.bulkTransactionsWrite(),
+            bulkUsersMoney = driver.bulkUsersMoney(),
+            bulkUsersResources = driver.bulkUsersResources(),
+            bulkUsersPowerCreeps = driver.bulkUsersPowerCreeps(),
+            bulkMarketOrders = driver.bulkMarketOrders(),
+            bulkMarketIntershardOrders = driver.bulkMarketIntershardOrders(),
+            activateRooms = {},
+            usersById = _.indexBy(users, '_id'),
+            roomObjectsByType = _.groupBy(roomObjects, 'type');
 
         // creeps
 
@@ -29,11 +39,27 @@ module.exports = () => {
             }
             activateRooms[creep.interRoom.room] = true;
 
-            bulk.update(creep, {room: creep.interRoom.room, x: creep.interRoom.x, y: creep.interRoom.y, interRoom: null});
+            bulkObjects.update(creep, {room: creep.interRoom.room, x: creep.interRoom.x, y: creep.interRoom.y, interRoom: null});
         });
 
-        return marketProcessor.execute(market, gameTime, terminals, bulk)
-        .then(() => q.all([bulk.execute(), bulkRooms.execute()]));
+        powerProcessor({userIntents, usersById, roomObjectsByType, userPowerCreeps, gameTime,
+            bulkObjects, bulkUsers, bulkUsersPowerCreeps, shardName});
+
+        marketProcessor({orders, userIntents, usersById, gameTime, roomObjectsByType, bulkObjects, bulkUsers, bulkTransactions,
+            bulkUsersMoney, bulkUsersResources, bulkMarketOrders, bulkMarketIntershardOrders});
+
+        return q.all([
+            bulkObjects.execute(),
+            bulkRooms.execute(),
+            bulkUsers.execute(),
+            bulkMarketOrders.execute(),
+            bulkMarketIntershardOrders.execute(),
+            bulkUsersMoney.execute(),
+            bulkTransactions.execute(),
+            bulkUsersResources.execute(),
+            bulkUsersPowerCreeps.execute(),
+            driver.clearGlobalIntents()
+        ]);
     });
 };
 

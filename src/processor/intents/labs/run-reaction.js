@@ -3,14 +3,20 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, intent, {roomObjects, bulk}) {
+module.exports = function(object, intent, {roomObjects, bulk, gameTime}) {
 
     if(object.cooldown > 0) {
         return;
     }
 
+    var reactionAmount = C.LAB_REACTION_AMOUNT;
+    var effect = _.find(object.effects, {power: C.PWR_OPERATE_LAB});
+    if(effect && effect.endTime > gameTime) {
+        reactionAmount += C.POWER_INFO[C.PWR_OPERATE_LAB].effect[effect.level-1];
+    }
+
     var lab1 = roomObjects[intent.lab1];
-    if(!lab1 || lab1.type != 'lab' || lab1.mineralAmount < C.LAB_REACTION_AMOUNT) {
+    if(!lab1 || lab1.type != 'lab' || lab1.mineralAmount < reactionAmount) {
         return;
     }
     if(Math.abs(lab1.x - object.x) > 2 || Math.abs(lab1.y - object.y) > 2) {
@@ -18,14 +24,14 @@ module.exports = function(object, intent, {roomObjects, bulk}) {
     }
 
     var lab2 = roomObjects[intent.lab2];
-    if(!lab2 || lab2.type != 'lab' || lab2.mineralAmount < C.LAB_REACTION_AMOUNT) {
+    if(!lab2 || lab2.type != 'lab' || lab2.mineralAmount < reactionAmount) {
         return;
     }
     if(Math.abs(lab2.x - object.x) > 2 || Math.abs(lab2.y - object.y) > 2) {
         return;
     }
 
-    if(object.mineralAmount > object.mineralCapacity - C.LAB_REACTION_AMOUNT) {
+    if(object.mineralAmount > object.mineralCapacity - reactionAmount) {
         return;
     }
 
@@ -38,18 +44,18 @@ module.exports = function(object, intent, {roomObjects, bulk}) {
     let cooldown = C.REACTION_TIME[product] ;
 
     bulk.update(object, {
-        mineralAmount: object.mineralAmount + C.LAB_REACTION_AMOUNT,
+        mineralAmount: object.mineralAmount + reactionAmount,
         cooldown
     });
     if(!object.mineralType) {
         bulk.update(object, {mineralType: product});
     }
 
-    bulk.update(lab1, {mineralAmount: lab1.mineralAmount - C.LAB_REACTION_AMOUNT});
+    bulk.update(lab1, {mineralAmount: lab1.mineralAmount - reactionAmount});
     if(!lab1.mineralAmount) {
         bulk.update(lab1, {mineralType: null});
     }
-    bulk.update(lab2, {mineralAmount: lab2.mineralAmount - C.LAB_REACTION_AMOUNT});
+    bulk.update(lab2, {mineralAmount: lab2.mineralAmount - reactionAmount});
     if(!lab2.mineralAmount) {
         bulk.update(lab2, {mineralType: null});
     }

@@ -15,7 +15,7 @@ exports.make = function(runtimeData, intents, register) {
             resourceType = 'all';
         }
         if(!cachedOrders[resourceType]) {
-            if(resourceType != 'all' && !_.contains(C.RESOURCES_ALL, resourceType) && resourceType != C.SUBSCRIPTION_TOKEN) {
+            if(resourceType != 'all' && !_.contains(C.RESOURCES_ALL, resourceType) && !_.contains(C.INTERSHARD_RESOURCES, resourceType)) {
                 return {};
             }
             cachedOrders[resourceType] = JSON.parse(JSON.stringify(runtimeData.market.orders[resourceType]) || '{}');
@@ -48,7 +48,7 @@ exports.make = function(runtimeData, intents, register) {
         }),
 
         createOrder: register.wrapFn(function(type, resourceType, price, totalAmount, roomName) {
-            if(!_.contains(C.RESOURCES_ALL, resourceType) && resourceType != C.SUBSCRIPTION_TOKEN) {
+            if(!_.contains(C.RESOURCES_ALL, resourceType) && !_.contains(C.INTERSHARD_RESOURCES, resourceType)) {
                 return C.ERR_INVALID_ARGS;
             }
             if(type != C.ORDER_BUY && type != C.ORDER_SELL) {
@@ -62,7 +62,7 @@ exports.make = function(runtimeData, intents, register) {
             if(price * totalAmount * C.MARKET_FEE > this.credits) {
                 return C.ERR_NOT_ENOUGH_RESOURCES;
             }
-            if(resourceType != C.SUBSCRIPTION_TOKEN &&
+            if(!_.contains(C.INTERSHARD_RESOURCES, resourceType) &&
                 (!roomName || !_.any(runtimeData.userObjects, {type: 'terminal', room: roomName}))) {
                 return C.ERR_NOT_OWNER;
             }
@@ -70,7 +70,7 @@ exports.make = function(runtimeData, intents, register) {
                 return C.ERR_FULL;
             }
             ordersCreatedDuringTick++;
-            intents.pushByName('market', 'createOrder', {
+            intents.pushByName('global', 'createOrder', {
                 type, resourceType, price, totalAmount, roomName
             });
             return C.OK;
@@ -80,7 +80,7 @@ exports.make = function(runtimeData, intents, register) {
             if(!this.orders[orderId]) {
                 return C.ERR_INVALID_ARGS;
             }
-            intents.pushByName('market', 'cancelOrder', {orderId}, 50);
+            intents.pushByName('global', 'cancelOrder', {orderId}, 50);
             return C.OK;
         }),
 
@@ -93,9 +93,11 @@ exports.make = function(runtimeData, intents, register) {
             if(!amount || amount < 0) {
                 return C.ERR_INVALID_ARGS;
             }
-            if(order.resourceType == C.SUBSCRIPTION_TOKEN) {
-                if(order.type == C.ORDER_BUY && (runtimeData.user.subscriptionTokens||0) < amount) {
-                    return C.ERR_NOT_ENOUGH_RESOURCES;
+            if(_.contains(C.INTERSHARD_RESOURCES, order.resourceType)) {
+                if(order.resourceType == C.SUBSCRIPTION_TOKEN) {
+                    if(order.type == C.ORDER_BUY && (runtimeData.user.subscriptionTokens||0) < amount) {
+                        return C.ERR_NOT_ENOUGH_RESOURCES;
+                    }
                 }
             }
             else {
@@ -125,7 +127,7 @@ exports.make = function(runtimeData, intents, register) {
                 return C.ERR_NOT_ENOUGH_RESOURCES;
             }
 
-            if(!intents.pushByName('market', 'deal', {orderId, targetRoomName, amount}, 10)) {
+            if(!intents.pushByName('global', 'deal', {orderId, targetRoomName, amount}, 10)) {
                 return C.ERR_FULL;
             }
             return C.OK;
@@ -144,7 +146,7 @@ exports.make = function(runtimeData, intents, register) {
                 return C.ERR_NOT_ENOUGH_RESOURCES;
             }
 
-            intents.pushByName('market', 'changeOrderPrice', {
+            intents.pushByName('global', 'changeOrderPrice', {
                 orderId, newPrice
             }, 50);
             return C.OK;
@@ -163,7 +165,7 @@ exports.make = function(runtimeData, intents, register) {
                 return C.ERR_NOT_ENOUGH_RESOURCES;
             }
 
-            intents.pushByName('market', 'extendOrder', {
+            intents.pushByName('global', 'extendOrder', {
                 orderId, addAmount
             }, 50);
             return C.OK;

@@ -5,9 +5,13 @@ var q = require('q'),
     utils = require('./utils'),
     driver = utils.getDriver(),
     C = driver.constants,
-    config = require('./config');
+    config = require('./config'),
+    fakeRuntime = require('./processor/common/fake-runtime');
 
 var roomsQueue, usersQueue, lastRoomsStatsSaveTime = 0, currentHistoryPromise = q.when();
+
+const KEEPER_ID = "3";
+const INVADER_ID = "2";
 
 function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime, roomInfo, flags}) {
 
@@ -16,11 +20,12 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
         var bulk = driver.bulkObjectsWrite(),
             bulkUsers = driver.bulkUsersWrite(),
             bulkFlags = driver.bulkFlagsWrite(),
+            bulkUsersPowerCreeps = driver.bulkUsersPowerCreeps(),
             oldObjects = {},
             hasNewbieWalls = false,
             stats = driver.getRoomStatsUpdater(roomId),
             objectsToHistory = {},
-            roomNukes = [],
+            roomSpawns = [], roomExtensions = [], roomNukes = [], keepers = [], invaders = [],
             oldRoomInfo = _.clone(roomInfo);
 
         roomInfo.active = false;
@@ -32,7 +37,8 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
 
         let eventLog = [];
 
-        let scope = {roomObjects, roomTerrain, bulk, bulkUsers, stats, flags, bulkFlags, gameTime, roomInfo, users, eventLog};
+        let scope = {roomObjects, roomTerrain, bulk, bulkUsers, bulkUsersPowerCreeps, stats, flags,
+            bulkFlags, gameTime, roomInfo, users, eventLog};
 
         _.forEach(roomObjects, (object) => {
             if(!object) {
@@ -57,6 +63,11 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                     upgradeController: null,
                     reserveController: null
                 };
+                if(object.user == KEEPER_ID) {
+                    keepers.push(object);
+                } else if (object.user == INVADER_ID) {
+                    invaders.push(object);
+                }
             }
             if (object.type == 'link') {
                 object._actionLog = object.actionLog;
@@ -107,12 +118,65 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 hasNewbieWalls = true;
             }
 
+            if(object.type == 'extension') {
+                roomExtensions.push(object);
+            }
+            if(object.type == 'spawn') {
+                roomSpawns.push(object);
+            }
+            if (object.type == 'powerCreep') {
+                object._actionLog = object.actionLog;
+                object.actionLog = {
+                    spawned: null,
+                    attack: null,
+                    attacked: null,
+                    healed: null,
+                    power: null,
+                    say: null,
+                };
+            }
+
             driver.config.emit('processObject',object, roomObjects, roomTerrain, gameTime, roomInfo, bulk, bulkUsers);
 
         });
 
+        intents = intents || { users: {} };
+        driver.pathFinder.make({ RoomPosition: fakeRuntime.RoomPosition });
+
         for(let nuke of roomNukes) {
             require('./processor/intents/nukes/pretick')(nuke, intents, scope);
+        }
+
+        for(let keeper of keepers) {
+            const i = require('./processor/intents/creeps/keepers/pretick')(keeper, scope);
+
+            intents.users[keeper.user] = intents.users[keeper.user] || {};
+            intents.users[keeper.user].objects = intents.users[keeper.user].objects || {};
+            const objectsIntents =  intents.users[keeper.user].objects;
+            _.forEach(i, (ii, objId) => {
+                objectsIntents[objId] = _.assign(
+                    ii,
+                    objectsIntents[objId] || {}
+                );
+            });
+        }
+
+        for(let invader of invaders) {
+            const i = require('./processor/intents/creeps/invaders/pretick')(invader, scope);
+
+            intents.users[invader.user] = intents.users[invader.user] || {};
+            intents.users[invader.user].objects = intents.users[invader.user].objects || {};
+            const objectIntents = intents.users[invader.user].objects;
+            _.forEach(i, (ii, objId) => {
+                objectIntents[objId] = _.assign(
+                    ii,
+                    objectIntents[objId] || {}
+                );
+            });
+        }
+
+        if(roomSpawns.length || roomExtensions.length) {
+            require('./processor/intents/_calc_spawns')(roomSpawns, roomExtensions, scope);
         }
 
         movement.init(roomObjects, roomTerrain);
@@ -140,6 +204,8 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
 
                     if (object.type == 'creep')
                         require('./processor/intents/creeps/intents')(object, objectIntents, scope);
+                    if (object.type == 'powerCreep')
+                        require('./processor/intents/power-creeps/intents')(object, objectIntents, scope);
                     if (object.type == 'link')
                         require('./processor/intents/links/intents')(object, objectIntents, scope);
                     if (object.type == 'tower')
@@ -195,7 +261,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                         }
                     }
 
-                    if (objectIntents.notifyWhenAttacked && (C.CONSTRUCTION_COST[object.type] || object.type == 'creep')) {
+                    if (objectIntents.notifyWhenAttacked && (C.CONSTRUCTION_COST[object.type] || object.type == 'creep' || object.type == 'powerCreep')) {
                         bulk.update(object, {notifyWhenAttacked: !!objectIntents.notifyWhenAttacked.enabled});
                     }
 
@@ -240,6 +306,8 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 require('./processor/intents/minerals/tick')(object, scope);
             if (object.type == 'creep')
                 require('./processor/intents/creeps/tick')(object, scope);
+            if (object.type == 'powerCreep')
+                require('./processor/intents/power-creeps/tick')(object, scope);
             if (object.type == 'spawn')
                 require('./processor/intents/spawns/tick')(object, scope);
             if (object.type == 'rampart')
@@ -285,6 +353,12 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             if (object.type == 'storage') {
                 if (scope.roomController) {
                     var energyCapacity = scope.roomController.level > 0 && scope.roomController.user == object.user && C.CONTROLLER_STRUCTURES.storage[scope.roomController.level] > 0 ? C.STORAGE_CAPACITY : 0;
+                    if(energyCapacity > 0) {
+                        var effect = _.find(object.effects, {power: C.PWR_OPERATE_STORAGE});
+                        if (effect && effect.endTime > scope.gameTime) {
+                            energyCapacity += C.POWER_INFO[C.PWR_OPERATE_STORAGE].effect[effect.level-1];
+                        }
+                    }
                     if (energyCapacity != object.energyCapacity) {
                         bulk.update(object, {energyCapacity});
                     }
@@ -301,7 +375,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             if (object.type != 'flag') {
                 objectsToHistory[object._id] = object;
 
-                if (object.type == 'creep') {
+                if (object.type == 'creep' || object.type == 'powerCreep') {
                     objectsToHistory[object._id] = JSON.parse(JSON.stringify(object));
                     objectsToHistory[object._id]._id = "" + object._id;
                     delete objectsToHistory[object._id]._actionLog;
@@ -429,7 +503,7 @@ driver.connect('processor').then(() => driver.queue.create('rooms', 'read'))
                     driver.getRoomTerrain(_roomId),
                     driver.getGameTime(),
                     driver.getRoomInfo(_roomId),
-                    driver.getRoomFlags(_roomId)
+                    driver.getRoomFlags(_roomId),
                 ])
             })
             .then((result) => {

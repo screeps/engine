@@ -8,13 +8,18 @@ var _ = require('lodash'),
     roomObjects,
     roomTerrain;
 
+function canMove(object) {
+    return object.type == 'powerCreep' ||
+        (!!object._pulled || !object._oldFatigue && _.some(object.body, i => i.hits > 0 && i.type == C.MOVE));
+}
+
 function checkObstacleAtXY(x,y,object, roomIsInSafeMode) {
     var hasObstacle = false, hasRoad = false;
     _.forEach(roomObjects, (i) => {
         if (i.x != x || i.y != y) {
             return;
         }
-        if (i.type == 'creep' && !objects[i._id] && (!roomIsInSafeMode || roomIsInSafeMode != object.user || roomIsInSafeMode == object.user && object.user == i.user) ||
+        if ((i.type == 'creep' || i.type == 'powerCreep') && !objects[i._id] && (!roomIsInSafeMode || roomIsInSafeMode != object.user || roomIsInSafeMode == object.user && object.user == i.user) ||
             i.type != 'creep' && _.contains(C.OBSTACLE_OBJECT_TYPES, i.type) ||
             i.type == 'rampart' && !i.isPublic && i.user != object.user ||
             i.type == 'constructionSite' && i.user == object.user && _.contains(C.OBSTACLE_OBJECT_TYPES,
@@ -112,9 +117,12 @@ exports.check = function(roomIsInSafeMode) {
 
         if(matrix[i].length > 1) {
             var rates = _.map(matrix[i], (object) => {
-                var moves = utils.calcBodyEffectiveness(object.body, C.MOVE, 'fatigue', 1),
-                    weight = _.filter(object.body, (i) => i.type != C.MOVE && i.type != C.CARRY).length;
-                weight += calcResourcesWeight(object);
+                var moves = object.type == 'powerCreep' ? 0 :
+                        utils.calcBodyEffectiveness(object.body, C.MOVE, 'fatigue', 1),
+                    weight = object.type == 'powerCreep' ? 0 :
+                        _.filter(object.body, (i) => i.type != C.MOVE && i.type != C.CARRY).length;
+                weight += object.type == 'powerCreep' ? 0 :
+                    calcResourcesWeight(object);
                 weight = weight || 1;
                 var key = `${object.x},${object.y}`,
                     rate1 = affectedCnt[key] || 0;
@@ -175,9 +183,7 @@ exports.check = function(roomIsInSafeMode) {
             }
         }
 
-        var obstacle =  checkObstacleAtXY(x,y, object, roomIsInSafeMode);
-
-        if(obstacle) {
+        if(!canMove(object) || !!checkObstacleAtXY(x,y, object, roomIsInSafeMode)) {
             removeFromMatrix(i);
         }
     }
@@ -192,25 +198,34 @@ exports.execute = function(object, scope) {
         return;
     }
 
-    var ceilObjects = _.filter(roomObjects, (i) => i.x == move.x && i.y == move.y);
+    if(!canMove(object)) {
+        return;
+    }
+
+    var cellObjects = _.filter(roomObjects, (i) => i.x == move.x && i.y == move.y);
 
     var fatigueRate = 2;
 
-    if(_.any(ceilObjects, {type: 'swamp'}) ||
+    if(_.any(cellObjects, {type: 'swamp'}) ||
         utils.checkTerrain(roomTerrain, move.x, move.y, C.TERRAIN_MASK_SWAMP)) {
         fatigueRate = 10;
     }
 
-    var road = _.find(ceilObjects, {type: 'road'});
+    var road = _.find(cellObjects, {type: 'road'});
 
     if(road) {
         fatigueRate = 1;
-        road.nextDecayTime -= C.ROAD_WEAROUT * object.body.length;
+        if(object.type == 'powerCreep') {
+            road.nextDecayTime -= C.ROAD_WEAROUT_POWER_CREEP;
+        }
+        else {
+            road.nextDecayTime -= C.ROAD_WEAROUT * object.body.length;
+        }
         bulk.update(road, {nextDecayTime: road.nextDecayTime});
     }
 
     if(!roomController || roomController.user === object.user || !(roomController.safeMode > gameTime)) {
-        var constructionSite = _.find(ceilObjects, (i) => i.type == 'constructionSite' && i.user != object.user);
+        var constructionSite = _.find(cellObjects, (i) => i.type == 'constructionSite' && i.user != object.user);
         if (constructionSite) {
             bulk.remove(constructionSite._id);
             if(constructionSite.progress > 1) {
@@ -220,9 +235,12 @@ exports.execute = function(object, scope) {
         }
     }
 
-    var fatigue = _(object.body).filter((i) => i.type != C.MOVE && i.type != C.CARRY).size();
-    fatigue += calcResourcesWeight(object);
-    fatigue *= fatigueRate;
+    var fatigue;
+    if(object.type == 'creep') {
+        fatigue = _(object.body).filter((i) => i.type != C.MOVE && i.type != C.CARRY).size();
+        fatigue += calcResourcesWeight(object);
+        fatigue *= fatigueRate;
+    }
 
     if(utils.isAtEdge(move) && !utils.isAtEdge(object)) {
         fatigue = 0;
@@ -230,6 +248,8 @@ exports.execute = function(object, scope) {
         bulk.update(object, { x: move.x, y: move.y, fatigue });
     } else {
         bulk.update(object, { x: move.x, y: move.y });
-        require('./creeps/_add-fatigue')(object, fatigue, scope);
+        if(object.type == 'creep') {
+            require('./creeps/_add-fatigue')(object, fatigue, scope);
+        }
     }
 };
