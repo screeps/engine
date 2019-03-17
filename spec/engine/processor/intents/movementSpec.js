@@ -5,6 +5,7 @@ const _ =require('lodash'),
     movement = require('../../../../src/processor/intents/movement'),
     roomsEnv = require('../../../helpers/mocks/rooms'),
     creepsEnv = require('../../../helpers/mocks/creeps'),
+    powerCreepsEnv = require('../../../helpers/mocks/powerCreeps'),
     intents = require('../../../helpers/mocks/intents');
 
 describe('movement', ()=>{
@@ -180,6 +181,39 @@ describe('movement', ()=>{
             expect(scout1.x).toBe(24); expect(scout1.y).toBe(25);
             expect(scout2.x).toBe(24); expect(scout2.y).toBe(24);
         });
+    });
+
+    describe('Single Power Creep',()=>{
+        let operator;
+        beforeEach(()=>{
+            operator = powerCreepsEnv.createPowerCreep('FullOperator', {x: 21, y: 26});
+
+            movement.init(scope.roomObjects, roomsEnv.terrain.E2S7);
+        });
+
+        it('blocks his tile when do not move',()=>{
+            const fullSpeed = creepsEnv.createCreep('fullSpeed', {x: 22, y: 27});
+
+            fullSpeed.move(8);
+            movement.check(false);
+            intents.ticks();
+
+            expect(fullSpeed.x).toBe(22); expect(fullSpeed.y).toBe(27);
+        });
+
+        it('swaps position with a regular creep',()=>{
+            const fullSpeed = creepsEnv.createCreep('fullSpeed', {x: 22, y: 27});
+
+            operator.move(4);
+            fullSpeed.move(8);
+            movement.check(false);
+            intents.ticks();
+
+            expect(operator.x).toBe(22); expect(operator.y).toBe(27);
+            expect(fullSpeed.x).toBe(21); expect(fullSpeed.y).toBe(26);
+        });
+
+
     });
 
     describe('When several creeps trying to move onto the same tile',()=>{

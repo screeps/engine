@@ -8,4 +8,10 @@ exports.scope = {
 };
 
 exports.reset = ()=>{ exports.scope.bulk.reset(); exports.scope.roomObjects = {}};
-exports.ticks = ()=> { _(exports.scope.roomObjects).filter({type: 'creep'}).value().map(c=>c.tick()) };
+exports.ticks = ()=> {
+    _.forEach(exports.scope.roomObjects, (object => {
+        if(object.type == 'creep' || object.type == 'powerCreep') {
+            object.tick();
+        }
+    }));
+};
