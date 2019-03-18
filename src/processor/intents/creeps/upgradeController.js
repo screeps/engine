@@ -40,7 +40,7 @@ module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, stats, 
 
     if(target.level == 8) {
         var limit = C.CONTROLLER_MAX_UPGRADE_PER_TICK;
-        var effect = _.find(object.effects, {power: C.PWR_OPERATE_CONTROLLER});
+        var effect = _.find(target.effects, {power: C.PWR_OPERATE_CONTROLLER});
         if(effect && effect.endTime >= gameTime) {
             limit += C.POWER_INFO[C.PWR_OPERATE_CONTROLLER].effect[effect.level-1];
         }
