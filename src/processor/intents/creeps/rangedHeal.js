@@ -13,7 +13,7 @@ module.exports = function(object, intent, {roomObjects, roomController, gameTime
     }
 
     var target = roomObjects[intent.id];
-    if(!target || target.type != 'creep' || target.spawning) {
+    if(!target || (target.type != 'creep' && target.type != 'powerCreep') || target.spawning) {
         return;
     }
     if(Math.abs(target.x - object.x) > 3 || Math.abs(target.y - object.y) > 3) {
