@@ -147,7 +147,7 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
             });
         }
 
-        const hitsMax = !!roomController ? C.RAMPART_HITS_MAX[roomController.level] : 1;
+        const hitsMax = (!!roomController && roomController.user == object.user) ? C.RAMPART_HITS_MAX[roomController.level] || 0 : 0;
         if (target.structureType == 'rampart') {
             _.extend(newObject, {
                 user: target.user,

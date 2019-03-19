@@ -39,10 +39,11 @@ exports.make = function(runtimeData, intents, register) {
         }),
 
         getOrderById: register.wrapFn(function(id) {
-            if(!runtimeData.market.orders.all[id]) {
+            const order = runtimeData.market.orders.all[id] || this.orders[id];
+            if(!order) {
                 return null;
             }
-            var result = JSON.parse(JSON.stringify(runtimeData.market.orders.all[id]));
+            const result = JSON.parse(JSON.stringify(order));
             result.price /= 1000;
             return result;
         }),
