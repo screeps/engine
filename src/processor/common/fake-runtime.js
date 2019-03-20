@@ -48,7 +48,7 @@ RoomPosition.prototype.lookFor = function(type) {
     }
 
     const terrainStrings = ['plain', 'wall', 'swamp', 'wall'];
-    return terrainStrings[terrains[this.roomName][50*this.y+this.x]];
+    return [terrainStrings[terrains[this.roomName][50*this.y+this.x]]];
 };
 
 const packLocal = function(x, y) {
