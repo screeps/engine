@@ -34,7 +34,8 @@ module.exports = function(intent, user, {roomObjectsByType, userPowerCreeps, bul
         y: powerSpawn.y,
         hits: powerCreep.hitsMax,
         ageTime: gameTime + C.POWER_CREEP_LIFE_TIME,
-        actionLog: {spawned: true}
+        actionLog: {spawned: true},
+        notifyWhenAttacked: true
     }), powerCreep._id);
 
     powerSpawn._justSpawned = true;
