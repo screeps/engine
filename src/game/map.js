@@ -207,6 +207,20 @@ exports.makeMap = function(runtimeData, register, globals) {
             }
             return _.contains(runtimeData.accessibleRooms, roomName);
         },
+	    
+	isRoomNovice(roomName){
+            if(!_.contains(Object.keys(runtimeData.rooms), roomName)){
+                return C.ERR_INVALID_TARGET;
+            }
+            return runtimeData.rooms[roomName].novice > Date.now();
+        },
+
+        isRoomRespawn(roomName){
+            if(!_.contains(Object.keys(runtimeData.rooms), roomName)){
+                return C.ERR_INVALID_TARGET;
+            }
+            return runtimeData.rooms[roomName].respawnArea > Date.now()
+        },
         
         getTerrainAt(x, y, roomName) {
             register.deprecated('Method `Game.map.getTerrainAt` is deprecated and will be removed. Please use a faster method `Game.map.getRoomTerrain` instead.');
