@@ -10,7 +10,7 @@ module.exports = function(object, intent, {roomObjects}) {
     }
 
     const target = roomObjects[intent.id];
-    if(target.type != 'creep' || target.spawning) {
+    if(!target || target.type != 'creep' || target.spawning) {
         return;
     }
 
