@@ -28,7 +28,7 @@
             var keys = Object.keys(reg);
             reg.spatial = {};
             keys.forEach((i) => {
-                reg.spatial[i] = new Array(2500);
+                reg.spatial[i] = [];
             });
         }
     }
