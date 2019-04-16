@@ -182,6 +182,9 @@ module.exports = function(object, intent, scope) {
             if(target.mineralAmount == 0) {
                 return;
             }
+            if(target.nextRegenerationTime) {
+                return;
+            }
             applyEffectOnTarget = true;
             break;
         }
