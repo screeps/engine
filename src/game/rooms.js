@@ -487,6 +487,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 resource: register.byRoom[id].energy,
                 source: register.byRoom[id].sources,
                 mineral: register.byRoom[id].minerals,
+                deposit: register.byRoom[id].deposits,
                 structure: register.byRoom[id].structures,
                 flag: register.byRoom[id].flags,
                 constructionSite: register.byRoom[id].constructionSites,
@@ -500,6 +501,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 resource: register.byRoom[id].spatial.energy,
                 source: register.byRoom[id].spatial.sources,
                 mineral: register.byRoom[id].spatial.minerals,
+                deposit: register.byRoom[id].spatial.deposits,
                 structure: register.byRoom[id].spatial.structures,
                 flag: register.byRoom[id].spatial.flags,
                 constructionSite: register.byRoom[id].spatial.constructionSites,
@@ -765,6 +767,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         _lookSpatialRegister(this.name, C.LOOK_RESOURCES, x,y, result);
         _lookSpatialRegister(this.name, C.LOOK_SOURCES, x,y, result);
         _lookSpatialRegister(this.name, C.LOOK_MINERALS, x,y, result);
+        _lookSpatialRegister(this.name, C.LOOK_DEPOSITS, x,y, result);
         _lookSpatialRegister(this.name, C.LOOK_STRUCTURES, x,y, result);
         _lookSpatialRegister(this.name, C.LOOK_FLAGS, x,y, result);
         _lookSpatialRegister(this.name, C.LOOK_CONSTRUCTION_SITES, x,y, result);
@@ -804,6 +807,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         _lookAreaMixedRegister(this.name, C.LOOK_RESOURCES, top, left, bottom, right, true, asArray, result);
         _lookAreaMixedRegister(this.name, C.LOOK_SOURCES, top, left, bottom, right, true, asArray, result);
         _lookAreaMixedRegister(this.name, C.LOOK_MINERALS, top, left, bottom, right, true, asArray, result);
+        _lookAreaMixedRegister(this.name, C.LOOK_DEPOSITS, top, left, bottom, right, true, asArray, result);
         _lookAreaMixedRegister(this.name, C.LOOK_STRUCTURES, top, left, bottom, right, true, asArray, result);
         _lookAreaMixedRegister(this.name, C.LOOK_FLAGS, top, left, bottom, right, true, asArray, result);
         _lookAreaMixedRegister(this.name, C.LOOK_CONSTRUCTION_SITES, top, left, bottom, right, true, asArray, result);

@@ -390,6 +390,14 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 return C.ERR_TIRED;
             }
         }
+        else if(register.deposits[target.id] && (target instanceof globals.Deposit)) {
+            if(!target.pos.isNearTo(this.pos)) {
+                return C.ERR_NOT_IN_RANGE;
+            }
+            if(target.cooldown) {
+                return C.ERR_TIRED;
+            }
+        }
         else {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;

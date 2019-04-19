@@ -312,6 +312,8 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 require('./processor/intents/energy/tick')(object, scope);
             if (object.type == 'source')
                 require('./processor/intents/sources/tick')(object, scope);
+            if (object.type == 'deposit')
+                require('./processor/intents/deposits/tick')(object, scope);
             if (object.type == 'mineral')
                 require('./processor/intents/minerals/tick')(object, scope);
             if (object.type == 'creep')
@@ -423,6 +425,9 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 mapView.s.push([object.x, object.y]);
             }
             else if (object.type == 'mineral') {
+                mapView.m.push([object.x, object.y]);
+            }
+            else if (object.type == 'deposit') {
                 mapView.m.push([object.x, object.y]);
             }
             else if (object.type == 'controller') {

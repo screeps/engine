@@ -5,7 +5,7 @@ var _ = require('lodash'),
 
 module.exports = function(object, intent, scope) {
 
-    const {roomObjects, roomTerrain, bulk, roomController, stats, eventLog} = scope;
+    const {roomObjects, roomTerrain, bulk, roomController, stats, eventLog, gameTime} = scope;
 
     if(object.type != 'creep') {
         return;
@@ -108,6 +108,33 @@ module.exports = function(object, intent, scope) {
 
             eventLog.push({event: C.EVENT_HARVEST, objectId: object._id, data: {targetId: target._id, amount: harvestAmount}});
         }
+    }
 
+    if(target.type == 'deposit') {
+        if(target.cooldownTime && target.cooldownTime > gameTime) {
+            return;
+        }
+
+        const amount = utils.calcBodyEffectiveness(object.body, C.WORK, 'harvest', C.HARVEST_DEPOSIT_POWER);
+        bulk.update(object, {[target.depositType]: (object[target.depositType] || 0)+amount});
+
+        let sum = utils.calcResources(object);
+
+        if (sum > object.energyCapacity) {
+            require('./drop')(object, {
+                amount: Math.min(object[target.mineralType], sum - object.energyCapacity),
+                resourceType: target.mineralType
+            }, scope);
+        }
+
+        object.actionLog.harvest = {x: target.x, y: target.y};
+
+        bulk.inc(target, 'harvested', amount);
+        const cooldown = Math.ceil(C.DEPOSIT_EXHAUST_MULTIPLY*Math.pow(target.harvested,C.DEPOSIT_EXHAUST_POW));
+        if(cooldown > 1) {
+            bulk.update(target, {decayTime: C.DEPOSIT_DECAY_TIME + gameTime, cooldownTime: cooldown + gameTime});
+        } else {
+            bulk.update(target, {decayTime: C.DEPOSIT_DECAY_TIME + gameTime});
+        }
     }
 };

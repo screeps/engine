@@ -19,6 +19,7 @@
             flags: {},
             constructionSites: {},
             minerals: {},
+            deposits: {},
             tombstones: {},
             nukes: {},
             powerCreeps: {},
@@ -193,6 +194,7 @@
         require('./structures').make(runtimeData, intents, register, globals);
         require('./sources').make(runtimeData, intents, register, globals);
         require('./minerals').make(runtimeData, intents, register, globals);
+        require('./deposits').make(runtimeData, intents, register, globals);
         require('./nukes').make(runtimeData, intents, register, globals);
         require('./resources').make(runtimeData, intents, register, globals);
         require('./flags').make(runtimeData, intents, register, globals);
@@ -321,6 +323,11 @@
                 register._objects[i] = new globals.Mineral(i);
                 addObjectToRegister(register, 'minerals', register._objects[i], object);
                 addObjectToFindCache(register, C.FIND_MINERALS, register.minerals[i], object);
+            }
+            if(object.type == 'deposit') {
+                register._objects[i] = new globals.Deposit(i);
+                addObjectToRegister(register, 'deposits', register._objects[i], object)
+                addObjectToFindCache(register, C.FIND_DEPOSITS, register.deposits[i], object)
             }
             if (object.type == 'energy') {
                 register._objects[i] = new globals.Energy(i);
