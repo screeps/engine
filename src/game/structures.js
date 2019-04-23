@@ -170,7 +170,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     Structure.prototype.notifyWhenAttacked = register.wrapFn(function(enabled) {
 
-        if(this.my === false || (this.room.controller && !this.room.controller.my)) {
+        if(this.my === false || (this.room.controller && this.room.controller.owner && !this.room.controller.my)) {
             return C.ERR_NOT_OWNER;
         }
         if(!_.isBoolean(enabled)) {
