@@ -812,9 +812,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!_.contains(C.RESOURCES_ALL, resourceType)) {
             return C.ERR_INVALID_ARGS;
         }
-        if(amount < C.TERMINAL_MIN_SEND) {
-            return C.ERR_INVALID_ARGS;
-        }
         if(!data(this.id)[resourceType] || data(this.id)[resourceType] < amount) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
