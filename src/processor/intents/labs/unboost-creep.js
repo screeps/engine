@@ -4,10 +4,12 @@ const _ = require('lodash'),
     C = driver.constants;
 
 module.exports = function(object, intent, scope) {
-    if(object.cooldown > 0) {
+    const {roomObjects, bulk, roomController, gameTime} = scope;
+
+    if(!!object.cooldownTime && object.cooldownTime > gameTime) {
         return;
     }
-    const {roomObjects, bulk, roomController} = scope;
+
     const target = roomObjects[intent.id];
     if(!target || target.type != 'creep' || target.user != object.user) {
         return;
@@ -46,6 +48,6 @@ module.exports = function(object, intent, scope) {
     }, 0);
 
     if(cooldown > 0) {
-        bulk.update(object, { cooldown });
+        bulk.update(object, { cooldownTime: cooldown + gameTime });
     }
 };

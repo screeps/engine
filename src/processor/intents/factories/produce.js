@@ -6,7 +6,11 @@ var _ = require('lodash'),
 module.exports = function(object, intent, scope) {
     const {gameTime, roomObjects, roomController, bulk} = scope;
 
-    if(!object || (object.cooldown > 0) || !C.COMMODITIES[intent.resourceType] || !!C.COMMODITIES[intent.resourceType].level && object.level != C.COMMODITIES[intent.resourceType].level) {
+    if(!object || !C.COMMODITIES[intent.resourceType] || !!C.COMMODITIES[intent.resourceType].level && object.level != C.COMMODITIES[intent.resourceType].level) {
+        return;
+    }
+
+    if(!!object.cooldownTime && object.cooldownTime > gameTime) {
         return;
     }
 
@@ -35,5 +39,5 @@ module.exports = function(object, intent, scope) {
 
     object.actionLog.produce = {x: object.x, y: object.y, resourceType: intent.resourceType};
 
-    bulk.update(object, {cooldown: C.COMMODITIES[intent.resourceType].cooldown});
+    bulk.update(object, {cooldownTime: C.COMMODITIES[intent.resourceType].cooldown + gameTime});
 };

@@ -5,7 +5,7 @@ var _ = require('lodash'),
 
 module.exports = function(object, intent, {roomObjects, bulk, gameTime}) {
 
-    if(object.cooldown > 0) {
+    if(!!object.cooldownTime && object.cooldownTime > gameTime) {
         return;
     }
 
@@ -41,11 +41,9 @@ module.exports = function(object, intent, {roomObjects, bulk, gameTime}) {
         return;
     }
 
-    let cooldown = C.REACTION_TIME[product] ;
-
     bulk.update(object, {
         mineralAmount: object.mineralAmount + reactionAmount,
-        cooldown
+        cooldownTime: gameTime + C.REACTION_TIME[product]
     });
     if(!object.mineralType) {
         bulk.update(object, {mineralType: product});

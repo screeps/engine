@@ -387,7 +387,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     utils.defineGameObjectProperties(StructureLab.prototype, data, {
         energy: (o) => o.energy,
         energyCapacity: (o) => o.energyCapacity,
-        cooldown: (o) => o.cooldown || 0,
+        cooldown: o => o.cooldownTime && o.cooldownTime > runtimeData.time ? o.cooldownTime - runtimeData.time : 0,
         mineralAmount: (o) => o.mineralAmount,
         mineralCapacity: (o) => o.mineralCapacity,
         mineralType: (o) => o.mineralType
@@ -1531,7 +1531,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         level: o => o.level,
         store: _storeGetter,
         storeCapacity: o => o.energyCapacity,
-        cooldown: o => o.cooldown,
+        cooldown: o => o.cooldownTime && o.cooldownTime > runtimeData.time ? o.cooldownTime - runtimeData.time : 0,
         operationalTicks: o => {
             if(o.level == 0) {
                 return undefined;
