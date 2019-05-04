@@ -408,11 +408,8 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
             return;
         }
 
-        var amount = Math.min(deal.amount, order.remainingAmount);
-        if(seller.user) {
-            amount = Math.min(amount, seller[userFieldNames[order.resourceType]] || 0);
-        }
-        if(!amount) {
+        var amount = Math.min(deal.amount, order.remainingAmount, seller[userFieldNames[order.resourceType]] || 0);
+        if(!amount || amount < 0) {
             return;
         }
 
@@ -508,7 +505,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                 availableResourceAmount = Math.min(availableResourceAmount, order.remainingAmount);
 
                 if (order.active) {
-                    if (!availableResourceAmount) {
+                    if (!availableResourceAmount || availableResourceAmount < 0) {
                         bulk.update(order, {active: false, amount: 0});
                         return;
                     }
