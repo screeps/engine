@@ -1531,18 +1531,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         level: o => o.level,
         store: _storeGetter,
         storeCapacity: o => o.energyCapacity,
-        cooldown: o => o.cooldownTime && o.cooldownTime > runtimeData.time ? o.cooldownTime - runtimeData.time : 0,
-        operationalTicks: o => {
-            if(o.level == 0) {
-                return undefined;
-            }
-
-            const effect = _.find(o.effects, {power: C.PWR_OPERATE_FACTORY});
-            if(!effect) {
-                return 0;
-            }
-            return effect.endTime < runtimeData.time ? 0 : effect.endTime - runtimeData.time;
-        }
+        cooldown: o => o.cooldownTime && o.cooldownTime > runtimeData.time ? o.cooldownTime - runtimeData.time : 0
     });
 
     StructureFactory.prototype.produce = register.wrapFn(function(resourceType){
