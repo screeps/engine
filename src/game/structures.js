@@ -1155,11 +1155,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             }
             // convert directions to numbers, eliminate duplicates
             directions = _.uniq(_.map(directions, d => +d));
-            if(directions.length > 0) {
-                // bail if any numbers are out of bounds or non-integers
-                if(!_.all(directions, (direction) => direction >= 1 && direction <= 8 && direction === (direction | 0))) {
-                    return C.ERR_INVALID_ARGS;
-                }
+            // bail if any numbers are out of bounds or non-integers
+            if(directions.length ==0 || !_.all(directions, direction => direction >= 1 && direction <= 8 && direction === (direction | 0))) {
+                return C.ERR_INVALID_ARGS;
             }
         }
 
