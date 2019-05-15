@@ -33,6 +33,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     utils.defineGameObjectProperties(Deposit.prototype, data, {
         depositType: o => o.depositType,
         cooldown: o => o.cooldownTime && o.cooldownTime > runtimeData.time ? o.cooldownTime - runtimeData.time : 0,
+        lastCooldown: o => Math.ceil(C.DEPOSIT_EXHAUST_MULTIPLY*Math.pow(o.harvested,C.DEPOSIT_EXHAUST_POW)),
         ticksToDecay: o => o.decayTime ? o.decayTime - runtimeData.time : undefined
     });
 
