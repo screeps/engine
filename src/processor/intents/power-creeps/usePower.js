@@ -260,7 +260,7 @@ module.exports = function(object, intent, scope) {
             if(!target.level) {
                 bulk.update(target, {level: creepPower.level});
             } else {
-                if(target.level > creepPower.level) {
+                if(target.level != creepPower.level) {
                     return;
                 }
             }

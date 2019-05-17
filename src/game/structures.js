@@ -1554,7 +1554,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
 
-        if(!!C.COMMODITIES[resourceType].level && (rawFactory.level > 0) && !_.some(rawFactory.effects, e => e.power == C.PWR_OPERATE_FACTORY && e.endTime >= runtimeData.time)) {
+        if(!!C.COMMODITIES[resourceType].level && (rawFactory.level > 0) && !_.some(rawFactory.effects, e => e.power == C.PWR_OPERATE_FACTORY && e.level == C.COMMODITIES[resourceType].level && e.endTime >= runtimeData.time)) {
             return C.ERR_BUSY;
         }
 

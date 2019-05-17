@@ -18,7 +18,7 @@ module.exports = function(object, intent, scope) {
         return;
     }
 
-    if(!!C.COMMODITIES[intent.resourceType].level && (object.level > 0) && !_.some(object.effects, e => e.power == C.PWR_OPERATE_FACTORY && e.endTime >= gameTime)) {
+    if(!!C.COMMODITIES[intent.resourceType].level && (object.level > 0) && !_.some(object.effects, e => e.power == C.PWR_OPERATE_FACTORY && e.level == C.COMMODITIES[intent.resourceType].level && e.endTime >= gameTime)) {
         return;
     }
 
