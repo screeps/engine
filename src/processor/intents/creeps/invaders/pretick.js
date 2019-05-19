@@ -17,7 +17,7 @@ module.exports = function(creep, scope) {
 
     const creeps = [], invaders = [], healers = [], hostiles = [], defenders = [], fortifications = [];
     _.forEach(roomObjects, function(object){
-        if(object.type == 'creep' || object.type == 'powerCreep') {
+        if(!object.spawning && object.type == 'creep' || object.type == 'powerCreep') {
             creeps.push(object);
             if(creep.user == object.user) {
                 invaders.push(object);
