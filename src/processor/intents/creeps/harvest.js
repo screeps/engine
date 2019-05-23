@@ -122,8 +122,8 @@ module.exports = function(object, intent, scope) {
 
         if (sum > object.energyCapacity) {
             require('./drop')(object, {
-                amount: Math.min(object[target.mineralType], sum - object.energyCapacity),
-                resourceType: target.mineralType
+                amount: Math.min(object[target.depositType], sum - object.energyCapacity),
+                resourceType: target.depositType
             }, scope);
         }
 
