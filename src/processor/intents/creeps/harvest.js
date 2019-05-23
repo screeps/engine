@@ -132,9 +132,8 @@ module.exports = function(object, intent, scope) {
         bulk.inc(target, 'harvested', amount);
         const cooldown = Math.ceil(C.DEPOSIT_EXHAUST_MULTIPLY*Math.pow(target.harvested,C.DEPOSIT_EXHAUST_POW));
         if(cooldown > 1) {
-            bulk.update(target, {decayTime: C.DEPOSIT_DECAY_TIME + gameTime, cooldownTime: cooldown + gameTime});
-        } else {
-            bulk.update(target, {decayTime: C.DEPOSIT_DECAY_TIME + gameTime});
+            target._cooldown = cooldown;
         }
+        bulk.update(target, {decayTime: C.DEPOSIT_DECAY_TIME + gameTime});
     }
 };
