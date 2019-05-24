@@ -384,7 +384,12 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                 amount: order.amount - amount,
                 remainingAmount: order.remainingAmount - amount
             });
-            bulkObjects.update(targetTerminal, {cooldownTime: gameTime + C.TERMINAL_COOLDOWN});
+            let cooldown = C.TERMINAL_COOLDOWN;
+            const effect = _.find(targetTerminal.effects, {power: C.PWR_OPERATE_TERMINAL});
+            if(effect && effect.endTime > gameTime) {
+                cooldown = Math.round(cooldown * C.POWER_INFO[C.PWR_OPERATE_TERMINAL].effect[effect.level-1]);
+            }
+            bulkObjects.update(targetTerminal, {cooldownTime: gameTime + cooldown});
         }
     });
 
