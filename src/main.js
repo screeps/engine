@@ -6,7 +6,7 @@ var q = require('q'),
     config = require('./config');
 
 var lastAccessibleRoomsUpdate = 0;
-var usersLegacyQueue, roomsQueue, usersIvmQueue;
+var roomsQueue, usersQueue;
 
 function loop() {
 
@@ -32,20 +32,12 @@ function loop() {
         .then((users) => {
             stage = 'addUsersToQueue';
             driver.config.emit('mainLoopStage',stage, users);
-            return q.all([
-                usersLegacyQueue.addMulti(users.legacy.map(user => user._id.toString())),
-                usersIvmQueue.addMulti(users.ivm.map(user => user._id.toString())),
-            ]);
+            return usersQueue.addMulti(users.map(user => user._id.toString()));
         })
         .then(() => {
             stage = 'waitForUsers';
             driver.config.emit('mainLoopStage',stage);
-            return q.all([
-                usersLegacyQueue.whenAllDone()
-                    .then(() => driver.config.emit('mainLoopStage', stage, 'legacyDone')),
-                usersIvmQueue.whenAllDone()
-                    .then(() => driver.config.emit('mainLoopStage', stage, 'ivmDone')),
-            ]);
+            return usersQueue.whenAllDone();
         })
         .then(() => {
             stage = 'getRooms';
@@ -131,14 +123,12 @@ function loop() {
 
 driver.connect('main')
     .then(() =>  q.all([
-        driver.queue.create('usersLegacy', 'write'),
         driver.queue.create('rooms', 'write'),
-        driver.queue.create('usersIvm', 'write'),
+        driver.queue.create('users', 'write'),
     ]))
     .then((data) => {
-        usersLegacyQueue = data[0];
-        roomsQueue = data[1];
-        usersIvmQueue = data[2];
+        roomsQueue = data[0];
+        usersQueue = data[1];
         loop();
     })
     .catch((error) => console.log('Error connecting to driver:', error));
