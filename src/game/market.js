@@ -67,7 +67,7 @@ exports.make = function(runtimeData, intents, register) {
                 (!roomName || !_.any(runtimeData.userObjects, {type: 'terminal', room: roomName}))) {
                 return C.ERR_NOT_OWNER;
             }
-            if(_.size(this.orders) + ordersCreatedDuringTick >= 50) {
+            if(_.size(this.orders) + ordersCreatedDuringTick >= C.MARKET_MAX_ORDERS) {
                 return C.ERR_FULL;
             }
             ordersCreatedDuringTick++;
