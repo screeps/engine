@@ -43,7 +43,7 @@ module.exports = function(intent, user, {roomObjectsByType, userPowerCreeps, gam
     }
 
     level++;
-    let energyCapacity = powerCreep.energyCapacity + 100;
+    let storeCapacity = powerCreep.storeCapacity + 100;
     let hitsMax = powerCreep.hitsMax + 1000;
     powerCreep.powers[intent.power].level++;
 
@@ -52,7 +52,7 @@ module.exports = function(intent, user, {roomObjectsByType, userPowerCreeps, gam
         bulkObjects.update(roomPowerCreep, {
             level,
             hitsMax,
-            energyCapacity,
+            storeCapacity,
             powers: powerCreep.powers
         });
     }
@@ -60,7 +60,7 @@ module.exports = function(intent, user, {roomObjectsByType, userPowerCreeps, gam
     bulkUsersPowerCreeps.update(powerCreep, {
         level,
         hitsMax,
-        energyCapacity,
+        storeCapacity,
         powers: powerCreep.powers
     });
 };

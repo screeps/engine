@@ -39,10 +39,7 @@ function checkObstacleAtXY(x,y,object, roomIsInSafeMode) {
 }
 
 function calcResourcesWeight(creep) {
-    var totalCarry = 0, weight = 0;
-    C.RESOURCES_ALL.forEach(resourceType => {
-        totalCarry += creep[resourceType] || 0;
-    });
+    var totalCarry = _.sum(creep.store), weight = 0;
     for(var i = creep.body.length-1; i >= 0; i--) {
         if(!totalCarry) {
             break;

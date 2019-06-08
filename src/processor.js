@@ -45,6 +45,16 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 return;
             }
 
+            if(object.type != 'source' && object.type != 'energy') {
+                C.RESOURCES_ALL.forEach(resourceType => {
+                    Object.defineProperty(object, resourceType, {
+                        enumerable: false,
+                        get() { throw new Error(`Reading resource ${resourceType} of ${object.type}#${object._id} failed. Shouldn't ever happen.`);},
+                        set(newValue) {throw new Error(`Writing ${newValue} to resource ${resourceType} of ${object.type}#${object._id} failed. Shouldn't ever happen.`);}
+                    })
+                });
+            }
+
             if (object.type == 'creep') {
                 object._actionLog = object.actionLog;
                 object._ticksToLive = object.ageTime - gameTime;
@@ -258,12 +268,6 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                         }
                     }
 
-                    if (object.type == 'extension' || object.type == 'storage' || object.type == 'powerSpawn' || object.type == 'terminal' || object.type == 'container') {
-                        if (objectIntents.transfer) {
-                            require('./processor/intents/extensions/transfer')(object, objectIntents.transfer, scope);
-                        }
-                    }
-
                     if(object.type == 'controller') {
                         if(objectIntents.unclaim) {
                             require('./processor/intents/controllers/unclaim')(object, objectIntents.unclaim, scope);
@@ -286,7 +290,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
 
         movement.check(scope.roomController && scope.roomController.safeMode > gameTime ? scope.roomController.user : false);
 
-        scope.energyAvailable = _(roomObjects).filter((i) => !i.off && (i.type == 'spawn' || i.type == 'extension')).sum('energy');
+        scope.energyAvailable = _(roomObjects).filter((i) => !i.off && (i.type == 'spawn' || i.type == 'extension')).sum('store.energy');
 
         var mapView = {
             w: [],
@@ -365,18 +369,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             }
 
             if (object.type == 'storage') {
-                if (scope.roomController) {
-                    var energyCapacity = scope.roomController.level > 0 && scope.roomController.user == object.user && C.CONTROLLER_STRUCTURES.storage[scope.roomController.level] > 0 ? C.STORAGE_CAPACITY : 0;
-                    if(energyCapacity > 0) {
-                        var effect = _.find(object.effects, {power: C.PWR_OPERATE_STORAGE});
-                        if (effect && effect.endTime > scope.gameTime) {
-                            energyCapacity += C.POWER_INFO[C.PWR_OPERATE_STORAGE].effect[effect.level-1];
-                        }
-                    }
-                    if (energyCapacity != object.energyCapacity) {
-                        bulk.update(object, {energyCapacity});
-                    }
-                }
+                require('./processor/intents/storages/tick')(object, scope);
             }
 
             if(object.type == 'powerBank') {

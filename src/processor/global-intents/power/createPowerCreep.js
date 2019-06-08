@@ -30,7 +30,8 @@ module.exports = function(intent, user, {userPowerCreeps, bulkUsersPowerCreeps})
         user: ""+user._id,
         level: 0,
         hitsMax: 1000,
-        energyCapacity: 100,
+        store: {},
+        storeCapacity: 100,
         spawnCooldownTime: 0,
         powers: {}
     });

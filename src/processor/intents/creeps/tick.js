@@ -38,6 +38,7 @@ module.exports = function(object, scope) {
         var spawn = _.find(roomObjects, {type: 'spawn', x: object.x, y: object.y});
         if(!spawn) {
             bulk.remove(object._id);
+            delete roomObjects[object._id];
         }
         else {
             if(!spawn.spawning || spawn.spawning.name != object.name) {
@@ -144,7 +145,7 @@ module.exports = function(object, scope) {
         bulk.update(object, {
             hits: object.hits,
             body: object.body,
-            energyCapacity: object.energyCapacity
+            storeCapacity: object.storeCapacity
         });
     }
 };

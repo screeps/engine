@@ -40,12 +40,13 @@ module.exports = function(object, intent, scope) {
     }
 
     if(amount) {
+        object.store = object.store || {};
+        object.store.energy += energyGain;
+        bulk.update(object, {store:{energy: object.store.energy}});
 
-        object.energy += energyGain;
-        bulk.update(object, {energy: object.energy});
-
-        if (object.energy > object.energyCapacity) {
-            require('./drop')(object, {amount: object.energy - object.energyCapacity, resourceType: 'energy'}, scope);
+        const usedSpace = utils.calcResources(object);
+        if (usedSpace > object.storeCapacity) {
+            require('./drop')(object, {amount: usedSpace - object.storeCapacity, resourceType: 'energy'}, scope);
         }
 
         require('../_damage')(object, target, amount, C.EVENT_ATTACK_TYPE_DISMANTLE, scope);

@@ -3,9 +3,6 @@ module.exports = function(object, objectIntents, scope) {
     if(objectIntents.createCreep)
         require('./create-creep')(object, objectIntents.createCreep, scope);
 
-    if(objectIntents.transferEnergy)
-        require('./transfer-energy')(object, objectIntents.transferEnergy, scope);
-
     if(objectIntents.renewCreep)
         require('./renew-creep')(object, objectIntents.renewCreep, scope);
 

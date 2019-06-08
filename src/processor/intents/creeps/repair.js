@@ -8,26 +8,23 @@ module.exports = function(object, intent, {roomObjects, bulk, stats, eventLog}) 
     if(object.type != 'creep') {
         return;
     }
-    if(object.spawning || object.energy <= 0) {
+    if(object.spawning || !object.store || object.store.energy <= 0) {
         return;
     }
 
     var target = roomObjects[intent.id];
-    if(!target || !C.CONSTRUCTION_COST[target.type] || target.hits >= target.hitsMax) {
+    if(!target || !target.hitsMax || !C.CONSTRUCTION_COST[target.type] || target.hits >= target.hitsMax) {
         return;
     }
     if(Math.abs(target.x - object.x) > 3 || Math.abs(target.y - object.y) > 3) {
         return;
     }
-    if(!target.hitsMax) {
-        return;
-    }
 
     var repairPower = _.filter(object.body, (i) => (i.hits > 0 || i._oldHits > 0) && i.type == C.WORK).length * C.REPAIR_POWER || 0,
-        repairEnergyRemaining = object.energy / C.REPAIR_COST,
+        repairEnergyRemaining = object.store.energy / C.REPAIR_COST,
         repairHitsMax = target.hitsMax - target.hits,
         repairEffect = Math.min(repairPower, repairEnergyRemaining, repairHitsMax),
-        repairCost = Math.min(object.energy, Math.ceil(repairEffect * C.REPAIR_COST)),
+        repairCost = Math.min(object.store.energy, Math.ceil(repairEffect * C.REPAIR_COST)),
         boostedParts = _.map(object.body, i => {
             if(i.type == C.WORK && i.boost && C.BOOSTS[C.WORK][i.boost].repair > 0) {
                 return (C.BOOSTS[C.WORK][i.boost].repair-1) * C.REPAIR_POWER;
@@ -45,7 +42,7 @@ module.exports = function(object, intent, {roomObjects, bulk, stats, eventLog}) 
     }
 
     target.hits += boostedEffect;
-    object.energy -= repairCost;
+    object.store.energy -= repairCost;
 
     stats.inc('energyConstruction', object.user, repairCost);
 
@@ -56,7 +53,7 @@ module.exports = function(object, intent, {roomObjects, bulk, stats, eventLog}) 
     object.actionLog.repair = {x: target.x, y: target.y};
 
     bulk.update(target, {hits: target.hits});
-    bulk.update(object, {energy: object.energy});
+    bulk.update(object, {store: {energy: object.store.energy}});
 
     eventLog.push({event: C.EVENT_REPAIR, objectId: object._id, data: {
         targetId: target._id, amount: boostedEffect, energySpent: repairCost

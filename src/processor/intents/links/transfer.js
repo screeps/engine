@@ -5,11 +5,11 @@ var _ = require('lodash'),
 
 module.exports = function(object, intent, {roomObjects, bulk, roomController, eventLog}) {
 
-    if(object.type != 'link') {
+    if(!object || object.type != 'link') {
         return;
     }
 
-    if(object.energy < intent.amount || intent.amount < 0) {
+    if(!object.store || object.store.energy < intent.amount || intent.amount < 0) {
         return;
     }
 
@@ -18,48 +18,37 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ev
         return;
     }
 
-    if(!_.contains(['link','creep'], target.type)) {
+    if(target.type != 'link') {
         return;
     }
-    var targetTotal;
-    if(target.type == 'creep') {
-        if(target.spawning || Math.abs(target.x - object.x) > 1 || Math.abs(target.y - object.y) > 1) {
-            return;
-        }
-        targetTotal = utils.calcResources(target);
-    }
-    if(target.type == 'link') {
-        if(object.cooldown > 0) {
-            return;
-        }
-        if(!utils.checkStructureAgainstController(object, roomObjects, roomController)) {
-            return;
-        }
-        targetTotal = target.energy;
-    }
-
-    if(targetTotal == target.energyCapacity) {
-        return;
-    }
-
     var amount = intent.amount;
-    if(targetTotal + amount > target.energyCapacity) {
-        amount = target.energyCapacity - targetTotal;
+    var targetTotal;
+
+    if(object.cooldown > 0) {
+        return;
+    }
+    if(!utils.checkStructureAgainstController(object, roomObjects, roomController)) {
+        return;
+    }
+    targetTotal = target.store.energy;
+
+    if(!target.storeCapacityResource || !target.storeCapacityResource.energy || targetTotal == target.storeCapacityResource.energy) {
+        return;
     }
 
-    target.energy += amount;
-    object.energy -= amount;
-
-    if(target.type == 'link') {
-        target.energy -= Math.ceil(amount * C.LINK_LOSS_RATIO);
-        object.cooldown += C.LINK_COOLDOWN * Math.max(Math.abs(target.x - object.x), Math.abs(target.y - object.y));
-        object.actionLog.transferEnergy = {x: target.x, y: target.y};
+    if(targetTotal + amount > target.storeCapacityResource.energy) {
+        amount = target.storeCapacityResource.energy - targetTotal;
     }
+    target.store.energy += amount;
 
+    object.store.energy -= amount;
 
+    target.store.energy -= Math.ceil(amount * C.LINK_LOSS_RATIO);
+    object.cooldown += C.LINK_COOLDOWN * Math.max(Math.abs(target.x - object.x), Math.abs(target.y - object.y));
+    object.actionLog.transferEnergy = {x: target.x, y: target.y};
+    bulk.update(target, {store:{energy: target.store.energy}});
 
-    bulk.update(object, {energy: object.energy, cooldown: object.cooldown, actionLog: object.actionLog});
-    bulk.update(target, {energy: target.energy});
+    bulk.update(object, {store:{energy: object.store.energy}, cooldown: object.cooldown, actionLog: object.actionLog});
 
     eventLog.push({event: C.EVENT_TRANSFER, objectId: object._id, data: {targetId: target._id, resourceType: C.RESOURCE_ENERGY, amount}});
 };

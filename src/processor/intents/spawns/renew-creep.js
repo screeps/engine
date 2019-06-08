@@ -49,7 +49,7 @@ module.exports = function(object, intent, scope) {
         require('../creeps/_recalc-body')(target);
         // we may not be able to hold all of the resources we could before now.
         require('../creeps/_drop-resources-without-space')(target, scope);
-        bulk.update(target, {body: target.body, energyCapacity: target.energyCapacity});
+        bulk.update(target, {body: target.body, storeCapacity: target.storeCapacity});
     }
 
 };

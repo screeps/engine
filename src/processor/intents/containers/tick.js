@@ -11,13 +11,14 @@ module.exports = function(object, scope) {
         object.hits = object.hits || 0;
         object.hits -= C.CONTAINER_DECAY;
         if(object.hits <= 0) {
-
-            C.RESOURCES_ALL.forEach(resourceType => {
-                if (object[resourceType] > 0) {
-                    require('../creeps/_create-energy')(object.x, object.y, object.room,
-                    object[resourceType], resourceType, scope);
-                }
-            });
+            if(object.store) {
+                _.forEach(object.store, (amount, resourceType) => {
+                    if (amount > 0) {
+                        require('../creeps/_create-energy')(object.x, object.y, object.room,
+                            amount, resourceType, scope);
+                    }
+                });
+            }
 
             bulk.remove(object._id);
             delete roomObjects[object._id];

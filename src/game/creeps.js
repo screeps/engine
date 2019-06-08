@@ -71,19 +71,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         owner: (o) => new Object({username: runtimeData.users[o.user].username}),
         spawning: (o) => o.spawning,
         ticksToLive: (o) => o.ageTime ? o.ageTime - runtimeData.time : undefined,
-        carryCapacity: (o) => o.energyCapacity,
-        carry: (o) => {
-
-            var result = {energy: 0};
-
-            C.RESOURCES_ALL.forEach(resourceType => {
-                if(o[resourceType]) {
-                    result[resourceType] = o[resourceType];
-                }
-            });
-
-            return result;
-        },
+        carryCapacity: o => o.storeCapacity,
+        carry: o => _.reduce(o.store, (acc, amount, resource) => { if(amount) {acc[resource]=amount}; return acc; }, {energy: 0}),
         fatigue: (o) => o.fatigue,
         hits: (o) => o.hits,
         hitsMax: (o) => o.hitsMax,
@@ -417,13 +406,13 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!_.contains(C.RESOURCES_ALL, resourceType)) {
             return C.ERR_INVALID_ARGS;
         }
-        if(!data(this.id)[resourceType]) {
+        if(!data(this.id).store || !data(this.id).store[resourceType]) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
         if(!amount) {
-            amount = data(this.id)[resourceType];
+            amount = data(this.id).store[resourceType];
         }
-        if(data(this.id)[resourceType] < amount) {
+        if(data(this.id).store[resourceType] < amount) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
 
@@ -445,128 +434,47 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_INVALID_ARGS;
         }
         if(!target || !target.id || (!register.spawns[target.id] && !register.powerCreeps[target.id] && !register.creeps[target.id] && !register.structures[target.id]) ||
+            (!data(target.id).store && (register.structures[target.id].structureType != 'controller')) ||
             !(target instanceof globals.StructureSpawn) && !(target instanceof globals.Structure) && !(target instanceof globals.Creep) && !(target instanceof globals.PowerCreep) && !target.spawning) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
-        if(resourceType == C.RESOURCE_ENERGY) {
 
-            if(register.structures[target.id] && register.structures[target.id].structureType == 'controller') {
-                return this.upgradeController(target);
-            }
+        if(resourceType == C.RESOURCE_ENERGY && register.structures[target.id] && register.structures[target.id].structureType == 'controller') {
+            return this.upgradeController(target);
+        }
 
-            if (register.structures[target.id] &&
-                register.structures[target.id].structureType != 'extension' &&
-                register.structures[target.id].structureType != 'spawn' &&
-                register.structures[target.id].structureType != 'link' &&
-                register.structures[target.id].structureType != 'storage' &&
-                register.structures[target.id].structureType != 'tower' &&
-                register.structures[target.id].structureType != 'powerSpawn' &&
-                register.structures[target.id].structureType != 'terminal' &&
-                register.structures[target.id].structureType != 'container' &&
-                register.structures[target.id].structureType != 'lab' &&
-                register.structures[target.id].structureType != 'nuker' &&
-                register.structures[target.id].structureType != 'factory') {
-                return C.ERR_INVALID_TARGET;
-            }
-        }
-        else if(resourceType == C.RESOURCE_POWER) {
-            if (register.structures[target.id] &&
-                register.structures[target.id].structureType != 'storage' &&
-                register.structures[target.id].structureType != 'terminal' &&
-                register.structures[target.id].structureType != 'container' &&
-                register.structures[target.id].structureType != 'powerSpawn') {
-                return C.ERR_INVALID_TARGET;
-            }
-        }
-        else {
-            if (register.structures[target.id] &&
-                register.structures[target.id].structureType != 'storage' &&
-                register.structures[target.id].structureType != 'terminal' &&
-                register.structures[target.id].structureType != 'container' &&
-                register.structures[target.id].structureType != 'lab' &&
-                register.structures[target.id].structureType != 'nuker' &&
-                register.structures[target.id].structureType != 'factory') {
-                return C.ERR_INVALID_TARGET;
-            }
+        if(!register.structures[target.id] || !utils.capacityForResource(data(target.id), resourceType)) {
+            return C.ERR_INVALID_TARGET;
         }
 
         if(!target.pos.isNearTo(this.pos)) {
             return C.ERR_NOT_IN_RANGE;
         }
-        if(!data(this.id)[resourceType]) {
+        if(!data(this.id).store || !data(this.id).store[resourceType]) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
-        if(target.structureType == 'powerSpawn') {
-            if(data(target.id)[resourceType] >= data(target.id)[resourceType+'Capacity']) {
-                return C.ERR_FULL;
-            }
-            if(!amount) {
-                amount = Math.min( data(this.id)[resourceType], data(target.id)[resourceType+'Capacity'] - data(target.id)[resourceType] );
-            }
-            if(data(this.id)[resourceType] < amount) {
-                return C.ERR_NOT_ENOUGH_RESOURCES;
-            }
-            if(!amount || data(target.id)[resourceType] + amount > data(target.id)[resourceType+'Capacity']) {
-                return C.ERR_FULL;
-            }
-        }
-        else if(target.structureType == 'lab') {
-            if(resourceType != C.RESOURCE_ENERGY && data(target.id).mineralType && data(target.id).mineralType != resourceType) {
-                return C.ERR_FULL;
-            }
 
-            var targetCapacity = resourceType == C.RESOURCE_ENERGY ? data(target.id).energyCapacity : data(target.id).mineralCapacity;
-            var targetAmount = resourceType == C.RESOURCE_ENERGY ? data(target.id).energy : data(target.id).mineralAmount;
+        const storedAmount = data(target.id).storeCapacityResource ? data(target.id).store[resourceType] : utils.calcResources(target);
+        const targetCapacity = Math.max(0,
+            data(target.id).storeCapacityResource &&
+            data(target.id).storeCapacityResource[resourceType] ||
+            (data(target.id).storeCapacity||0) - _.sum(data(target.id).storeCapacityResource));
 
-            if(targetAmount > targetCapacity) {
-                return C.ERR_FULL;
-            }
-            if(!amount) {
-                amount = Math.min( data(this.id)[resourceType], targetCapacity - targetAmount );
-            }
-            if(data(this.id)[resourceType] < amount) {
-                return C.ERR_NOT_ENOUGH_RESOURCES;
-            }
-            if(!amount || targetAmount + amount > targetCapacity) {
-                return C.ERR_FULL;
-            }
+        if(!data(target.id).store || storedAmount >= targetCapacity) {
+            return C.ERR_FULL;
         }
-        else if(target.structureType == 'nuker') {
-            if(resourceType != C.RESOURCE_ENERGY && resourceType != C.RESOURCE_GHODIUM) {
-                return C.ERR_FULL;
-            }
-            if(data(target.id)[resourceType] >= data(target.id)[resourceType+'Capacity']) {
-                return C.ERR_FULL;
-            }
-            if(!amount) {
-                amount = Math.min( data(this.id)[resourceType], data(target.id)[resourceType+'Capacity'] - data(target.id)[resourceType] );
-            }
-            if(data(this.id)[resourceType] < amount) {
-                return C.ERR_NOT_ENOUGH_RESOURCES;
-            }
-            if(!amount || data(target.id)[resourceType] + amount > data(target.id)[resourceType+'Capacity']) {
-                return C.ERR_FULL;
-            }
+
+        if(!amount) {
+            amount = Math.min(data(this.id).store[resourceType], targetCapacity - storedAmount);
         }
-        else {
-            if(!_.isUndefined(data(target.id).energyCapacity) && utils.calcResources(data(target.id)) > data(target.id).energyCapacity) {
-                return C.ERR_FULL;
-            }
-            if(!amount) {
-                if(!_.isUndefined(data(target.id).energyCapacity)) {
-                    amount = Math.min(data(this.id)[resourceType], data(target.id).energyCapacity - utils.calcResources(data(target.id)));
-                }
-                else {
-                    amount = data(this.id)[resourceType];
-                }
-            }
-            if(data(this.id)[resourceType] < amount) {
-                return C.ERR_NOT_ENOUGH_RESOURCES;
-            }
-            if(!_.isUndefined(data(target.id).energyCapacity) && (!amount || utils.calcResources(data(target.id)) + amount > data(target.id).energyCapacity)) {
-                return C.ERR_FULL;
-            }
+
+        if(data(this.id).store[resourceType] < amount) {
+            return C.ERR_NOT_ENOUGH_RESOURCES;
+        }
+
+        if(!amount || (amount + storedAmount) > targetCapacity) {
+            return C.ERR_FULL;
         }
 
         intents.set(this.id, 'transfer', {id: target.id, amount, resourceType});
@@ -586,7 +494,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!_.contains(C.RESOURCES_ALL, resourceType)) {
             return C.ERR_INVALID_ARGS;
         }
-        if(!target || !target.id || ((!register.structures[target.id] || !(target instanceof globals.Structure) ) && !(target instanceof globals.Tombstone))) {
+        if(!target || !target.id || !data(target.id).store || ((!register.structures[target.id] || !(target instanceof globals.Structure) ) && !(target instanceof globals.Tombstone))) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
@@ -598,93 +506,31 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NOT_OWNER;
         }
 
-        if(resourceType == C.RESOURCE_ENERGY) {
-
-            if (register.structures[target.id] &&
-            register.structures[target.id].structureType != 'extension' &&
-            register.structures[target.id].structureType != 'spawn' &&
-            register.structures[target.id].structureType != 'link' &&
-            register.structures[target.id].structureType != 'storage' &&
-            register.structures[target.id].structureType != 'tower' &&
-            register.structures[target.id].structureType != 'powerSpawn' &&
-            register.structures[target.id].structureType != 'terminal' &&
-            register.structures[target.id].structureType != 'container' &&
-            register.structures[target.id].structureType != 'lab' &&
-            register.structures[target.id].structureType != 'factory') {
-                return C.ERR_INVALID_TARGET;
-            }
-        }
-        else if(resourceType == C.RESOURCE_POWER) {
-            if (register.structures[target.id] &&
-            register.structures[target.id].structureType != 'storage' &&
-            register.structures[target.id].structureType != 'terminal' &&
-            register.structures[target.id].structureType != 'container' &&
-            register.structures[target.id].structureType != 'powerSpawn') {
-                return C.ERR_INVALID_TARGET;
-            }
-        }
-        else {
-            if (register.structures[target.id] &&
-            register.structures[target.id].structureType != 'storage' &&
-            register.structures[target.id].structureType != 'terminal' &&
-            register.structures[target.id].structureType != 'container' &&
-            register.structures[target.id].structureType != 'lab' &&
-            register.structures[target.id].structureType != 'factory') {
-                return C.ERR_INVALID_TARGET;
-            }
+        if(!register.structures[target.id] ||
+            register.structures[target.id].structureType == C.STRUCTURE_NUKER) {
+            return C.ERR_INVALID_TARGET;
         }
 
         if(!target.pos.isNearTo(this.pos)) {
             return C.ERR_NOT_IN_RANGE;
         }
 
-        var totalResources = utils.calcResources(data(this.id));
-        var emptySpace = data(this.id).energyCapacity - totalResources;
+        var emptySpace = data(this.id).storeCapacity - utils.calcResources(data(this.id));;
 
         if(emptySpace <= 0) {
             return C.ERR_FULL;
         }
 
-        if(target.structureType == 'powerSpawn') {
-            if(!amount) {
-                amount = Math.min( data(target.id)[resourceType], emptySpace );
-            }
-            if(!data(target.id)[resourceType] || data(target.id)[resourceType] < amount) {
-                return C.ERR_NOT_ENOUGH_RESOURCES;
-            }
-            if(amount > emptySpace) {
-                return C.ERR_FULL;
-            }
+        if(!amount) {
+            amount = Math.min(emptySpace, data(target.id).store[resourceType]);
         }
-        else if(target.structureType == 'lab') {
-            if(resourceType != C.RESOURCE_ENERGY && data(target.id).mineralType && data(target.id).mineralType != resourceType) {
-                return C.ERR_INVALID_ARGS;
-            }
 
-            var targetCapacity = resourceType == C.RESOURCE_ENERGY ? data(target.id).energyCapacity : data(target.id).mineralCapacity;
-            var targetAmount = resourceType == C.RESOURCE_ENERGY ? data(target.id).energy : data(target.id).mineralAmount;
-
-            if(!amount) {
-                amount = Math.min( targetAmount, emptySpace );
-            }
-
-            if(!targetAmount || targetAmount < amount) {
-                return C.ERR_NOT_ENOUGH_RESOURCES;
-            }
-            if(amount > emptySpace) {
-                return C.ERR_FULL;
-            }
+        if((data(target.id).store[resourceType]||0) < amount) {
+            return C.ERR_NOT_ENOUGH_RESOURCES;
         }
-        else {
-            if(!amount) {
-                amount = Math.min(data(target.id)[resourceType], emptySpace);
-            }
-            if(!data(target.id)[resourceType] || data(target.id)[resourceType] < amount) {
-                return C.ERR_NOT_ENOUGH_RESOURCES;
-            }
-            if(amount > emptySpace) {
-                return C.ERR_FULL;
-            }
+
+        if(amount > emptySpace) {
+            return C.ERR_FULL;
         }
 
         intents.set(this.id, 'withdraw', {id: target.id, amount, resourceType});
@@ -703,13 +549,12 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
-        if(utils.calcResources(this.carry) >= this.carryCapacity) {
+        if(utils.calcResources(data(this.id)) >= data(this.id).storeCapacity) {
             return C.ERR_FULL;
         }
         if(!target.pos.isNearTo(this.pos)) {
             return C.ERR_NOT_IN_RANGE;
         }
-
 
         intents.set(this.id, 'pickup', {id: target.id});
         return C.OK;
@@ -741,7 +586,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!target.pos.isNearTo(this.pos)) {
             return C.ERR_NOT_IN_RANGE;
         }
-
 
         intents.set(this.id, 'attack', {id: target.id, x: target.pos.x, y: target.pos.y});
         return C.OK;
@@ -1166,7 +1010,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.spawning) {
             return C.ERR_BUSY;
         }
-        if(!(data(this.id)[C.RESOURCE_GHODIUM] >= C.SAFE_MODE_COST)) {
+        if(!data(this.id).store || !(data(this.id).store[C.RESOURCE_GHODIUM] >= C.SAFE_MODE_COST)) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
         if(!target || !target.id || !register.structures[target.id] || !(target instanceof globals.StructureController)) {

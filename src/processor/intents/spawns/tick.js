@@ -44,9 +44,9 @@ module.exports = function(object, scope) {
         }
     }
 
-    if(!object.tutorial && energyAvailable < C.SPAWN_ENERGY_CAPACITY && object.energy < C.SPAWN_ENERGY_CAPACITY) {
-        object.energy++;
-        bulk.update(object, {energy: object.energy});
+    if(!object.tutorial && energyAvailable < C.SPAWN_ENERGY_CAPACITY && object.store.energy < C.SPAWN_ENERGY_CAPACITY) {
+        object.store.energy++;
+        bulk.update(object, {store:{energy: object.store.energy}});
     }
 
 };

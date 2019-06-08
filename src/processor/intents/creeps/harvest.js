@@ -39,18 +39,19 @@ module.exports = function(object, intent, scope) {
             let amount = Math.min(target.energy, harvestAmount);
 
             target.energy -= amount;
-            object.energy += amount;
+            object.store = object.store || {};
+            object.store.energy = (object.store.energy || 0) + amount;
 
             let invaderHarvested = (target.invaderHarvested || 0) + amount;
 
-            bulk.update(object, {energy: object.energy});
+            bulk.update(object, {store:{energy: object.store.energy}});
             bulk.update(target, {energy: target.energy, invaderHarvested});
 
             let sum = utils.calcResources(object);
 
-            if (sum > object.energyCapacity) {
+            if (sum > object.storeCapacity) {
                 require('./drop')(object, {
-                    amount: Math.min(object.energy, sum - object.energyCapacity),
+                    amount: Math.min(object.store.energy, sum - object.storeCapacity),
                     resourceType: 'energy'
                 }, scope);
             }
@@ -89,15 +90,15 @@ module.exports = function(object, intent, scope) {
         if (harvestAmount) {
 
             let amount = Math.min(target.mineralAmount, harvestAmount);
-
+            object.store = object.store || {};
             bulk.update(target, {mineralAmount: target.mineralAmount - amount});
-            bulk.update(object, {[target.mineralType]: (object[target.mineralType] || 0)+amount});
+            bulk.update(object, {store: {[target.mineralType]: (object.store[target.mineralType] || 0)+amount}});
 
             let sum = utils.calcResources(object);
 
-            if (sum > object.energyCapacity) {
+            if (sum > object.storeCapacity) {
                 require('./drop')(object, {
-                    amount: Math.min(object[target.mineralType], sum - object.energyCapacity),
+                    amount: Math.min(object.store[target.mineralType], sum - object.storeCapacity),
                     resourceType: target.mineralType
                 }, scope);
             }
@@ -116,13 +117,13 @@ module.exports = function(object, intent, scope) {
         }
 
         const amount = utils.calcBodyEffectiveness(object.body, C.WORK, 'harvest', C.HARVEST_DEPOSIT_POWER);
-        bulk.update(object, {[target.depositType]: (object[target.depositType] || 0)+amount});
+        bulk.update(object, {store: {[target.depositType]: (object.store[target.depositType] || 0)+amount}});
 
         let sum = utils.calcResources(object);
 
-        if (sum > object.energyCapacity) {
+        if (sum > object.storeCapacity) {
             require('./drop')(object, {
-                amount: Math.min(object[target.depositType], sum - object.energyCapacity),
+                amount: Math.min(object.store[target.depositType], sum - object.storeCapacity),
                 resourceType: target.depositType
             }, scope);
         }

@@ -62,7 +62,7 @@ module.exports = function(spawn, intent, scope) {
         }
     });
 
-    var body = [], energyCapacity = 0;
+    var body = [], storeCapacity = 0;
 
     intent.body.forEach((i) => {
         if(_.contains(C.BODYPARTS_ALL, i)) {
@@ -73,7 +73,7 @@ module.exports = function(spawn, intent, scope) {
         }
 
         if(i == C.CARRY)
-            energyCapacity += C.CARRY_CAPACITY;
+            storeCapacity += C.CARRY_CAPACITY;
     });
 
     var creep = {
@@ -81,8 +81,8 @@ module.exports = function(spawn, intent, scope) {
         x: spawn.x,
         y: spawn.y,
         body,
-        energy: 0,
-        energyCapacity,
+        store: { energy: 0 },
+        storeCapacity,
         type: 'creep',
         room: spawn.room,
         user: spawn.user,

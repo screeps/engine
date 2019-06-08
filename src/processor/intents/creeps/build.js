@@ -11,7 +11,7 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
     if(object.type != 'creep') {
         return;
     }
-    if(object.spawning || object.energy <= 0) {
+    if(object.spawning || !object.store || object.store.energy <= 0) {
         return;
     }
 
@@ -66,7 +66,7 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
 
     var buildPower = _.filter(object.body, (i) => (i.hits > 0 || i._oldHits > 0) && i.type == C.WORK).length * C.BUILD_POWER || 0,
         buildRemaining = target.progressTotal - target.progress,
-        buildEffect = Math.min(buildPower, buildRemaining, object.energy),
+        buildEffect = Math.min(buildPower, buildRemaining, object.store.energy),
         boostedParts = _.map(object.body, i => {
             if(i.type == C.WORK && i.boost && C.BOOSTS[C.WORK][i.boost].build > 0) {
                 return (C.BOOSTS[C.WORK][i.boost].build-1) * C.BUILD_POWER;
@@ -80,12 +80,12 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
     var boostedEffect = Math.min(Math.floor(buildEffect + _.sum(boostedParts)), buildRemaining);
 
     target.progress += boostedEffect;
-    object.energy -= buildEffect;
+    object.store.energy -= buildEffect;
 
     stats.inc('energyConstruction', object.user, buildEffect);
 
     object.actionLog.build = {x: target.x, y: target.y};
-    bulk.update(object, {energy: object.energy});
+    bulk.update(object, {store:{energy: object.store.energy}});
 
     eventLog.push({event: C.EVENT_BUILD, objectId: object._id, data: {targetId: target._id, amount: boostedEffect}});
 
@@ -109,8 +109,8 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
             _.extend(newObject, {
                 name: target.name,
                 user: target.user,
-                energy: 0,
-                energyCapacity: C.SPAWN_ENERGY_CAPACITY,
+                store: {energy: 0},
+                storeCapacityResource: {energy: C.SPAWN_ENERGY_CAPACITY},
                 hits: C.SPAWN_HITS,
                 hitsMax: C.SPAWN_HITS
             });
@@ -119,8 +119,8 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
         if (target.structureType == 'extension') {
             _.extend(newObject, {
                 user: target.user,
-                energy: 0,
-                energyCapacity: 0,
+                store: {energy: 0},
+                storeCapacityResource: {energy: 0},
                 hits: C.EXTENSION_HITS,
                 hitsMax: C.EXTENSION_HITS
             });
@@ -129,8 +129,8 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
         if (target.structureType == 'link') {
             _.extend(newObject, {
                 user: target.user,
-                energy: 0,
-                energyCapacity: C.LINK_CAPACITY,
+                store: {energy: 0},
+                storeCapacityResource: {energy: C.LINK_CAPACITY},
                 cooldown: 0,
                 hits: C.LINK_HITS,
                 hitsMax: C.LINK_HITS_MAX
@@ -140,8 +140,8 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
         if (target.structureType == 'storage') {
             _.extend(newObject, {
                 user: target.user,
-                energy: 0,
-                energyCapacity: C.STORAGE_CAPACITY,
+                store: { energy: 0 },
+                storeCapacity: C.STORAGE_CAPACITY,
                 hits: C.STORAGE_HITS,
                 hitsMax: C.STORAGE_HITS
             });
@@ -185,8 +185,8 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
         if (target.structureType == 'tower') {
             _.extend(newObject, {
                 user: target.user,
-                energy: 0,
-                energyCapacity: C.TOWER_CAPACITY,
+                store: {energy: 0},
+                storeCapacityResource: {energy: C.TOWER_CAPACITY},
                 hits: C.TOWER_HITS,
                 hitsMax: C.TOWER_HITS
             });
@@ -215,20 +215,17 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
                 hitsMax: C.LAB_HITS,
                 mineralAmount: 0,
                 cooldown: 0,
-                mineralType: null,
-                mineralCapacity: C.LAB_MINERAL_CAPACITY,
-                energy: 0,
-                energyCapacity: C.LAB_ENERGY_CAPACITY
+                store: {energy: 0},
+                storeCapacity: C.LAB_ENERGY_CAPACITY + C.LAB_MINERAL_CAPACITY,
+                storeCapacityResource: {energy: C.LAB_ENERGY_CAPACITY}
             });
         }
 
         if (target.structureType == 'powerSpawn') {
             _.extend(newObject, {
                 user: target.user,
-                power: 0,
-                powerCapacity: C.POWER_SPAWN_POWER_CAPACITY,
-                energy: 0,
-                energyCapacity: C.POWER_SPAWN_ENERGY_CAPACITY,
+                store: {energy: 0},
+                storeCapacityResource: {energy: C.POWER_SPAWN_ENERGY_CAPACITY, power: C.POWER_SPAWN_POWER_CAPACITY},
                 hits: C.POWER_SPAWN_HITS,
                 hitsMax: C.POWER_SPAWN_HITS
             });
@@ -237,8 +234,8 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
         if (target.structureType == 'terminal') {
             _.extend(newObject, {
                 user: target.user,
-                energy: 0,
-                energyCapacity: C.TERMINAL_CAPACITY,
+                store: {energy: 0},
+                storeCapacity: C.TERMINAL_CAPACITY,
                 hits: C.TERMINAL_HITS,
                 hitsMax: C.TERMINAL_HITS
             });
@@ -246,8 +243,8 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
 
         if (target.structureType == 'container') {
             _.extend(newObject, {
-                energy: 0,
-                energyCapacity: C.CONTAINER_CAPACITY,
+                store: {energy: 0},
+                storeCapacity: C.CONTAINER_CAPACITY,
                 hits: C.CONTAINER_HITS,
                 hitsMax: C.CONTAINER_HITS,
                 nextDecayTime: gameTime + C.CONTAINER_DECAY_TIME
@@ -257,10 +254,8 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
         if (target.structureType == 'nuker') {
             _.extend(newObject, {
                 user: target.user,
-                energy: 0,
-                energyCapacity: config.ptr ? 1 : C.NUKER_ENERGY_CAPACITY,
-                G: 0,
-                GCapacity: config.ptr ? 1 : C.NUKER_GHODIUM_CAPACITY,
+                store: {energy: 0},
+                storeCapacityResource: {energy: config.ptr ? 1 : C.NUKER_ENERGY_CAPACITY, G: config.ptr ? 1 : C.NUKER_GHODIUM_CAPACITY},
                 hits: C.NUKER_HITS,
                 hitsMax: C.NUKER_HITS,
                 cooldownTime: gameTime + (config.ptr ? 100 : C.NUKER_COOLDOWN)
@@ -270,8 +265,8 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
         if (target.structureType == 'factory') {
             _.extend(newObject, {
                 user: target.user,
-                energy: 0,
-                energyCapacity: C.FACTORY_CAPACITY,
+                store: {energy: 0},
+                storeCapacity: C.FACTORY_CAPACITY,
                 hits: C.FACTORY_HITS,
                 hitsMax: C.FACTORY_HITS,
                 cooldown: 0

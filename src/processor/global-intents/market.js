@@ -19,12 +19,12 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
         if(!fromTerminal || !toTerminal || !transferFeeTerminal) {
             return false;
         }
-        if(fromTerminal.user && (!fromTerminal[resourceType] || fromTerminal[resourceType] < amount)) {
+        if(fromTerminal.user && (!fromTerminal.store || !fromTerminal.store[resourceType] || fromTerminal.store[resourceType] < amount)) {
             return false;
         }
         if(toTerminal.user) {
             var targetResourceTotal = utils.calcResources(toTerminal),
-                freeSpace = Math.max(0, toTerminal.energyCapacity - targetResourceTotal);
+                freeSpace = Math.max(0, toTerminal.storeCapacity - targetResourceTotal);
             amount = Math.min(amount, freeSpace);
         }
         if(!(amount > 0)) {
@@ -40,20 +40,20 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
         }
 
         if(transferFeeTerminal === fromTerminal &&
-            (resourceType != C.RESOURCE_ENERGY && fromTerminal.energy < transferCost ||
-             resourceType == C.RESOURCE_ENERGY && fromTerminal.energy < amount + transferCost) ||
-           transferFeeTerminal === toTerminal && toTerminal.energy < transferCost) {
+            (resourceType != C.RESOURCE_ENERGY && fromTerminal.store.energy < transferCost ||
+             resourceType == C.RESOURCE_ENERGY && fromTerminal.store.energy < amount + transferCost) ||
+           transferFeeTerminal === toTerminal && toTerminal.store.energy < transferCost) {
             return false;
         }
 
         if(toTerminal.user) {
-            toTerminal[resourceType] = toTerminal[resourceType] || 0;
-            toTerminal[resourceType] += amount;
-            bulkObjects.update(toTerminal, {[resourceType]: toTerminal[resourceType]});
+            toTerminal.store = toTerminal.store || {};
+            toTerminal.store[resourceType] = (toTerminal.store[resourceType] || 0) + amount;
+            bulkObjects.update(toTerminal, {store: {[resourceType]: toTerminal.store[resourceType]}});
         }
 
-        bulkObjects.update(fromTerminal, {[resourceType]: fromTerminal[resourceType] - amount});
-        bulkObjects.update(transferFeeTerminal, {energy: transferFeeTerminal.energy - transferCost});
+        bulkObjects.update(fromTerminal, {store:{[resourceType]: fromTerminal.store[resourceType] - amount}});
+        bulkObjects.update(transferFeeTerminal, {store:{energy: transferFeeTerminal.store.energy - transferCost}});
 
         bulkTransactions.insert(_.extend({
             time: +gameTime,
@@ -298,6 +298,8 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
         if(targetTerminal.cooldownTime > gameTime) {
             return;
         }
+        orderTerminal.store = orderTerminal.store || {};
+        targetTerminal.store = targetTerminal.store || {};
 
         if(order.type == C.ORDER_SELL) {
             buyer = targetTerminal;
@@ -310,11 +312,11 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
 
         var amount = Math.min(deal.amount, order.remainingAmount);
         if(seller.user) {
-            amount = Math.min(amount, seller[order.resourceType] || 0);
+            amount = Math.min(amount, seller.store[order.resourceType] || 0);
         }
         if(buyer.user) {
             var targetResourceTotal = utils.calcResources(buyer),
-                targetFreeSpace = Math.max(0, buyer.energyCapacity - targetResourceTotal);
+                targetFreeSpace = Math.max(0, buyer.storeCapacity - targetResourceTotal);
             amount = Math.min(amount, targetFreeSpace);
         }
         if(!(amount > 0)) {
@@ -505,7 +507,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
 
                 var availableResourceAmount = order.resourceType == C.SUBSCRIPTION_TOKEN ?
                     (usersById[order.user].subscriptionTokens || 0) :
-                    terminal && terminal.user == order.user ? terminal[order.resourceType] || 0 : 0;
+                    terminal && terminal.user == order.user ? terminal.store[order.resourceType] || 0 : 0;
 
                 availableResourceAmount = Math.min(availableResourceAmount, order.remainingAmount);
 
@@ -537,7 +539,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                 var newAmount = Math.min(Math.floor(userMoney / order.price), order.remainingAmount);
                 if (terminal && terminal.user) {
                     var targetResourceTotal = utils.calcResources(terminal),
-                        targetFreeSpace = Math.max(0, terminal.energyCapacity - targetResourceTotal);
+                        targetFreeSpace = Math.max(0, terminal.storeCapacity - targetResourceTotal);
                     newAmount = Math.min(newAmount, targetFreeSpace);
                 }
 

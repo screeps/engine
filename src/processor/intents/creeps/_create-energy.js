@@ -20,12 +20,12 @@ module.exports = function(x, y, room, amount, resourceType, scope) {
     var container = _.find(roomObjects, {type: 'container', x, y});
 
     if(container && container.hits > 0) {
+        container.store = container.store || {};
         var targetTotal = utils.calcResources(container);
-        var toContainerAmount = Math.min(amount, container.energyCapacity - targetTotal);
+        var toContainerAmount = Math.min(amount, container.storeCapacity - targetTotal);
         if(toContainerAmount > 0) {
-            container[resourceType] = container[resourceType] || 0;
-            container[resourceType] += toContainerAmount;
-            bulk.update(container, {[resourceType]: container[resourceType]});
+            container.store[resourceType] = (container.store[resourceType] || 0) + toContainerAmount;
+            bulk.update(container, {store: {[resourceType]: container.store[resourceType]}});
             amount -= toContainerAmount;
         }
     }

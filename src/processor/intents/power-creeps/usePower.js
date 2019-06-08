@@ -31,7 +31,8 @@ module.exports = function(object, intent, scope) {
         ops = ops[creepPower.level-1];
     }
 
-    if((object.ops || 0) < ops) {
+    object.store = object.store || {};
+    if((object.store.ops || 0) < ops) {
         return;
     }
 
@@ -55,13 +56,13 @@ module.exports = function(object, intent, scope) {
 
         case C.PWR_GENERATE_OPS: {
             bulk.update(object, {
-                [C.RESOURCE_OPS]: (object[C.RESOURCE_OPS] || 0) + powerInfo.effect[creepPower.level-1],
+                store:{[C.RESOURCE_OPS]: (object.store[C.RESOURCE_OPS] || 0) + powerInfo.effect[creepPower.level-1]},
             });
             let sum = utils.calcResources(object);
 
-            if (sum > object.energyCapacity) {
+            if (sum > object.storeCapacity) {
                 require('./drop')(object, {
-                    amount: Math.min(object[C.RESOURCE_OPS], sum - object.energyCapacity),
+                    amount: Math.min(object.store[C.RESOURCE_OPS], sum - object.storeCapacity),
                     resourceType: C.RESOURCE_OPS
                 }, scope);
             }
@@ -101,7 +102,7 @@ module.exports = function(object, intent, scope) {
         }
 
         case C.PWR_OPERATE_EXTENSION: {
-            if(target.type != 'storage' && target.type != 'terminal' && target.type !== 'container') {
+            if(!target.store || target.type != 'storage' && target.type != 'terminal' && target.type !== 'container') {
                 return;
             }
             var effect = _.find(target.effects, {power: C.PWR_DISRUPT_TERMINAL});
@@ -111,11 +112,11 @@ module.exports = function(object, intent, scope) {
             var extensions = _.filter(roomObjects, i => i.type == 'extension' && i.user == target.user && !i.off);
             var energySent = 0;
             var energyLimit = Math.min(
-                target.energy,
-                powerInfo.effect[creepPower.level-1] * _.sum(extensions, 'energyCapacity'));
+                target.store.energy,
+                powerInfo.effect[creepPower.level-1] * _.sum(extensions, 'storeCapacity'));
             extensions.sort(utils.comparatorDistance(target));
             extensions.every((extension) => {
-                var energy = Math.min(energyLimit - energySent, extension.energyCapacity - extension.energy);
+                var energy = Math.min(energyLimit - energySent, extension.storeCapacity - extension.store.energy);
                 bulk.update(extension, {energy: extension.energy + energy});
                 energySent += energy;
                 return energySent < energyLimit;
@@ -123,7 +124,7 @@ module.exports = function(object, intent, scope) {
             if(energySent === 0) {
                 return;
             }
-            bulk.update(target, {energy: target.energy - energySent});
+            bulk.update(target, {store:{energy: target.store.energy - energySent}});
             break;
         }
 
@@ -289,7 +290,7 @@ module.exports = function(object, intent, scope) {
                 cooldownTime: gameTime + powerInfo.cooldown
             }
         },
-        ops: (object.ops || 0) - ops
+        store: {ops: (object.store.ops || 0) - ops}
     });
 
     eventLog.push({event: C.EVENT_POWER, objectId: object._id, data: {

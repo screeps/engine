@@ -4,8 +4,6 @@ const _ = require('lodash'),
     C = driver.constants;
 
 module.exports = function(object, dFatigue, {roomObjects, bulk}) {
-//    console.log(`add-fatigue ${dFatigue} called for ${}`)
-
     if(_.isUndefined(object._fatigue)) { object._fatigue = object.fatigue }
 
     if((object._fatigue > 0) && (dFatigue < 0)) { // MOVES contribution removes own fatigue first

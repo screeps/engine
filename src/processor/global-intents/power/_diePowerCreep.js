@@ -13,6 +13,7 @@ module.exports = function(object, {roomObjects, bulkObjects, bulkUsersPowerCreep
         user: object.user,
         deathTime: gameTime,
         decayTime: gameTime + C.TOMBSTONE_DECAY_POWER_CREEP,
+        store: {},
         powerCreepId: ""+object._id,
         powerCreepName: object.name,
         powerCreepTicksToLive: object.ageTime - gameTime,
@@ -21,27 +22,31 @@ module.exports = function(object, {roomObjects, bulkObjects, bulkUsersPowerCreep
         powerCreepPowers: _.mapValues(object.powers, i => ({level: i.level})),
         powerCreepSaying: object.actionLog && object.actionLog.say && object.actionLog.say.isPublic ? object.actionLog.say.message : undefined
     };
-    
-    let container = _.find(roomObjects, { type: 'container', x: object.x, y: object.y });
 
-    C.RESOURCES_ALL.forEach(resourceType => {
-        if (object[resourceType] > 0) {
-            let amount = object[resourceType];
+    let container = _.find(roomObjects, { type: 'container', x: object.x, y: object.y });
+    if(container) {
+        container.store = container.store || {};
+    }
+
+    if(object.store) {
+        _.forEach(object.store, (amount, resourceType) => {
+            if(amount <= 0) {
+                return;
+            }
             if(container && container.hits > 0) {
-                let targetTotal = utils.calcResources(container);
-                let toContainerAmount = Math.min(amount, container.energyCapacity - targetTotal);
+                const targetTotal = utils.calcResources(container);
+                const toContainerAmount = Math.min(amount, container.storeCapacity - targetTotal);
                 if(toContainerAmount > 0) {
-                    container[resourceType] = container[resourceType] || 0;
-                    container[resourceType] += toContainerAmount;
-                    bulkObjects.update(container, {[resourceType]: container[resourceType]});
+                    container.store[resourceType] = (container.store[resourceType] || 0) + toContainerAmount;
+                    bulkObjects.update(container, {store: {[resourceType]: container.store[resourceType]}});
                     amount -= toContainerAmount;
                 }
+                if(amount > 0){
+                    tombstone.store[resourceType] = (tombstone.store[resourceType] || 0) + amount;
+                }
             }
-            if(amount > 0){
-                tombstone[resourceType] = (tombstone[resourceType] || 0) + amount;
-            }
-        }
-    });
+        })
+    }
 
     bulkObjects.insert(tombstone);
 

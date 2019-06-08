@@ -27,7 +27,7 @@ module.exports = function(object, intent, scope) {
 
     target.body.forEach(function(p) {p.boost = null;});
     require('../creeps/_recalc-body')(target);
-    bulk.update(target, {body: target.body, energyCapacity: target.energyCapacity});
+    bulk.update(target, {body: target.body, storeCapacity: target.storeCapacity});
 
     const cooldown = _.reduce(C.RESOURCES_ALL, function(a, r){
         if(!boostedParts[r]) {

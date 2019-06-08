@@ -6,10 +6,7 @@ var _ = require('lodash'),
 
 module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, stats, gameTime, eventLog}) {
 
-    if(object.type != 'creep') {
-        return;
-    }
-    if(object.spawning || object.energy <= 0) {
+    if(object.type != 'creep' || object.spawning || !object.store || object.store.energy <= 0) {
         return;
     }
 
@@ -30,7 +27,7 @@ module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, stats, 
     target._upgraded = target._upgraded || 0;
 
     var buildPower = _.filter(object.body, (i) => (i.hits > 0 || i._oldHits > 0) && i.type == C.WORK).length * C.UPGRADE_CONTROLLER_POWER || 0,
-        buildEffect = Math.min(buildPower, object.energy),
+        buildEffect = Math.min(buildPower, object.store.energy),
         boostedParts = _.map(object.body, i => {
             if(i.type == C.WORK && i.boost && C.BOOSTS[C.WORK][i.boost].upgradeController > 0) {
                 return C.BOOSTS[C.WORK][i.boost].upgradeController-1;
@@ -88,11 +85,11 @@ module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, stats, 
 
     stats.inc('energyControl', object.user, boostedEffect);
 
-    object.energy -= buildEffect;
+    object.store.energy -= buildEffect;
 
     object.actionLog.upgradeController = {x: target.x, y: target.y};
 
-    bulk.update(object, {energy: object.energy});
+    bulk.update(object, {store: {energy: object.store.energy}});
 
     bulk.update(target, {
         level: target.level,

@@ -9,7 +9,7 @@ module.exports = function(object, target, damage, attackType, scope) {
 
     if(!target.hits) {
         return;
-    }   
+    }
 
     var attackBackPower = 0;
 
@@ -45,12 +45,13 @@ module.exports = function(object, target, damage, attackType, scope) {
     }
     else if (target.hits <= 0) {
         if (target.type != 'creep' && target.type != 'powerCreep') {
-            C.RESOURCES_ALL.forEach(resourceType => {
-                if (target[resourceType] > 0) {
-                    require('./creeps/_create-energy')(target.x, target.y, target.room,
-                    target[resourceType], resourceType, scope);
-                }
-            });
+            if(target.store) {
+                _.forEach(target.store, (amount, resourceType) => {
+                    if(amount) {
+                        require('./creeps/_create-energy')(target.x, target.y, target.room, amount, resourceType, scope);
+                    }
+                });
+            }
 
             bulk.remove(target._id);
             delete roomObjects[target._id];

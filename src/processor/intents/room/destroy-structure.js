@@ -27,18 +27,14 @@ module.exports = function(userId, intent, scope) {
         }
     }
 
-    C.RESOURCES_ALL.forEach(resourceType => {
-        // drop contents of anything with .energy or .store[]
-        if (object[resourceType] > 0) {
-            require('../creeps/_create-energy')(object.x, object.y, object.room,
-            object[resourceType], resourceType, scope);
-        }
-        // drop mineral from lab
-        if (object.mineralType === resourceType && object.mineralAmount > 0) {
-            require('../creeps/_create-energy')(object.x, object.y, object.room,
-            object.mineralAmount, resourceType, scope);
-        }
-    });
+    // drop contents of anything with .energy or .store[]
+    if(object.store) {
+        _.forEach(object.store, (amount, resourceType) => {
+            if(amount > 0) {
+                require('../creeps/_create-energy')(object.x, object.y, object.room, amount, resourceType, scope);
+            }
+        })
+    }
 
     if(object.type == 'constructedWall' && object.decayTime && object.user) {
         require('../creeps/_clear-newbie-walls')(scope);

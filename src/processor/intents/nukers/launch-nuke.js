@@ -10,7 +10,7 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ga
     if(!utils.checkStructureAgainstController(object, roomObjects, roomController)) {
         return;
     }
-    if(object.G < object.GCapacity || object.energy < object.energyCapacity) {
+    if(object.store.G < object.storeCapacityResource.G || object.store.energy < object.storeCapacityResource.energy) {
         return;
     }
     if(object.cooldownTime > gameTime) {
@@ -22,7 +22,7 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ga
     if(roomInfo.novice && roomInfo.novice > Date.now() || roomInfo.respawnArea && roomInfo.respawnArea > Date.now()) {
         return;
     }
-    
+
     if(!_.isString(intent.roomName) || !/^(W|E)\d+(S|N)\d+$/.test(intent.roomName)) {
         return;
     }
@@ -35,8 +35,7 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ga
     }
 
     bulk.update(object, {
-        energy: 0,
-        G: 0,
+        store: {energy: 0, G: 0},
         cooldownTime: gameTime + (config.ptr ? 100 : C.NUKER_COOLDOWN)
     });
 

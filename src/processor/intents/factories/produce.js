@@ -6,7 +6,7 @@ var _ = require('lodash'),
 module.exports = function(object, intent, scope) {
     const {gameTime, roomObjects, roomController, bulk} = scope;
 
-    if(!object || !C.COMMODITIES[intent.resourceType] || !!C.COMMODITIES[intent.resourceType].level && object.level != C.COMMODITIES[intent.resourceType].level) {
+    if(!object ||!object.store || !C.COMMODITIES[intent.resourceType] || !!C.COMMODITIES[intent.resourceType].level && object.level != C.COMMODITIES[intent.resourceType].level) {
         return;
     }
 
@@ -22,20 +22,21 @@ module.exports = function(object, intent, scope) {
         return;
     }
 
-    if(_.some(_.keys(C.COMMODITIES[intent.resourceType].components), p => (object[p]||0)<C.COMMODITIES[intent.resourceType].components[p])) {
+    if(_.some(_.keys(C.COMMODITIES[intent.resourceType].components), p => (object.store[p]||0)<C.COMMODITIES[intent.resourceType].components[p])) {
         return;
     }
 
     const targetTotal = utils.calcResources(object);
-    const componentsTotal = utils.calcResources(C.COMMODITIES[intent.resourceType].components);
-    if (targetTotal - componentsTotal + (C.COMMODITIES[intent.resourceType].amount||1) > object.energyCapacity) {
+    const componentsTotal = _.sum(C.COMMODITIES[intent.resourceType].components);
+    if (targetTotal - componentsTotal + (C.COMMODITIES[intent.resourceType].amount||1) > object.storeCapacity) {
         return;
     }
 
     for(let part in C.COMMODITIES[intent.resourceType].components) {
-        bulk.inc(object, part, -C.COMMODITIES[intent.resourceType].components[part]);
+        object.store[part] = object.store[part] - C.COMMODITIES[intent.resourceType].components[part];
     }
-    bulk.inc(object, intent.resourceType, C.COMMODITIES[intent.resourceType].amount || 1);
+    object.store[intent.resourceType] = (object.store[intent.resourceType]||0) + (C.COMMODITIES[intent.resourceType].amount || 1);
+    bulk.update(object, {store: object.store});
 
     object.actionLog.produce = {x: object.x, y: object.y, resourceType: intent.resourceType};
 

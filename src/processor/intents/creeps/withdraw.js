@@ -9,11 +9,10 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ga
         return;
     }
 
-    var totalResources = utils.calcResources(object);
-    var emptySpace = object.energyCapacity - totalResources;
+    var emptySpace = object.storeCapacity - utils.calcResources(object);
     var amount = Math.min(intent.amount, emptySpace);
 
-    if(object.spawning || amount < 0) {
+    if(!object || object.spawning || !object.storeCapacity || amount < 0) {
         return;
     }
     if(roomController && roomController.user != object.user && roomController.safeMode > gameTime) {
@@ -30,65 +29,32 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ga
         return;
     }
 
-    if(intent.resourceType == 'energy') {
-        if(!_.contains(['spawn','creep','powerCreep','extension','link','storage','tower','powerSpawn','lab','terminal','container','tombstone','factory'], target.type)) {
-            return;
-        }
+    if(target.type == 'nuker') {
+        return;
     }
-    else if(intent.resourceType == 'power') {
-        if(!_.contains(['creep','powerCreep','storage','powerSpawn','terminal','container','tombstone'], target.type)) {
-            return;
-        }
 
-    }
-    else {
-        if(!_.contains(['creep','powerCreep','storage','lab','terminal','container','tombstone','factory'], target.type)) {
+    if(target.type == 'terminal') {
+        var effect = _.find(target.effects, {power: C.PWR_DISRUPT_TERMINAL});
+        if(effect && effect.endTime > gameTime) {
             return;
         }
     }
 
-
-
-    if(target.type == 'lab') {
-        if(intent.resourceType != C.RESOURCE_ENERGY && intent.resourceType != target.mineralType) {
-            return;
-        }
-
-        var targetCapacityKey = intent.resourceType == C.RESOURCE_ENERGY ? 'energyCapacity' : 'mineralCapacity';
-        var targetAmountKey = intent.resourceType == C.RESOURCE_ENERGY ? 'energy' : 'mineralAmount';
-
-        if(amount > target[targetAmountKey]) {
-            amount = target[targetAmountKey];
-        }
-
-        target[targetAmountKey] -= amount;
-        bulk.update(target, {[targetAmountKey]: target[targetAmountKey]});
-
-        if(!target.mineralAmount && target.mineralType) {
-            bulk.update(target, {mineralType: null});
-        }
-    }
-    else {
-
-        if(target.type == 'terminal') {
-            var effect = _.find(target.effects, {power: C.PWR_DISRUPT_TERMINAL});
-            if(effect && effect.endTime > gameTime) {
-                return;
-            }
-        }
-
-        if (amount > target[intent.resourceType]) {
-            amount = target[intent.resourceType];
-        }
-
-        target[intent.resourceType] -= amount;
-        bulk.update(target, {[intent.resourceType]: target[intent.resourceType]});
+    if(amount > target.store[intent.resourceType]) {
+        amount = target.store[intent.resourceType];
     }
 
-    object[intent.resourceType] = object[intent.resourceType] || 0;
-    object[intent.resourceType] += amount;
+    object.store[intent.resourceType] = (object.store[intent.resourceType]||0) + amount;
+    bulk.update(object, {store:{[intent.resourceType]: object.store[intent.resourceType]}});
 
-    bulk.update(object, {[intent.resourceType]: object[intent.resourceType]});
+    target.store[intent.resourceType] -= amount;
+    bulk.update(target, {store:{[intent.resourceType]: target.store[intent.resourceType]}});
+    if(target.type == 'lab' && intent.resourceType != 'energy' && !target.store[intent.resourceType]) {
+        bulk.update(target, {
+            storeCapacityResource: {[intent.resourceType]: null},
+            storeCapacity: C.LAB_ENERGY_CAPACITY + C.LAB_MINERAL_CAPACITY
+        });
+    }
 
     eventLog.push({event: C.EVENT_TRANSFER, objectId: target._id, data: {targetId: object._id, resourceType: intent.resourceType, amount}});
 

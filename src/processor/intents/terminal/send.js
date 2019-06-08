@@ -12,7 +12,7 @@ module.exports = function(object, intent, {bulk, gameTime}) {
     if(!_.contains(C.RESOURCES_ALL, intent.resourceType)) {
         return;
     }
-    if(!intent.amount || !(object[intent.resourceType] >= intent.amount)) {
+    if(!intent.amount || !object.store || !(object.store[intent.resourceType] >= intent.amount)) {
         return;
     }
 
@@ -24,8 +24,8 @@ module.exports = function(object, intent, {bulk, gameTime}) {
         cost = Math.ceil(cost * C.POWER_INFO[C.PWR_OPERATE_TERMINAL].effect[effect.level-1]);
     }
 
-    if(intent.resourceType != C.RESOURCE_ENERGY && object.energy < cost ||
-        intent.resourceType == C.RESOURCE_ENERGY && object.energy < intent.amount + cost) {
+    if(intent.resourceType != C.RESOURCE_ENERGY && object.store.energy < cost ||
+        intent.resourceType == C.RESOURCE_ENERGY && object.store.energy < intent.amount + cost) {
         return;
     }
 

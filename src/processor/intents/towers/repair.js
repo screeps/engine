@@ -5,10 +5,7 @@ var _ = require('lodash'),
 
 module.exports = function(object, intent, {roomObjects, bulk, stats, eventLog, gameTime}) {
 
-    if(object.type != 'tower') {
-        return;
-    }
-    if(object.spawning) {
+    if(!object || object.type != 'tower' || !object.store) {
         return;
     }
 
@@ -16,7 +13,7 @@ module.exports = function(object, intent, {roomObjects, bulk, stats, eventLog, g
     if(!target || !C.CONSTRUCTION_COST[target.type] || target.hits >= target.hitsMax) {
         return;
     }
-    if(object.energy < C.TOWER_ENERGY_COST) {
+    if(object.store.energy < C.TOWER_ENERGY_COST) {
         return;
     }
 
@@ -46,9 +43,9 @@ module.exports = function(object, intent, {roomObjects, bulk, stats, eventLog, g
     }
     bulk.update(target, {hits: target.hits});
 
-    object.energy -= C.TOWER_ENERGY_COST;
+    object.store.energy -= C.TOWER_ENERGY_COST;
     object.actionLog.repair = {x: target.x, y: target.y};
-    bulk.update(object, {energy: object.energy});
+    bulk.update(object, {store:{energy: object.store.energy}});
 
     stats.inc('energyConstruction', object.user, C.TOWER_ENERGY_COST);
 

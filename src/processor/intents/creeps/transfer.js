@@ -5,10 +5,11 @@ var _ = require('lodash'),
 
 module.exports = function(object, intent, {roomObjects, bulk, eventLog}) {
 
-    if(!_.contains(C.RESOURCES_ALL, intent.resourceType)) {
+    const resourceType = intent.resourceType;
+    if(!_.contains(C.RESOURCES_ALL, resourceType)) {
         return;
     }
-    if(object.spawning || !(object[intent.resourceType] >= intent.amount) || intent.amount < 0) {
+    if(object.spawning || !object.store || !(object.store[resourceType] >= intent.amount) || intent.amount < 0) {
         return;
     }
 
@@ -20,86 +21,36 @@ module.exports = function(object, intent, {roomObjects, bulk, eventLog}) {
         return;
     }
 
-    if(intent.resourceType == 'energy') {
-        if(!_.contains(['spawn','creep','powerCreep','extension','link','storage','tower','powerSpawn','lab','terminal','container','nuker', 'factory'], target.type)) {
-            return;
-        }
-    }
-    else if(intent.resourceType == 'power') {
-        if(!_.contains(['creep','powerCreep','storage','powerSpawn','terminal','container'], target.type)) {
-            return;
-        }
+    const targetCapacity = utils.capacityForResource(target, resourceType);
 
-    }
-    else {
-        if(!_.contains(['creep','powerCreep','storage','lab','terminal','container','nuker','factory'], target.type)) {
-            return;
-        }
+    if(!targetCapacity) {
+        return;
     }
 
-    var amount = intent.amount;
+    let amount = intent.amount;
 
-    if(target.type == 'lab') {
-        if(intent.resourceType != C.RESOURCE_ENERGY && target.mineralType && target.mineralType != intent.resourceType) {
-            return;
-        }
+    const storedAmount = target.storeCapacityResource ? target.store[resourceType] : utils.calcResources(target);
 
-        var targetCapacityKey = intent.resourceType == C.RESOURCE_ENERGY ? 'energyCapacity' : 'mineralCapacity';
-        var targetAmountKey = intent.resourceType == C.RESOURCE_ENERGY ? 'energy' : 'mineralAmount';
-
-        if(target[targetAmountKey] >= target[targetCapacityKey]) {
-            return;
-        }
-        if(target[targetAmountKey] + amount > target[targetCapacityKey]) {
-            amount = target[targetCapacityKey] - target[targetAmountKey];
-        }
-
-        target[targetAmountKey] += amount;
-        bulk.update(target, {[targetAmountKey]: target[targetAmountKey]});
-
-        if(target.mineralAmount && !target.mineralType) {
-            bulk.update(target, {mineralType: intent.resourceType});
-        }
+    if(storedAmount >= targetCapacity) {
+        return;
     }
-    else {
-        if (target.type == 'powerSpawn') {
-            if (target[intent.resourceType] >= target[intent.resourceType + 'Capacity']) {
-                return;
-            }
-            if (target[intent.resourceType] + amount > target[intent.resourceType + 'Capacity']) {
-                amount = target[intent.resourceType + 'Capacity'] - target[intent.resourceType];
-            }
-        }
-        else  if (target.type == 'nuker') {
-            if(intent.resourceType != C.RESOURCE_ENERGY && intent.resourceType != C.RESOURCE_GHODIUM) {
-                return;
-            }
-            if (target[intent.resourceType] >= target[intent.resourceType + 'Capacity']) {
-                return;
-            }
-            if (target[intent.resourceType] + amount > target[intent.resourceType + 'Capacity']) {
-                amount = target[intent.resourceType + 'Capacity'] - target[intent.resourceType];
-            }
-        }
-        else {
-            var targetTotal = utils.calcResources(target);
-            if (targetTotal >= target.energyCapacity) {
-                return;
-            }
-            if (targetTotal + amount > target.energyCapacity) {
-                amount = target.energyCapacity - targetTotal;
-            }
-        }
-
-        target[intent.resourceType] = target[intent.resourceType] || 0;
-        target[intent.resourceType] += amount;
-        bulk.update(target, {[intent.resourceType]: target[intent.resourceType]});
+    if(storedAmount + amount > targetCapacity) {
+        amount = targetCapacity - storedAmount;
     }
 
-    object[intent.resourceType] -= amount;
+    target.store[resourceType] = (target.store[resourceType] || 0) + amount;
+    bulk.update(target, {store: {[resourceType]: target.store[resourceType]}});
 
-    bulk.update(object, {[intent.resourceType]: object[intent.resourceType]});
+    object.store[resourceType] -= amount;
+    bulk.update(object, {store: {[resourceType]: object.store[resourceType]}});
 
-    eventLog.push({event: C.EVENT_TRANSFER, objectId: object._id, data: {targetId: target._id, resourceType: intent.resourceType, amount}});
+    if(target.type == 'lab' && intent.resourceType != 'energy' && !target.storeCapacityResource[resourceType]) {
+        bulk.update(target, {
+            storeCapacityResource: {[resourceType]: C.LAB_MINERAL_CAPACITY},
+            storeCapacity: null
+        });
+    }
+
+    eventLog.push({event: C.EVENT_TRANSFER, objectId: object._id, data: {targetId: target._id, resourceType: resourceType, amount}});
 
 };

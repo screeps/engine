@@ -7,10 +7,7 @@ module.exports = function(object, intent, scope) {
 
     let {roomObjects, bulk, roomController, gameTime} = scope;
 
-    if(object.type != 'tower') {
-        return;
-    }
-    if(object.spawning) {
+    if(!object || object.type != 'tower' || !object.store) {
         return;
     }
 
@@ -24,7 +21,7 @@ module.exports = function(object, intent, scope) {
     if(!target.hits) {
         return;
     }
-    if(object.energy < C.TOWER_ENERGY_COST) {
+    if(object.store.energy < C.TOWER_ENERGY_COST) {
         return;
     }
     var rampart = _.find(roomObjects, {type: 'rampart', x: target.x, y: target.y});
@@ -54,8 +51,8 @@ module.exports = function(object, intent, scope) {
 
     require('../_damage')(object, target, amount, C.EVENT_ATTACK_TYPE_RANGED, scope);
 
-    object.energy -= C.TOWER_ENERGY_COST;
-    bulk.update(object, {energy: object.energy});
+    object.store.energy -= C.TOWER_ENERGY_COST;
+    bulk.update(object, {store:{energy: object.store.energy}});
 
 
     object.actionLog.attack = {x: target.x, y: target.y};

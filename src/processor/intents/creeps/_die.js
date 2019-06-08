@@ -29,9 +29,10 @@ module.exports = function(object, dropRate, violentDeath, {roomObjects, bulk, st
         creepName: object.name,
         creepTicksToLive: object.ageTime - gameTime,
         creepBody: _.map(object.body, b => b.type),
-        creepSaying: object.actionLog && object.actionLog.say && object.actionLog.say.isPublic ? object.actionLog.say.message : undefined
+        creepSaying: object.actionLog && object.actionLog.say && object.actionLog.say.isPublic ? object.actionLog.say.message : undefined,
+        store: {}
     };
-    
+
     let container = _.find(roomObjects, { type: 'container', x: object.x, y: object.y });
 
     if(dropRate > 0 && !object.userSummoned) {
@@ -55,37 +56,36 @@ module.exports = function(object, dropRate, violentDeath, {roomObjects, bulk, st
             amount = Math.floor(amount);
             if(amount > 0) {
                 if(container && container.hits > 0) {
+                    container.store = container.store || {};
                     let targetTotal = utils.calcResources(container);
-                    let toContainerAmount = Math.min(amount, container.energyCapacity - targetTotal);
+                    let toContainerAmount = Math.min(amount, container.storeCapacity - targetTotal);
                     if(toContainerAmount > 0) {
-                        container[resourceType] = container[resourceType] || 0;
-                        container[resourceType] += toContainerAmount;
-                        bulk.update(container, {[resourceType]: container[resourceType]});
+                        container.store[resourceType] = (container.store[resourceType] || 0) + toContainerAmount;
+                        bulk.update(container, {store: {[resourceType]: container.store[resourceType]}});
                         amount -= toContainerAmount;
                     }
                 }
                 if(amount > 0){
-                    tombstone[resourceType] = (tombstone[resourceType] || 0) + amount;
+                    tombstone.store[resourceType] = (tombstone.store[resourceType] || 0) + amount;
                 }
             }
         });
 
-        C.RESOURCES_ALL.forEach(resourceType => {
-            if (object[resourceType] > 0) {
-                let amount = object[resourceType];
+        _.forEach(object.store, (amount, resourceType) => {
+            if(amount > 0) {
                 if(container && container.hits > 0) {
+                    container.store = container.store || {};
                     let targetTotal = utils.calcResources(container);
-                    let toContainerAmount = Math.min(amount, container.energyCapacity - targetTotal);
+                    let toContainerAmount = Math.min(amount, container.storeCapacity - targetTotal);
                     if(toContainerAmount > 0) {
-                        container[resourceType] = container[resourceType] || 0;
-                        container[resourceType] += toContainerAmount;
-                        bulk.update(container, {[resourceType]: container[resourceType]});
+                        container.store[resourceType] = (container.store[resourceType] || 0) + toContainerAmount;
+                        bulk.update(container, {store: {[resourceType]: container.store[resourceType]}});
                         amount -= toContainerAmount;
                     }
                 }
-                if(amount > 0){
-                    tombstone[resourceType] = (tombstone[resourceType] || 0) + amount;
-                }
+            }
+            if(amount > 0){
+                tombstone.store[resourceType] = (tombstone.store[resourceType] || 0) + amount;
             }
         });
     }

@@ -573,10 +573,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     Room.prototype.find = register.wrapFn(function(type, opts) {
         var result = [];
         opts = opts || {};
-        if(type === C.FIND_DROPPED_ENERGY) {
-            register.deprecated('FIND_DROPPED_ENERGY constant is considered deprecated and will be removed soon. Please use FIND_DROPPED_RESOURCES instead.');
-            type = C.FIND_DROPPED_RESOURCES;
-        }
         if(register.findCache[type] && register.findCache[type][this.name]) {
             result = register.findCache[type][this.name];
         }

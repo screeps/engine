@@ -5,10 +5,7 @@ var _ = require('lodash'),
 
 module.exports = function(object, intent, {roomObjects, bulk, eventLog, gameTime}) {
 
-    if(object.type != 'tower') {
-        return;
-    }
-    if(object.spawning) {
+    if(!object || object.type != 'tower' || !object.store) {
         return;
     }
 
@@ -19,7 +16,7 @@ module.exports = function(object, intent, {roomObjects, bulk, eventLog, gameTime
     if(target.spawning) {
         return;
     }
-    if(object.energy < C.TOWER_ENERGY_COST) {
+    if(object.store.energy < C.TOWER_ENERGY_COST) {
         return;
     }
 
@@ -45,8 +42,8 @@ module.exports = function(object, intent, {roomObjects, bulk, eventLog, gameTime
 
     target._healToApply = (target._healToApply || 0) + amount;
 
-    object.energy -= C.TOWER_ENERGY_COST;
-    bulk.update(object, {energy: object.energy});
+    object.store.energy -= C.TOWER_ENERGY_COST;
+    bulk.update(object, {store:{energy: object.store.energy}});
 
     object.actionLog.heal = {x: target.x, y: target.y};
     target.actionLog.healed = {x: object.x, y: object.y};

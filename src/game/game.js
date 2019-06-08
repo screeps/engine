@@ -310,8 +310,8 @@
 
             }
             if (!object.off && (object.type == 'extension' || object.type == 'spawn') && (object.user == runtimeData.user._id)) {
-                register.rooms[object.room].energyAvailable += object.energy;
-                register.rooms[object.room].energyCapacityAvailable += object.energyCapacity;
+                register.rooms[object.room].energyAvailable += object.store.energy;
+                register.rooms[object.room].energyCapacityAvailable += object.storeCapacityResource.energy;
             }
             if (object.type == 'source') {
                 register._objects[i] = new globals.Source(i);

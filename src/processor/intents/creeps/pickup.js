@@ -5,9 +5,10 @@ var _ = require('lodash'),
 
 module.exports = function(object, intent, {roomObjects, bulk}) {
 
+    object.store = object.store || {};
     var carry = utils.calcResources(object);
 
-    if(object.spawning || carry >= object.energyCapacity) {
+    if(object.spawning || carry >= object.storeCapacity) {
         return;
     }
 
@@ -21,11 +22,10 @@ module.exports = function(object, intent, {roomObjects, bulk}) {
 
     var resourceType = target.resourceType || 'energy';
 
-    var amount = Math.min(object.energyCapacity - carry, target[resourceType]);
+    var amount = Math.min(object.storeCapacity - carry, target[resourceType]);
 
     target[resourceType] -= amount;
-    object[resourceType] = object[resourceType] || 0;
-    object[resourceType] += amount;
+    object.store[resourceType] = (object.store[resourceType] || 0) + amount;
 
     if(!target[resourceType]) {
         bulk.remove(target._id);
@@ -35,5 +35,5 @@ module.exports = function(object, intent, {roomObjects, bulk}) {
         bulk.update(target, {[resourceType]: target[resourceType]});
     }
 
-    bulk.update(object, {[resourceType]: object[resourceType]});
+    bulk.update(object, {store:{[resourceType]: object.store[resourceType]}});
 };

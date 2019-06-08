@@ -62,19 +62,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             }
             return o.actionLog.say.isPublic ? o.actionLog.say.message : undefined;
         },
-        carry: (o) => {
-
-            var result = {energy: 0};
-
-            C.RESOURCES_ALL.forEach(resourceType => {
-                if(o[resourceType]) {
-                    result[resourceType] = o[resourceType];
-                }
-            });
-
-            return result;
-        },
-        carryCapacity: (o) => o.energyCapacity,
+        carry: o => _.reduce(o.store, (acc, amount, resource) => { if(amount) {acc[resource]=amount}; return acc; }, {energy: 0}),
+        carryCapacity: o => o.storeCapacity,
         ticksToLive: (o) => o.ageTime - runtimeData.time,
     });
 

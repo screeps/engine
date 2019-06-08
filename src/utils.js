@@ -723,12 +723,6 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                 y: parseInt(objectIntentsResult.build.y)
             };
         }
-        if(objectIntentsResult.transferEnergy) {
-            objectIntents.transferEnergy = {
-                id: ""+objectIntentsResult.transferEnergy.id,
-                amount: parseInt(objectIntentsResult.transferEnergy.amount)
-            };
-        }
         if(objectIntentsResult.drop) {
             objectIntents.drop = {
                 amount: parseInt(objectIntentsResult.drop.amount),
@@ -1117,6 +1111,10 @@ exports.deserializePath = function(path) {
 };
 
 exports.calcResources = function(object) {
+    if(object.store) {
+        return _.sum(object.store);
+    }
+
     return _.sum(C.RESOURCES_ALL, i => typeof object[i] == 'object' ? object[i].amount : (object[i] || 0));
 };
 
@@ -1166,4 +1164,10 @@ exports.calcTotalReactionsTime = function(mineral) {
     const reagents = _.reduce(C.REACTIONS, (a,n,j) => { _.forEach(n, (k,v) => a[k] = [v,j]); return a; }, {});
     const calcStep = m => !!C.REACTION_TIME[m] ? C.REACTION_TIME[m] + calcStep(reagents[m][0]) + calcStep(reagents[m][1]) : 0;
     return calcStep(mineral);
+};
+
+exports.capacityForResource = function(object, resourceType) {
+    return object.storeCapacityResource &&
+        object.storeCapacityResource[resourceType] ||
+        Math.max(0, (object.storeCapacity||0) - _.sum(object.storeCapacityResource));
 };

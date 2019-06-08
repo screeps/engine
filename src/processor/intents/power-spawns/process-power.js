@@ -6,7 +6,7 @@ var _ = require('lodash'),
 
 module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, roomController, stats, gameTime}) {
 
-    if(object.type != 'powerSpawn')
+    if(object.type != 'powerSpawn' || !object.store)
         return;
 
     if(!utils.checkStructureAgainstController(object, roomObjects, roomController)) {
@@ -16,22 +16,22 @@ module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, roomCon
     var amount = 1;
     var effect = _.find(object.effects, {power: C.PWR_OPERATE_POWER});
     if(effect && effect.endTime >= gameTime) {
-        amount = Math.min(object.power, amount + C.POWER_INFO[C.PWR_OPERATE_POWER].effect[effect.level-1]);
+        amount = Math.min(object.store.power, amount + C.POWER_INFO[C.PWR_OPERATE_POWER].effect[effect.level-1]);
     }
 
-    if(object.power < amount || object.energy < amount * C.POWER_SPAWN_ENERGY_RATIO) {
+    if(object.store.power < amount || object.store.energy < amount * C.POWER_SPAWN_ENERGY_RATIO) {
         return;
     }
 
-    object.power -= amount;
-    object.energy -= amount * C.POWER_SPAWN_ENERGY_RATIO;
+    object.store.power -= amount;
+    object.store.energy -= amount * C.POWER_SPAWN_ENERGY_RATIO;
 
     stats.inc('powerProcessed', object.user, amount);
 
-    bulk.update(object, {
-        energy: object.energy,
-        power: object.power
-    });
+    bulk.update(object, { store: {
+        energy: object.store.energy,
+        power: object.store.power
+    }});
 
     if(bulkUsers.inc) {
         bulkUsers.inc(object.user, 'power', amount);

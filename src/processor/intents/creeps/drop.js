@@ -10,14 +10,14 @@ module.exports = function(object, intent, scope) {
     if(!_.contains(C.RESOURCES_ALL, intent.resourceType)) {
         return;
     }
-    if(object.spawning || !(object[intent.resourceType] >= intent.amount) ) {
+    if(object.spawning || !object.store || !(object.store[intent.resourceType] >= intent.amount) ) {
         return;
     }
 
     if(intent.amount > 0) {
-        object[intent.resourceType] -= intent.amount;
+        object.store[intent.resourceType] -= intent.amount;
         require('./_create-energy')(object.x, object.y, object.room, intent.amount, intent.resourceType, scope);
     }
 
-    bulk.update(object, {[intent.resourceType]: object[intent.resourceType]});
+    bulk.update(object, {store:{[intent.resourceType]: object.store[intent.resourceType]}});
 };

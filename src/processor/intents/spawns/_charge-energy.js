@@ -6,7 +6,7 @@ var _ = require('lodash'),
 function oldEnergyHandling(spawn, cost, {roomObjects, bulk}){
     var spawns = _.filter(roomObjects, i => i.type == 'spawn' && i.user == spawn.user && !i.off);
     var extensions = _.filter(roomObjects, i => i.type == 'extension' && i.user == spawn.user && !i.off);
-    var availableEnergy = _.sum(extensions, 'energy') + _.sum(spawns, 'energy');
+    var availableEnergy = _.sum(extensions, 'store.energy') + _.sum(spawns, 'store.energy');
 
     if(availableEnergy < cost) {
         return false;
@@ -14,10 +14,10 @@ function oldEnergyHandling(spawn, cost, {roomObjects, bulk}){
 
     spawns.sort(utils.comparatorDistance(spawn));
     spawns.forEach((i) => {
-        var neededEnergy = Math.min(cost, i.energy);
-        i.energy -= neededEnergy;
+        var neededEnergy = Math.min(cost, i.store.energy);
+        i.store.energy -= neededEnergy;
         cost -= neededEnergy;
-        bulk.update(i, {energy: i.energy});
+        bulk.update(i, {store:{energy: i.store.energy}});
     });
 
     if(cost <= 0) {
@@ -29,10 +29,10 @@ function oldEnergyHandling(spawn, cost, {roomObjects, bulk}){
         if(cost <= 0) {
             return;
         }
-        var neededEnergy = Math.min(cost, extension.energy);
-        extension.energy -= neededEnergy;
+        var neededEnergy = Math.min(cost, extension.store.energy);
+        extension.store.energy -= neededEnergy;
         cost -= neededEnergy;
-        bulk.update(extension, {energy: extension.energy});
+        bulk.update(extension, {store:{energy: extension.store.energy}});
     });
 
     return true;
@@ -48,7 +48,7 @@ function newEnergyHandling(spawn, cost, energyStructures, {roomObjects, bulk}){
 
     energyStructures = _.uniq(energyStructures);
 
-    let availableEnergy = _.sum(energyStructures, id => roomObjects[id].energy);
+    let availableEnergy = _.sum(energyStructures, id => roomObjects[id].store.energy);
     if(availableEnergy < cost) {
         return false;
     }
@@ -56,9 +56,9 @@ function newEnergyHandling(spawn, cost, energyStructures, {roomObjects, bulk}){
     _.forEach(energyStructures, id => {
         let energyStructure = roomObjects[id];
 
-        let energyChange = Math.min(cost, energyStructure.energy);
-        energyStructure.energy -= energyChange;
-        bulk.update(energyStructure, {energy: energyStructure.energy});
+        let energyChange = Math.min(cost, energyStructure.store.energy);
+        energyStructure.store.energy -= energyChange;
+        bulk.update(energyStructure, {store:{energy: energyStructure.store.energy}});
 
         cost -= energyChange;
         if(cost <= 0) {

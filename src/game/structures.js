@@ -14,91 +14,7 @@ function data(id) {
 }
 
 function _storeGetter(o) {
-    var result = {energy: 0};
-
-    C.RESOURCES_ALL.forEach(resourceType => {
-        if (o[resourceType]) {
-            result[resourceType] = o[resourceType];
-        }
-    });
-
-    return result;
-}
-
-function _transfer(target, resourceType, amount) {
-
-    register.deprecated('`Structure*.transfer` is considered deprecated and will be removed soon. Please use `Creep.withdraw` instead.');
-
-    if (!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning) {
-        register.assertTargetObject(target);
-        return C.ERR_INVALID_TARGET;
-    }
-    if (!target.my) {
-        return C.ERR_NOT_OWNER;
-    }
-    if(this.my === false && _.any(this.pos.lookFor('structure'), i => i.structureType == C.STRUCTURE_RAMPART)) {
-        return C.ERR_NOT_OWNER;
-    }
-    if(this.room.controller && !this.room.controller.my && this.room.controller.safeMode) {
-        return C.ERR_NOT_OWNER;
-    }
-    if (!data(this.id)[resourceType]) {
-        return C.ERR_NOT_ENOUGH_ENERGY;
-    }
-    if (!amount) {
-        amount = Math.min(data(this.id)[resourceType], data(target.id).energyCapacity - utils.calcResources(data(target.id)));
-    }
-    if (data(this.id)[resourceType] < amount || amount < 0) {
-        return C.ERR_NOT_ENOUGH_ENERGY;
-    }
-    if (data(target.id).energyCapacity && (!amount || utils.calcResources(data(target.id)) + amount > data(target.id).energyCapacity)) {
-        return C.ERR_FULL;
-    }
-    if (!target.pos.isNearTo(this.pos)) {
-        return C.ERR_NOT_IN_RANGE;
-    }
-
-    intents.set(data(this.id)._id, 'transfer', {id: target.id, amount, resourceType});
-    return C.OK;
-}
-
-function _transferEnergy(target, amount) {
-
-    register.deprecated('`Structure*.transferEnergy` is considered deprecated and will be removed soon. Please use `Creep.withdraw` instead.');
-
-    if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning) {
-        register.assertTargetObject(target);
-        return C.ERR_INVALID_TARGET;
-    }
-    if(!target.my) {
-        return C.ERR_NOT_OWNER;
-    }
-    if(this.my === false && _.any(this.pos.lookFor('structure'), i => i.structureType == C.STRUCTURE_RAMPART)) {
-        return C.ERR_NOT_OWNER;
-    }
-    if(!data(this.id).energy) {
-        return C.ERR_NOT_ENOUGH_ENERGY;
-    }
-    if(!amount) {
-        if(data(target.id).energyCapacity) {
-            amount = Math.min(data(this.id).energy, data(target.id).energyCapacity - utils.calcResources(data(target.id)));
-        }
-        else {
-            amount = data(this.id).energy;
-        }
-    }
-    if(this.energy < amount || amount < 0) {
-        return C.ERR_NOT_ENOUGH_ENERGY;
-    }
-    if(data(target.id).energyCapacity && (!amount || utils.calcResources(data(target.id)) + amount > data(target.id).energyCapacity)) {
-        return C.ERR_FULL;
-    }
-    if(!target.pos.isNearTo(this.pos)) {
-        return C.ERR_NOT_IN_RANGE;
-    }
-
-    intents.set(this.id, 'transfer', {id: target.id, amount, resourceType: 'energy'});
-    return C.OK;
+    return _.reduce(o.store, (acc, amount, resource) => { if(amount) {acc[resource]=amount}; return acc; }, {energy: 0});
 }
 
 exports.make = function(_runtimeData, _intents, _register, _globals) {
@@ -234,11 +150,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     utils.defineGameObjectProperties(StructureContainer.prototype, data, {
         store: _storeGetter,
-        storeCapacity: (o) => o.energyCapacity,
+        storeCapacity: o => o.storeCapacity,
         ticksToDecay: (o) => o.nextDecayTime ? o.nextDecayTime - runtimeData.time : o.decayTime ? o.decayTime - runtimeData.time : undefined,
     });
-
-    StructureContainer.prototype.transfer = register.wrapFn(_transfer);
 
     Object.defineProperty(globals, 'StructureContainer', {enumerable: true, value: StructureContainer});
 
@@ -329,11 +243,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     StructureExtension.prototype.constructor = StructureExtension;
 
     utils.defineGameObjectProperties(StructureExtension.prototype, data, {
-        energy: (o) => o.energy,
-        energyCapacity: (o) => o.energyCapacity
+        energy: o => o.store ? o.store.energy : 0,
+        energyCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.energy || 0 : 0
     });
-
-    StructureExtension.prototype.transferEnergy = register.wrapFn(_transferEnergy);
 
     Object.defineProperty(globals, 'StructureExtension', {enumerable: true, value: StructureExtension});
 
@@ -384,49 +296,16 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     StructureLab.prototype = Object.create(OwnedStructure.prototype);
     StructureLab.prototype.constructor = StructureLab;
 
+    const labMineralAmountGetter = o => _.sum(o.store) - (o.store.energy||0);
+    const labMineralTypeGetter = o => _(o.store).keys().filter(k => k != C.RESOURCE_ENERGY && o.store[k]).first();
+
     utils.defineGameObjectProperties(StructureLab.prototype, data, {
-        energy: (o) => o.energy,
-        energyCapacity: (o) => o.energyCapacity,
+        energy: o => o.store ? o.store.energy : 0,
+        energyCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.energy : 0,
         cooldown: o => o.cooldownTime && o.cooldownTime > runtimeData.time ? o.cooldownTime - runtimeData.time : 0,
-        mineralAmount: (o) => o.mineralAmount,
-        mineralCapacity: (o) => o.mineralCapacity,
-        mineralType: (o) => o.mineralType
-    });
-
-    StructureLab.prototype.transfer = register.wrapFn(function(target, resourceType, amount) {
-
-        if (!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning) {
-            register.assertTargetObject(target);
-            return C.ERR_INVALID_TARGET;
-        }
-        if (!target.my) {
-            return C.ERR_NOT_OWNER;
-        }
-        if(this.my === false && _.any(this.pos.lookFor('structure'), i => i.structureType == C.STRUCTURE_RAMPART)) {
-            return C.ERR_NOT_OWNER;
-        }
-        if(resourceType != C.RESOURCE_ENERGY && data(this.id).mineralType != resourceType) {
-            return C.ERR_INVALID_ARGS;
-        }
-        var currentAmount = resourceType == C.RESOURCE_ENERGY ? data(this.id).energy : data(this.id).mineralAmount;
-        if (!currentAmount) {
-            return C.ERR_NOT_ENOUGH_RESOURCES;
-        }
-        if (!amount) {
-            amount = Math.min(currentAmount, data(target.id).energyCapacity - utils.calcResources(data(target.id)));
-        }
-        if (currentAmount < amount || amount < 0) {
-            return C.ERR_NOT_ENOUGH_ENERGY;
-        }
-        if (data(target.id).energyCapacity && (!amount || utils.calcResources(data(target.id)) + amount > data(target.id).energyCapacity)) {
-            return C.ERR_FULL;
-        }
-        if (!target.pos.isNearTo(this.pos)) {
-            return C.ERR_NOT_IN_RANGE;
-        }
-
-        intents.set(data(this.id)._id, 'transfer', {id: target.id, amount, resourceType});
-        return C.OK;
+        mineralAmount: labMineralAmountGetter,
+        mineralCapacity: o => C.LAB_MINERAL_CAPACITY,
+        mineralType: labMineralTypeGetter
     });
 
     StructureLab.prototype.runReaction = register.wrapFn(function(lab1, lab2) {
@@ -444,7 +323,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             register.assertTargetObject(lab1);
             return C.ERR_INVALID_TARGET;
         }
-        if(!lab2 || !lab1.id || !register.structures[lab2.id] ||
+        if(!lab2 || !lab2.id || !register.structures[lab2.id] ||
         !(lab2 instanceof globals.Structure) || lab2.structureType != C.STRUCTURE_LAB || lab2.id == this.id) {
             register.assertTargetObject(lab2);
             return C.ERR_INVALID_TARGET;
@@ -486,14 +365,14 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.pos.isNearTo(target)) {
             return C.ERR_NOT_IN_RANGE;
         }
-        if(data(this.id).energy < C.LAB_BOOST_ENERGY) {
+        if(data(this.id).store.energy < C.LAB_BOOST_ENERGY) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
-        if(data(this.id).mineralAmount < C.LAB_BOOST_MINERAL) {
+        if(labMineralAmountGetter(data(this.id)) < C.LAB_BOOST_MINERAL) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
         bodyPartsCount = bodyPartsCount || 0;
-        var nonBoostedParts = _(target.body).filter(i => !i.boost && C.BOOSTS[i.type] && C.BOOSTS[i.type][data(this.id).mineralType]).size();
+        var nonBoostedParts = _(target.body).filter(i => !i.boost && C.BOOSTS[i.type] && C.BOOSTS[i.type][labMineralTypeGetter(data(this.id))]).size();
 
         if(!nonBoostedParts || bodyPartsCount && bodyPartsCount > nonBoostedParts) {
             return C.ERR_NOT_FOUND;
@@ -542,8 +421,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     StructureLink.prototype.constructor = StructureLink;
 
     utils.defineGameObjectProperties(StructureLink.prototype, data, {
-        energy: (o) => o.energy,
-        energyCapacity: (o) => o.energyCapacity,
+        energy: o => o.store ? o.store.energy : 0,
+        energyCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.energy || 0 : 0,
         cooldown: (o) => o.cooldown || 0,
     });
 
@@ -552,9 +431,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if (amount < 0) {
             return C.ERR_INVALID_ARGS;
         }
-        if (!target || !target.id || !register.structures[target.id] && !register.creeps[target.id] ||
-            !(target instanceof globals.Structure) && !((target instanceof globals.Creep) && target.spawning) ||
-            target === this) {
+        if (!target || !target.id || !register.structures[target.id] || !(target instanceof globals.Structure) || target === this || target.structureType != C.STRUCTURE_LINK) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
@@ -564,51 +441,32 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.my === false && _.any(this.pos.lookFor('structure'), i => i.structureType == C.STRUCTURE_RAMPART)) {
             return C.ERR_NOT_OWNER;
         }
-        if (target instanceof globals.Structure) {
-            if(target.structureType != C.STRUCTURE_LINK) {
-                register.assertTargetObject(target);
-                return C.ERR_INVALID_TARGET;
-            }
-            if(this.cooldown > 0) {
-                return C.ERR_TIRED;
-            }
-            if(!this.room.controller) {
-                return C.ERR_RCL_NOT_ENOUGH;
-            }
-            if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
-                return C.ERR_RCL_NOT_ENOUGH;
-            }
-        }
-        if (target instanceof globals.Creep) {
 
-            register.deprecated('`StructureLink.transferEnergy` applied to creeps is considered deprecated and will be ' +
-                'removed soon. Please use `Creep.withdraw` instead.');
-
-            if (!this.pos.isNearTo(target)) {
-                return C.ERR_NOT_IN_RANGE;
-            }
+        if(this.cooldown > 0) {
+            return C.ERR_TIRED;
         }
-        if (!data(this.id).energy) {
+        if(!this.room.controller) {
+            return C.ERR_RCL_NOT_ENOUGH;
+        }
+        if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
+            return C.ERR_RCL_NOT_ENOUGH;
+        }
+
+        if (!data(this.id).store || !data(this.id).store.energy) {
             return C.ERR_NOT_ENOUGH_ENERGY;
         }
         if (!amount) {
-            if (data(target.id).energyCapacity) {
-                amount = Math.min(data(this.id).energy, data(target.id).energyCapacity - data(target.id).energy);
-            }
-            else {
-                amount = data(this.id).energy;
-            }
+            amount = Math.min(data(this.id).store.energy, data(target.id).storeCapacityResource ? data(target.id).storeCapacityResource.energy - data(target.id).store.energy : 0);
         }
         if (this.energy < amount) {
             return C.ERR_NOT_ENOUGH_ENERGY;
         }
-        if (data(target.id).energyCapacity && (!amount || data(target.id).energy + amount > data(target.id).energyCapacity)) {
+        if (!data(target.id).storeCapacityResource || !data(target.id).storeCapacityResource.energy || data(target.id).store.energy + amount > data(target.id).storeCapacityResource.energy) {
             return C.ERR_FULL;
         }
         if (target.pos.roomName != this.pos.roomName) {
             return C.ERR_NOT_IN_RANGE;
         }
-
 
         intents.set(this.id, 'transfer', {id: target.id, amount, resourceType: 'energy'});
         return C.OK;
@@ -686,13 +544,11 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     StructurePowerSpawn.prototype.constructor = StructurePowerSpawn;
 
     utils.defineGameObjectProperties(StructurePowerSpawn.prototype, data, {
-        energy: (o) => o.energy,
-        energyCapacity: (o) => o.energyCapacity,
-        power: (o) => o.power,
-        powerCapacity: (o) => o.powerCapacity
+        energy: o => o.store ? o.store.energy : 0,
+        energyCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.energy : 0,
+        power: o => o.store ? o.store.power : 0,
+        powerCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.power : 0
     });
-
-    StructurePowerSpawn.prototype.transferEnergy = register.wrapFn(_transferEnergy);
 
     StructurePowerSpawn.prototype.processPower = register.wrapFn(function() {
         if(!this.my) {
@@ -773,10 +629,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     utils.defineGameObjectProperties(StructureStorage.prototype, data, {
         store: _storeGetter,
-        storeCapacity: (o) => o.energyCapacity
+        storeCapacity: o => o.storeCapacity
     });
-
-    StructureStorage.prototype.transfer = register.wrapFn(_transfer);
 
     Object.defineProperty(globals, 'StructureStorage', {enumerable: true, value: StructureStorage});
 
@@ -793,11 +647,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     utils.defineGameObjectProperties(StructureTerminal.prototype, data, {
         store: _storeGetter,
-        storeCapacity: (o) => o.energyCapacity,
+        storeCapacity: o => o.storeCapacity,
         cooldown: o => o.cooldownTime && o.cooldownTime > runtimeData.time ? o.cooldownTime - runtimeData.time : 0
     });
-
-    StructureTerminal.prototype.transfer = register.wrapFn(_transfer);
 
     StructureTerminal.prototype.send = register.wrapFn(function(resourceType, amount, targetRoomName, description) {
         if(!this.my) {
@@ -812,7 +664,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!_.contains(C.RESOURCES_ALL, resourceType)) {
             return C.ERR_INVALID_ARGS;
         }
-        if(!data(this.id)[resourceType] || data(this.id)[resourceType] < amount) {
+        if(!data(this.id).store || !data(this.id).store[resourceType] || data(this.id).store[resourceType] < amount) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
         if(data(this.id).cooldownTime > runtimeData.time) {
@@ -820,8 +672,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
         var range = utils.calcRoomsDistance(data(this.id).room, targetRoomName, true);
         var cost = utils.calcTerminalEnergyCost(amount,range);
-        if(resourceType != C.RESOURCE_ENERGY && data(this.id).energy < cost ||
-        resourceType == C.RESOURCE_ENERGY && data(this.id).energy < amount + cost) {
+        if(resourceType != C.RESOURCE_ENERGY && data(this.id).store.energy < cost ||
+        resourceType == C.RESOURCE_ENERGY && data(this.id).store.energy < amount + cost) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
         if(description && (!_.isString(description) || description.length > 100)) {
@@ -846,11 +698,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     StructureTower.prototype.constructor = StructureTower;
 
     utils.defineGameObjectProperties(StructureTower.prototype, data, {
-        energy: (o) => o.energy,
-        energyCapacity: (o) => o.energyCapacity,
+        energy: o => o.store ? o.store.energy : 0,
+        energyCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.energy || 0 : 0,
     });
-
-    StructureTower.prototype.transferEnergy = register.wrapFn(_transferEnergy);
 
     StructureTower.prototype.attack = register.wrapFn(function(target) {
         if(!this.my) {
@@ -861,7 +711,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
-        if(data(this.id).energy < C.TOWER_ENERGY_COST) {
+        if(!data(this.id).store || (data(this.id).store.energy < C.TOWER_ENERGY_COST)) {
             return C.ERR_NOT_ENOUGH_ENERGY;
         }
         if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
@@ -881,7 +731,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
-        if(data(this.id).energy < C.TOWER_ENERGY_COST) {
+        if(!data(this.id).store || (data(this.id).store.energy < C.TOWER_ENERGY_COST)) {
             return C.ERR_NOT_ENOUGH_ENERGY;
         }
         if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
@@ -901,7 +751,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
-        if(data(this.id).energy < C.TOWER_ENERGY_COST) {
+        if(!data(this.id).store || (data(this.id).store.energy < C.TOWER_ENERGY_COST)) {
             return C.ERR_NOT_ENOUGH_ENERGY;
         }
         if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
@@ -945,8 +795,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     utils.defineGameObjectProperties(StructureSpawn.prototype, data, {
         name: (o) => o.name,
-        energy: (o) => o.energy,
-        energyCapacity: (o) => o.energyCapacity,
+        energy: o => o.store ? o.store.energy : 0,
+        energyCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.energy || 0 : 0,
         spawning: (o, id) => o.spawning ? new StructureSpawn.Spawning(id) : null
     });
 
@@ -1128,8 +978,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     function calcEnergyAvailable(roomObjects, energyStructures){
         return _.sum(energyStructures, id => {
-            if (roomObjects[id] && !roomObjects[id].off && (roomObjects[id].type === 'spawn' || roomObjects[id].type === 'extension')) {
-                return roomObjects[id].energy;
+            if (roomObjects[id] && !roomObjects[id].off && (roomObjects[id].type === 'spawn' || roomObjects[id].type === 'extension') && roomObjects[id].store) {
+                return roomObjects[id].store.energy;
             } else {
                 return 0;
             }
@@ -1283,46 +1133,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    StructureSpawn.prototype.transferEnergy = register.wrapFn(function(target, amount) {
-
-        register.deprecated('`StructureSpawn.transferEnergy` is considered deprecated and will be removed soon. Please use `Creep.withdraw` instead.')
-        if(!this.my) {
-            return C.ERR_NOT_OWNER;
-        }
-        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning) {
-            register.assertTargetObject(target);
-            return C.ERR_INVALID_TARGET;
-        }
-        if(runtimeData.roomObjects[this.id].off) {
-            return C.ERR_RCL_NOT_ENOUGH;
-        }
-        if(!data(this.id).energy) {
-            return C.ERR_NOT_ENOUGH_ENERGY;
-        }
-        if(!amount) {
-            if(data(target.id).energyCapacity) {
-                amount = Math.min(data(this.id).energy, data(target.id).energyCapacity - data(target.id).energy);
-            }
-            else {
-                amount = data(this.id).energy;
-            }
-        }
-        if(this.energy < amount || amount < 0) {
-            return C.ERR_NOT_ENOUGH_ENERGY;
-        }
-        if(data(target.id).energy == data(target.id).energyCapacity) {
-            return C.ERR_FULL;
-        }
-        if(!target.pos.isNearTo(this.pos)) {
-            return C.ERR_NOT_IN_RANGE;
-        }
-
-
-
-        intents.set(this.id, 'transferEnergy', {id: target.id, amount});
-        return C.OK;
-    });
-
     StructureSpawn.prototype.notifyWhenAttacked = register.wrapFn(function(enabled) {
 
         if(!this.my) {
@@ -1451,11 +1261,11 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     StructureNuker.prototype.constructor = StructureNuker;
 
     utils.defineGameObjectProperties(StructureNuker.prototype, data, {
-        energy: o => o.energy,
-        energyCapacity: o => o.energyCapacity,
-        ghodium: o => o.G,
-        ghodiumCapacity: o => o.GCapacity,
-        cooldown: (o) => o.cooldownTime && o.cooldownTime > runtimeData.time ? o.cooldownTime - runtimeData.time : 0
+        energy: o => o.store ? o.store.energy : 0,
+        energyCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.energy : 0,
+        ghodium: o => o.store ? o.store.G : 0,
+        ghodiumCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.G : 0,
+        cooldown: o => o.cooldownTime && o.cooldownTime > runtimeData.time ? o.cooldownTime - runtimeData.time : 0
     });
 
     StructureNuker.prototype.launchNuke = register.wrapFn(function(pos) {
@@ -1480,7 +1290,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(Math.abs(tx-x) > C.NUKE_RANGE || Math.abs(ty-y) > C.NUKE_RANGE) {
             return C.ERR_NOT_IN_RANGE;
         }
-        if(this.energy < this.energyCapacity || this.ghodium < this.ghodiumCapacity) {
+        if(!this.energy < this.energyCapacity || this.ghodium < this.ghodiumCapacity) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
 
@@ -1528,7 +1338,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     utils.defineGameObjectProperties(StructureFactory.prototype, data, {
         level: o => o.level,
         store: _storeGetter,
-        storeCapacity: o => o.energyCapacity,
+        storeCapacity: o => o.storeCapacity,
         cooldown: o => o.cooldownTime && o.cooldownTime > runtimeData.time ? o.cooldownTime - runtimeData.time : 0
     });
 
@@ -1558,11 +1368,11 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_BUSY;
         }
 
-        if(_.some(_.keys(C.COMMODITIES[resourceType].components), p => (rawFactory[p]||0)<C.COMMODITIES[resourceType].components[p])) {
+        if(_.some(_.keys(C.COMMODITIES[resourceType].components), p => (rawFactory.store[p]||0)<C.COMMODITIES[resourceType].components[p])) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
 
-        if (!rawFactory.energyCapacity || (utils.calcResources(rawFactory) - utils.calcResources(C.COMMODITIES[resourceType].components) + (C.COMMODITIES[resourceType].amount||1) > rawFactory.energyCapacity)) {
+        if (!rawFactory.storeCapacity || (utils.calcResources(rawFactory) - utils.calcResources(C.COMMODITIES[resourceType].components) + (C.COMMODITIES[resourceType].amount||1) > rawFactory.storeCapacity)) {
             return C.ERR_FULL;
         }
 
