@@ -302,6 +302,8 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
         var resultPromises = [];
         var userVisibility = {};
 
+        let ownedTypes = ['extension','spawn','link','storage','tower','observer','powerSpawn','extractor','terminal','lab','nuker']
+        let ownedObjects = {}
         _.forEach(roomObjects, (object) => {
 
             if(!object || object._skip) {
@@ -400,6 +402,10 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 }
             }
 
+            if(ownedTypes.includes(object.type)) {
+                (ownedObjects[object.type] = ownedObjects[object.type] || []).push(object)
+            }
+
             if (object.user) {
                 //userVisibility[object.user] = true;
 
@@ -440,6 +446,11 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 mapView.pb.push([object.x, object.y]);
             }
         });
+
+
+        if(scope.roomController) {
+            require('./processor/intents/_check_active_structures')(ownedObjects, scope);
+        }
 
         /*for(var user in userVisibility) {
             resultPromises.push(core.setUserRoomVisibility(user, roomId));

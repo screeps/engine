@@ -14,7 +14,7 @@ module.exports = function(object, intent, scope) {
     if(!target || target.type != 'creep' || target.user != object.user) {
         return;
     }
-    if(!utils.checkStructureAgainstController(object, roomObjects, roomController)) {
+    if(object.off) {
         return;
     }
     if(Math.abs(target.x - object.x) > 1 || Math.abs(target.y - object.y) > 1) {
