@@ -1604,9 +1604,8 @@ exports.makePos = function(_register) {
                 ticksRemaining: i.endTime - runtimeData.time
             })).filter(i => i.ticksRemaining > 0).value();
         }
-
-        if (Array.isArray(this.effects) && this.effects.length === 0) {
-            this.effects = undefined;
+        else {
+            this.effects = []
         }
     });
 
