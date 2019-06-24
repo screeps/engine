@@ -244,7 +244,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     utils.defineGameObjectProperties(StructureExtension.prototype, data, {
         energy: o => o.store ? o.store.energy : 0,
-        energyCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.energy || 0 : 0
+        energyCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.energy || 0 : 0,
+        store: _storeGetter
     });
 
     Object.defineProperty(globals, 'StructureExtension', {enumerable: true, value: StructureExtension});
@@ -305,7 +306,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         cooldown: o => o.cooldownTime && o.cooldownTime > runtimeData.time ? o.cooldownTime - runtimeData.time : 0,
         mineralAmount: labMineralAmountGetter,
         mineralCapacity: o => C.LAB_MINERAL_CAPACITY,
-        mineralType: labMineralTypeGetter
+        mineralType: labMineralTypeGetter,
+        store: _storeGetter
     });
 
     StructureLab.prototype.runReaction = register.wrapFn(function(lab1, lab2) {
@@ -424,6 +426,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         energy: o => o.store ? o.store.energy : 0,
         energyCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.energy || 0 : 0,
         cooldown: (o) => o.cooldown || 0,
+        store: _storeGetter
     });
 
     StructureLink.prototype.transferEnergy = register.wrapFn(function(target, amount) {
@@ -547,7 +550,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         energy: o => o.store ? o.store.energy : 0,
         energyCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.energy : 0,
         power: o => o.store ? o.store.power : 0,
-        powerCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.power : 0
+        powerCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.power : 0,
+        store: _storeGetter
     });
 
     StructurePowerSpawn.prototype.processPower = register.wrapFn(function() {
@@ -700,6 +704,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     utils.defineGameObjectProperties(StructureTower.prototype, data, {
         energy: o => o.store ? o.store.energy : 0,
         energyCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.energy || 0 : 0,
+        store: _storeGetter
     });
 
     StructureTower.prototype.attack = register.wrapFn(function(target) {
@@ -1266,7 +1271,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         energyCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.energy : 0,
         ghodium: o => o.store ? o.store.G : 0,
         ghodiumCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.G : 0,
-        cooldown: o => o.cooldownTime && o.cooldownTime > runtimeData.time ? o.cooldownTime - runtimeData.time : 0
+        cooldown: o => o.cooldownTime && o.cooldownTime > runtimeData.time ? o.cooldownTime - runtimeData.time : 0,
+        store: _storeGetter
     });
 
     StructureNuker.prototype.launchNuke = register.wrapFn(function(pos) {
