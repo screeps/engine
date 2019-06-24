@@ -16,6 +16,10 @@ function data(id) {
     return Object.assign({}, runtimeData.userPowerCreeps[id], runtimeData.roomObjects[id]);
 }
 
+function _storeGetter(o) {
+    return new globals.Store(o);
+}
+
 exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     runtimeData = _runtimeData;
@@ -62,7 +66,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             }
             return o.actionLog.say.isPublic ? o.actionLog.say.message : undefined;
         },
-        carry: o => _.reduce(o.store, (acc, amount, resource) => { if(amount) {acc[resource]=amount}; return acc; }, {energy: 0}),
+        carry: _storeGetter,
+        store: _storeGetter,
         carryCapacity: o => o.storeCapacity,
         ticksToLive: (o) => o.ageTime - runtimeData.time,
     });

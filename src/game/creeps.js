@@ -30,6 +30,10 @@ function _hasActiveBodypart(body, type) {
     return false;
 }
 
+function _storeGetter(o) {
+    return new globals.Store(o);
+}
+
 exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     runtimeData = _runtimeData;
@@ -72,7 +76,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         spawning: (o) => o.spawning,
         ticksToLive: (o) => o.ageTime ? o.ageTime - runtimeData.time : undefined,
         carryCapacity: o => o.storeCapacity,
-        carry: o => _.reduce(o.store, (acc, amount, resource) => { if(amount) {acc[resource]=amount}; return acc; }, {energy: 0}),
+        carry: _storeGetter,
+        store: _storeGetter,
         fatigue: (o) => o.fatigue,
         hits: (o) => o.hits,
         hitsMax: (o) => o.hitsMax,

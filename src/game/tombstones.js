@@ -5,6 +5,13 @@ var utils = require('./../utils'),
 
 var runtimeData, intents, register, globals;
 
+function _storeGetter(o) {
+    if(!o) {
+        o = {store: {}, storeCapacity: this.carryCapacity};
+    }
+    return new globals.Store(o);
+}
+
 exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     runtimeData = _runtimeData;
@@ -33,7 +40,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     Tombstone.prototype.constructor = Tombstone;
     utils.defineGameObjectProperties(Tombstone.prototype, data, {
         deathTime: (o) => o.deathTime,
-        store: o => _.reduce(o.store, (acc, amount, resource) => { if(amount) {acc[resource]=amount}; return acc; }, {energy: 0}),
+        store: _storeGetter,
         ticksToDecay: (o) => o.decayTime - runtimeData.time,
         creep: (o) => {
             if(o.creepId) {
@@ -93,9 +100,11 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                     },
                     carry: {
                         enumerable: true,
-                        get() {
-                            return {energy: 0};
-                        }
+                        get: _storeGetter
+                    },
+                    store: {
+                        enumerable: true,
+                        get: _storeGetter
                     },
                     fatigue: {
                         enumerable: true,
@@ -188,9 +197,11 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                     },
                     carry: {
                         enumerable: true,
-                        get() {
-                            return {energy: 0};
-                        }
+                        get: _storeGetter
+                    },
+                    store: {
+                        enumerable: true,
+                        get: _storeGetter
                     },
                     hits: {
                         enumerable: true,

@@ -202,6 +202,7 @@
         require('./construction-sites').make(runtimeData, intents, register, globals);
         require('./path-finder').make(runtimeData, intents, register, globals);
         require('./power-creeps').make(runtimeData, intents, register, globals);
+        require('./store').make(runtimeData, intents, register, globals);
 
         for (var i in runtimeData.rooms) {
             register.rooms[i] = new globals.Room(i);

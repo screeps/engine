@@ -14,7 +14,7 @@ function data(id) {
 }
 
 function _storeGetter(o) {
-    return _.reduce(o.store, (acc, amount, resource) => { if(amount) {acc[resource]=amount}; return acc; }, {energy: 0});
+    return new globals.Store(o);
 }
 
 exports.make = function(_runtimeData, _intents, _register, _globals) {
@@ -797,7 +797,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         name: (o) => o.name,
         energy: o => o.store ? o.store.energy : 0,
         energyCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.energy || 0 : 0,
-        spawning: (o, id) => o.spawning ? new StructureSpawn.Spawning(id) : null
+        spawning: (o, id) => o.spawning ? new StructureSpawn.Spawning(id) : null,
+        store: _storeGetter
     });
 
     Object.defineProperty(StructureSpawn.prototype, 'memory', {

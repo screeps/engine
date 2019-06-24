@@ -1013,19 +1013,28 @@ exports.checkStructureAgainstController = function(object, roomObjects, roomCont
     return true;
 };
 
-exports.defineGameObjectProperties = function(obj, dataFn, properties) {
+exports.defineGameObjectProperties = function(obj, dataFn, properties, opts) {
     var propertiesInfo = {};
+    opts = opts || {};
+    if(opts.enumerable === undefined) {
+        opts.enumerable = true;
+    }
 
     for(var name in properties) {
         eval(`
             propertiesInfo['${name}'] = {
-                enumerable: true,
+                configurable: !!opts.configurable,
+                enumerable: !!opts.enumerable,
                 get() {
                     if(!this['_${name}']) {
                         this['_${name}'] = properties['${name}'](dataFn(this.id), this.id);
                     }
                     return this['_${name}'];
-                }
+                },
+                set: opts.canSet ? function(value) {
+                    this['_${name}'] = value;
+                } : undefined
+                
             }`);
     }
     Object.defineProperties(obj, propertiesInfo);
