@@ -497,6 +497,36 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                 return;
             }
 
+            if(order.user && (nowTimestamp - order.createdTimestamp > C.MARKET_ORDER_LIFE_TIME)) {
+                const remainingFee = order.remainingAmount * order.price * C.MARKET_FEE;
+                console.log(`${order.id} remaining fee: ${remainingFee}`);
+                if(remainingFee > 0) {
+                    const user = usersById[order.user];
+                    bulkUsers.inc(user, 'money', remainingFee);
+                    bulkUsersMoney.insert({
+                        date: new Date(),
+                        tick: gameTime,
+                        user: user._id.toString(),
+                        type: 'market.fee',
+                        balance: user.money / 1000,
+                        change: remainingFee / 1000,
+                        market: {
+                            order: {
+                                orderId: order._id.toString(),
+                                type: order.type,
+                                resourceType: order.resourceType,
+                                price: order.price / 1000,
+                                remainingAmount: order.remainingAmount,
+                                roomName: order.roomName
+                            }
+                        }
+                    });
+                }
+
+                bulk.remove(order._id);
+                return;
+            }
+
             if (!order.user) {
                 return;
             }
