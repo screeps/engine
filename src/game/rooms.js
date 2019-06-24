@@ -988,9 +988,10 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
         createdFlagNames.push(name);
 
-        globals.Game.flags[name] = new globals.Flag(name, color, secondaryColor, this.name, x, y);
+        const roomName = ""+this.name;
+        globals.Game.flags[name] = new globals.Flag(name, color, secondaryColor, roomName, x, y);
 
-        intents.pushByName('room', 'createFlag', {roomName: this.name, x, y, name, color, secondaryColor});
+        intents.pushByName('room', 'createFlag', {roomName, x, y, name, color, secondaryColor});
 
         return name;
     });
@@ -1018,11 +1019,12 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.controller && this.controller.level > 0 && !this.controller.my) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
+        const roomName = ""+this.name;
         if(!utils.checkControllerAvailability(structureType, register.objectsByRoom[this.name], this.controller)) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
-        if(!utils.checkConstructionSite(register.objectsByRoom[this.name], structureType, x, y) ||
-            !utils.checkConstructionSite(runtimeData.staticTerrainData[this.name], structureType, x, y)) {
+        if(!utils.checkConstructionSite(register.objectsByRoom[roomName], structureType, x, y) ||
+            !utils.checkConstructionSite(runtimeData.staticTerrainData[roomName], structureType, x, y)) {
             return C.ERR_INVALID_TARGET;
         }
 
@@ -1030,7 +1032,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_FULL;
         }
 
-        var intent = {roomName: this.name, x, y, structureType};
+        var intent = {roomName, x, y, structureType};
 
         if(structureType == 'spawn') {
             if(typeof name !== 'string') {
