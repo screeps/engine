@@ -7,7 +7,7 @@ var _ = require('lodash'),
 
 exports.make = function(runtimeData, intents, register) {
 
-    var ordersCreatedDuringTick = 0, cachedOrders = {},
+    var ordersCreatedDuringTick = 0, cachedOrders = {}, cachedHistory = {},
         _incomingTransactions, _outgoingTransactions, _orders;
 
     function _getOrders(resourceType) {
@@ -36,6 +36,20 @@ exports.make = function(runtimeData, intents, register) {
         getAllOrders: register.wrapFn(function(filter) {
             var orders = _getOrders(filter && filter.resourceType);
             return _.filter(orders, filter);
+        }),
+
+        getHistory: register.wrapFn(function(resourceType) {
+            if(!resourceType) {
+                resourceType = 'all';
+            }
+
+            if(!cachedHistory[resourceType]) {
+                if(resourceType != 'all' && !_.contains(C.RESOURCES_ALL, resourceType) && !_.contains(C.INTERSHARD_RESOURCES, resourceType)) {
+                    return {};
+                }
+                cachedHistory[resourceType] = JSON.parse(JSON.stringify(runtimeData.market.history[resourceType] || {}));
+                return cachedHistory[resourceType];
+            }
         }),
 
         getOrderById: register.wrapFn(function(id) {
