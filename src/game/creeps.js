@@ -581,6 +581,13 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_INVALID_TARGET;
         }
 
+        if(target.structureType == 'terminal') {
+            var effect = _.find(target.effects, {power: C.PWR_DISRUPT_TERMINAL});
+            if(effect && effect.ticksRemaining > 0) {
+                return C.ERR_INVALID_TARGET;
+            }
+        }
+
         if(target.my === false && _.any(target.pos.lookFor('structure'), i => i.structureType == C.STRUCTURE_RAMPART && !i.my && !i.isPublic)) {
             return C.ERR_NOT_OWNER;
         }
@@ -726,6 +733,12 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
+
+        var effect = _.find(target.effects, {power: C.PWR_FORTIFY});
+        if(effect && effect.ticksRemaining > 0) {
+            return C.ERR_INVALID_TARGET;
+        }
+
         if(!target.pos.isNearTo(this.pos)) {
             return C.ERR_NOT_IN_RANGE;
         }
@@ -758,6 +771,10 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NOT_IN_RANGE;
         }
 
+        var effect = _.find(target.effects, {power: C.PWR_FORTIFY});
+        if(effect && effect.ticksRemaining > 0) {
+            return C.ERR_INVALID_TARGET;
+        }
 
         intents.set(this.id, 'rangedAttack', {id: target.id});
         return C.OK;
@@ -1140,6 +1157,11 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
         if(this.room.controller && !this.room.controller.my && this.room.controller.safeMode) {
             return C.ERR_NO_BODYPART;
+        }
+
+        var effect = _.find(target.effects, {power: C.PWR_FORTIFY});
+        if(effect && effect.ticksRemaining > 0) {
+            return C.ERR_INVALID_TARGET;
         }
 
         intents.set(this.id, 'dismantle', {id: target.id});
