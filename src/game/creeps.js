@@ -438,9 +438,12 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!_.contains(C.RESOURCES_ALL, resourceType)) {
             return C.ERR_INVALID_ARGS;
         }
-        if(!target || !target.id || (!register.spawns[target.id] && !register.powerCreeps[target.id] && !register.creeps[target.id] && !register.structures[target.id]) ||
+        if(!target ||
+            !target.id ||
+            (!register.spawns[target.id] && !register.powerCreeps[target.id] && !register.creeps[target.id] && !register.structures[target.id]) ||
             (!data(target.id).store && (register.structures[target.id].structureType != 'controller')) ||
-            !(target instanceof globals.StructureSpawn) && !(target instanceof globals.Structure) && !(target instanceof globals.Creep) && !(target instanceof globals.PowerCreep) && !target.spawning) {
+            ((target instanceof globals.Creep) && target.spawning) ||
+            !(target instanceof globals.StructureSpawn) && !(target instanceof globals.Structure) && !(target instanceof globals.Creep) && !(target instanceof globals.PowerCreep)) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
@@ -449,7 +452,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return this.upgradeController(target);
         }
 
-        if(!register.structures[target.id] || !utils.capacityForResource(data(target.id), resourceType)) {
+        if(!utils.capacityForResource(data(target.id), resourceType)) {
             return C.ERR_INVALID_TARGET;
         }
 
@@ -461,10 +464,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
 
         const storedAmount = data(target.id).storeCapacityResource ? data(target.id).store[resourceType] : utils.calcResources(target);
-        const targetCapacity = Math.max(0,
-            data(target.id).storeCapacityResource &&
-            data(target.id).storeCapacityResource[resourceType] ||
-            (data(target.id).storeCapacity||0) - _.sum(data(target.id).storeCapacityResource));
+        const targetCapacity = utils.capacityForResource(data(target.id), resourceType);
 
         if(!data(target.id).store || storedAmount >= targetCapacity) {
             return C.ERR_FULL;
@@ -478,7 +478,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
 
-        if(!amount || (amount + storedAmount) > targetCapacity) {
+        if((amount + storedAmount) > targetCapacity) {
             return C.ERR_FULL;
         }
 
@@ -511,8 +511,11 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NOT_OWNER;
         }
 
-        if(!register.structures[target.id] ||
-            register.structures[target.id].structureType == C.STRUCTURE_NUKER) {
+        if(register.structures[target.id] && register.structures[target.id].structureType == C.STRUCTURE_NUKER) {
+            return C.ERR_INVALID_TARGET;
+        }
+
+        if(!utils.capacityForResource(data(target.id), resourceType)) {
             return C.ERR_INVALID_TARGET;
         }
 
@@ -520,7 +523,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NOT_IN_RANGE;
         }
 
-        var emptySpace = data(this.id).storeCapacity - utils.calcResources(data(this.id));;
+        var emptySpace = data(this.id).storeCapacity - utils.calcResources(data(this.id));
 
         if(emptySpace <= 0) {
             return C.ERR_FULL;
@@ -530,12 +533,12 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             amount = Math.min(emptySpace, data(target.id).store[resourceType]);
         }
 
-        if((data(target.id).store[resourceType]||0) < amount) {
-            return C.ERR_NOT_ENOUGH_RESOURCES;
-        }
-
         if(amount > emptySpace) {
             return C.ERR_FULL;
+        }
+
+        if(!amount || (data(target.id).store[resourceType]||0) < amount) {
+            return C.ERR_NOT_ENOUGH_RESOURCES;
         }
 
         intents.set(this.id, 'withdraw', {id: target.id, amount, resourceType});

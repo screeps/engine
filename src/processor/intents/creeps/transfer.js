@@ -9,7 +9,7 @@ module.exports = function(object, intent, {roomObjects, bulk, eventLog}) {
     if(!_.contains(C.RESOURCES_ALL, resourceType)) {
         return;
     }
-    if(object.spawning || !object.store || !(object.store[resourceType] >= intent.amount) || intent.amount < 0) {
+    if(!object || object.spawning || !object.store || !(object.store[resourceType] >= intent.amount) || intent.amount < 0) {
         return;
     }
 

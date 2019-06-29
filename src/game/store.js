@@ -1,4 +1,5 @@
-var utils = require('./../utils'),
+var _ = require('lodash'),
+    utils = require('./../utils'),
     driver = utils.getRuntimeDriver(),
     C = driver.constants;
 
@@ -19,24 +20,22 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
         Object.defineProperties(this,
             C.RESOURCES_ALL.reduce((result, resource) => {
-                result[resource] = {value: 0, configurable: true, writable: true};
+                result[resource] = {
+                    value: object.store[resource]||0,
+                    enumerable: object.store[resource],
+                    configurable: true,
+                    writable: true
+                };
                 return result;
             }, {}));
-
-        Object.defineProperties(this,
-            _.mapValues(object.store, (value) => ({value, enumerable: true, configurable: true, writable: true})));
-
 
         Object.defineProperties(this, {
             getCapacity: {
                 value: function getCapacity(resource) {
                     if(!resource) {
-                        return object.storeCapacity || null;
+                        return object.storeCapacityResource ? null : object.storeCapacity || null;
                     }
-                    if(!object.storeCapacityResource) {
-                        return object.storeCapacity;
-                    }
-                    return object.storeCapacityResource[resource] || null;
+                    return utils.capacityForResource(object, resource) || null;
                 }
             },
             getUsedCapacity: {
@@ -57,14 +56,13 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 value: function getFreeCapacity(resource) {
                     return this.getCapacity(resource) - this.getUsedCapacity(resource);
                 }
+            },
+            toString: {
+                value: function toString() {
+                    return `[store]`;
+                }
             }
         });
-
-
-    });
-
-    Store.prototype.toString = register.wrapFn(function() {
-        return `[store]`;
     });
 
     Object.defineProperty(globals, 'Store', {enumerable: true, value: Store});
