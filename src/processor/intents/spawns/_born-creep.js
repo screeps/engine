@@ -46,6 +46,7 @@ module.exports = function(spawn, creep, scope) {
             y: newY,
             spawning: false
         });
+        bulk.update(spawn, {spawning: null});
         return true;
     }
 
@@ -72,6 +73,7 @@ module.exports = function(spawn, creep, scope) {
             y: hostileOccupied.y,
             spawning: false
         });
+        bulk.update(spawn, {spawning: null});
         return true;
     }
 
