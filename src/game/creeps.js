@@ -515,7 +515,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_INVALID_TARGET;
         }
 
-        if(!utils.capacityForResource(data(target.id), resourceType)) {
+        if(!utils.capacityForResource(data(target.id), resourceType) && !(target instanceof globals.Tombstone)) {
             return C.ERR_INVALID_TARGET;
         }
 
