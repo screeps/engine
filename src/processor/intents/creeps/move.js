@@ -18,7 +18,7 @@ module.exports = function(object, intent, {roomObjects}) {
     }
     if(intent.id) {
         const creep = roomObjects[intent.id];
-        if(creep) {
+        if(creep && creep.type == 'creep' && utils.dist(object, creep) == 1) {
             d = [creep.x-object.x, creep.y-object.y];
         }
     }

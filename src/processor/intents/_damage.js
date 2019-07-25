@@ -56,7 +56,7 @@ module.exports = function(object, target, damage, attackType, scope) {
             bulk.remove(target._id);
             delete roomObjects[target._id];
 
-            eventLog.push({event: C.EVENT_OBJECT_DESTROYED, objectId: object._id, type: object.type});
+            eventLog.push({event: C.EVENT_OBJECT_DESTROYED, objectId: target._id, type: object.type});
         }
 
         if(target.type == 'spawn') {

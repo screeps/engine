@@ -329,6 +329,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
+        if((target instanceof globals.StructurePowerSpawn) && !utils.checkStructureAgainstController(data(target.id), register.objectsByRoom[data(target.id).room], data(target.room.controller.id))) {
+            return C.ERR_RCL_NOT_ENOUGH;
+        }
         if(!target.pos.isNearTo(this.pos)) {
             return C.ERR_NOT_IN_RANGE;
         }
