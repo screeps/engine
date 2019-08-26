@@ -499,6 +499,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!_.contains(C.RESOURCES_ALL, resourceType)) {
             return C.ERR_INVALID_ARGS;
         }
+
         if(!target || !target.id || !data(target.id).store || ((!register.structures[target.id] || !(target instanceof globals.Structure) ) && !(target instanceof globals.Tombstone))) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
@@ -522,7 +523,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_INVALID_TARGET;
         }
 
-        if(!utils.capacityForResource(data(target.id), resourceType) && !(target instanceof globals.Tombstone)) {
+        if(!utils.capacityForResource(data(target.id), resourceType) && !data(target.id).store[resourceType] && !(target instanceof globals.Tombstone)) {
             return C.ERR_INVALID_TARGET;
         }
 
