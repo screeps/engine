@@ -113,11 +113,11 @@ module.exports = function(object, intent, scope) {
             var energySent = 0;
             var energyLimit = Math.min(
                 target.store.energy,
-                powerInfo.effect[creepPower.level-1] * _.sum(extensions, 'storeCapacity'));
+                powerInfo.effect[creepPower.level-1] * _.sum(extensions, 'storeCapacityResource.energy'));
             extensions.sort(utils.comparatorDistance(target));
             extensions.every((extension) => {
-                var energy = Math.min(energyLimit - energySent, extension.storeCapacity - extension.store.energy);
-                bulk.update(extension, {energy: extension.energy + energy});
+                var energy = Math.min(energyLimit - energySent, extension.storeCapacityResource.energy - extension.store.energy);
+                bulk.update(extension, {store: {energy: extension.store.energy + energy}});
                 energySent += energy;
                 return energySent < energyLimit;
             });
