@@ -16,22 +16,23 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ev
     if(!_.contains(['tower','creep'], target.type)) {
         return;
     }
-    const targetTotal = target.type == 'creep' ? utils.calcResources(target) : target.energy;
-    if(targetTotal == target.energyCapacity) {
+    const targetTotal = target.type == 'creep' ? utils.calcResources(target) : target.store.energy;
+    const targetCapacity = target.storeCapacity || target.storeCapacityResource.energy;
+    if(targetTotal == targetCapacity) {
         return;
     }
 
     var amount = intent.amount;
-    if(targetTotal + amount > target.energyCapacity) {
-        amount = target.energyCapacity - targetTotal;
+    if(targetTotal + amount > targetCapacity) {
+        amount = targetCapacity - targetTotal;
     }
 
-    target.energy += amount;
+    target.store.energy += amount;
 
     object.actionLog.transferEnergy = {x: target.x, y: target.y};
 
     bulk.update(object, {actionLog: object.actionLog});
-    bulk.update(target, {energy: target.energy});
+    bulk.update(target, { store: { energy: target.store.energy }});
 
     eventLog.push({event: C.EVENT_TRANSFER, objectId: object._id, data: {targetId: target._id, resourceType: C.RESOURCE_ENERGY, amount}});
 };

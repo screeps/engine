@@ -7,7 +7,7 @@ const _ = require('lodash'),
 module.exports = function(creep, context) {
     const { ramparts, intents, scope } = context;
 
-    if(!creep.energy || !_.some(ramparts)) {
+    if(!creep.store.energy || !_.some(ramparts)) {
         return;
     }
 

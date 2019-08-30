@@ -33,7 +33,7 @@ module.exports = function(object, intent, scope) {
         }
     }
 
-    const energyCapacity = utils.calcBodyEffectiveness(body, C.CARRY, 'capacity', C.CARRY_CAPACITY, true);
+    const storeCapacity = utils.calcBodyEffectiveness(body, C.CARRY, 'capacity', C.CARRY_CAPACITY, true);
 
     const creep = {
         strongholdId: object.strongholdId,
@@ -42,8 +42,8 @@ module.exports = function(object, intent, scope) {
         x: object.x,
         y: object.y,
         body,
-        energy: 0,
-        energyCapacity,
+        store: { energy: 0 },
+        storeCapacity,
         room: object.room,
         user: object.user,
         hits: body.length * 100,

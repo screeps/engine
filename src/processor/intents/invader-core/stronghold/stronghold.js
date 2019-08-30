@@ -27,11 +27,11 @@ const reserveController = function(context) {
 
 const refillTowers = function(context) {
     const {core, intents, towers} = context;
-    const underchargedTowers = _.filter(towers, t => 2*t.energy <= t.energyCapacity);
+    const underchargedTowers = _.filter(towers, t => 2*t.store.energy <= t.storeCapacityResource.energy);
     if(_.some(underchargedTowers)) {
-        const towerToCharge = _.min(underchargedTowers, 'energy');
+        const towerToCharge = _.min(underchargedTowers, 'store.energy');
         if(towerToCharge) {
-            intents.set(core._id, 'transfer', {id: towerToCharge._id, amount: towerToCharge.energyCapacity - towerToCharge.energy, resourceType: C.RESOURCE_ENERGY});
+            intents.set(core._id, 'transfer', {id: towerToCharge._id, amount: towerToCharge.storeCapacityResource.energy - towerToCharge.store.energy, resourceType: C.RESOURCE_ENERGY});
             return true;
         }
     }
@@ -42,11 +42,11 @@ const refillTowers = function(context) {
 const refillCreeps = function(context) {
     const {core, intents, defenders} = context;
 
-    const underchargedCreeps = _.filter(defenders, c => (c.energyCapacity > 0) && (2*c.energy <= c.energyCapacity));
+    const underchargedCreeps = _.filter(defenders, c => (c.storeCapacity > 0) && (2*c.store.energy <= c.storeCapacity));
     if(_.some(underchargedCreeps)) {
-        const creep = _.min(underchargedCreeps, 'energy');
+        const creep = _.min(underchargedCreeps, 'store.energy');
         if(creep) {
-            intents.set(core._id, 'transfer', {id: creep._id, amount: creep.energyCapacity - creep.energy, resourceType: C.RESOURCE_ENERGY});
+            intents.set(core._id, 'transfer', {id: creep._id, amount: creep.storeCapacity - creep.store.energy, resourceType: C.RESOURCE_ENERGY});
             return true;
         }
     }
