@@ -45,16 +45,6 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 return;
             }
 
-            if(object.type != 'source' && object.type != 'energy') {
-                C.RESOURCES_ALL.forEach(resourceType => {
-                    Object.defineProperty(object, resourceType, {
-                        enumerable: false,
-                        get() { throw new Error(`Reading resource ${resourceType} of ${object.type}#${object._id} failed. Shouldn't ever happen.`);},
-                        set(newValue) {throw new Error(`Writing ${newValue} to resource ${resourceType} of ${object.type}#${object._id} failed. Shouldn't ever happen.`);}
-                    })
-                });
-            }
-
             if (object.type == 'creep') {
                 object._actionLog = object.actionLog;
                 object._ticksToLive = object.ageTime - gameTime;
