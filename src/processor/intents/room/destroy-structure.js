@@ -5,7 +5,7 @@ var _ = require('lodash'),
 
 module.exports = function(userId, intent, scope) {
 
-    const {roomObjects, bulk, roomController} = scope;
+    const {roomObjects, roomController} = scope;
 
     var object = roomObjects[intent.id];
 
@@ -17,24 +17,7 @@ module.exports = function(userId, intent, scope) {
 
     if(_.any(roomObjects, i => (i.type == 'creep' || i.type == 'powerCreep') && i.user != userId)) return;
 
-    bulk.remove(object._id);
-    delete roomObjects[object._id];
-
-    if(object.type == 'spawn' && object.spawning) {
-        var spawning = _.find(roomObjects, {user: object.user, name: object.spawning.name});
-        if(spawning) {
-            bulk.remove(spawning._id);
-        }
-    }
-
-    // drop contents of anything with .energy or .store[]
-    if(object.store) {
-        _.forEach(object.store, (amount, resourceType) => {
-            if(amount > 0) {
-                require('../creeps/_create-energy')(object.x, object.y, object.room, amount, resourceType, scope);
-            }
-        })
-    }
+    require('../structures/_destroy')(object, scope);
 
     if(object.type == 'constructedWall' && object.decayTime && object.user) {
         require('../creeps/_clear-newbie-walls')(scope);

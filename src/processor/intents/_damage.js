@@ -45,27 +45,10 @@ module.exports = function(object, target, damage, attackType, scope) {
     }
     else if (target.hits <= 0) {
         if (target.type != 'creep' && target.type != 'powerCreep') {
-            if(target.store) {
-                _.forEach(target.store, (amount, resourceType) => {
-                    if(amount) {
-                        require('./creeps/_create-energy')(target.x, target.y, target.room, amount, resourceType, scope);
-                    }
-                });
-            }
 
-            bulk.remove(target._id);
-            delete roomObjects[target._id];
+            require('./structures/_destroy')(target, scope);
 
             eventLog.push({event: C.EVENT_OBJECT_DESTROYED, objectId: target._id, type: object.type});
-        }
-
-        if(target.type == 'spawn') {
-            if(target.spawning) {
-                var spawning = _.find(roomObjects, {user: target.user, name: target.spawning.name});
-                if(spawning) {
-                    bulk.remove(spawning._id);
-                }
-            }
         }
     }
     else {

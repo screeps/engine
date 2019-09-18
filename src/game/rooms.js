@@ -492,6 +492,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 flag: register.byRoom[id].flags,
                 constructionSite: register.byRoom[id].constructionSites,
                 tombstone: register.byRoom[id].tombstones,
+                ruin: register.byRoom[id].ruins,
                 nuke: register.byRoom[id].nukes,
                 powerCreep: register.byRoom[id].powerCreeps
             },
@@ -506,6 +507,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 flag: register.byRoom[id].spatial.flags,
                 constructionSite: register.byRoom[id].spatial.constructionSites,
                 tombstone: register.byRoom[id].spatial.tombstones,
+                ruin: register.byRoom[id].spatial.ruins,
                 nuke: register.byRoom[id].spatial.nukes,
                 powerCreep: register.byRoom[id].spatial.powerCreeps
             }

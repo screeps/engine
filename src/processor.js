@@ -123,6 +123,9 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             if(object.type == 'tombstone') {
                 roomInfo.active = true;
             }
+            if(object.type == 'ruin') {
+                roomInfo.active = true;
+            }
             if(object.type == 'portal') {
                 roomInfo.active = true;
             }
@@ -377,6 +380,8 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 require('./processor/intents/terminal/tick')(object, scope);
             if (object.type == 'tombstone')
                 require('./processor/intents/tombstones/tick')(object, scope);
+            if (object.type == 'ruin')
+                require('./processor/intents/ruins/tick')(object, scope);
             if (object.type == 'factory')
                 require('./processor/intents/factories/tick')(object, scope);
 

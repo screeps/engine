@@ -23,6 +23,7 @@
             tombstones: {},
             nukes: {},
             powerCreeps: {},
+            ruins: {},
         });
 
         if(spatial) {
@@ -202,6 +203,7 @@
         require('./construction-sites').make(runtimeData, intents, register, globals);
         require('./path-finder').make(runtimeData, intents, register, globals);
         require('./power-creeps').make(runtimeData, intents, register, globals);
+        require('./ruins').make(runtimeData, intents, register, globals);
         require('./store').make(runtimeData, intents, register, globals);
 
         for (var i in runtimeData.rooms) {
@@ -345,6 +347,11 @@
                 register._objects[i] = new globals.Tombstone(i);
                 addObjectToRegister(register, 'tombstones', register._objects[i], object);
                 addObjectToFindCache(register, C.FIND_TOMBSTONES, register._objects[i], object);
+            }
+            if(object.type == 'ruin') {
+                register._objects[i] = new globals.Ruin(i);
+                addObjectToRegister(register, 'ruins', register._objects[i], object);
+                addObjectToFindCache(register, C.FIND_RUINS, register._objects[i], object)
             }
 
             if (object.type == 'constructionSite') {

@@ -500,7 +500,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_INVALID_ARGS;
         }
 
-        if(!target || !target.id || !data(target.id).store || ((!register.structures[target.id] || !(target instanceof globals.Structure) ) && !(target instanceof globals.Tombstone))) {
+        if(!target || !target.id || !data(target.id).store || ((!register.structures[target.id] || !(target instanceof globals.Structure)) && !(target instanceof globals.Tombstone) && !(target instanceof globals.Ruin))) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
