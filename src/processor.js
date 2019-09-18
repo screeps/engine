@@ -110,6 +110,9 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             if(object.type == 'powerBank' && gameTime > object.decayTime - 500) {
                 roomInfo.active = true;
             }
+            if(object.type == 'deposit' && gameTime > object.decayTime - 500) {
+                roomInfo.active = true;
+            }
             if(object.type == 'energy') {
                 roomInfo.active = true;
             }
@@ -390,7 +393,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 require('./processor/intents/storages/tick')(object, scope);
             }
 
-            if(object.type == 'powerBank') {
+            if(object.type == 'powerBank' || object.type == 'deposit') {
                 if(gameTime >= object.decayTime-1) {
                     bulk.remove(object._id);
                     delete roomObjects[object._id];

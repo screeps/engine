@@ -51,7 +51,7 @@ module.exports = function(object, intent, scope) {
         spawning: true,
         fatigue: 0,
         notifyWhenAttacked: false,
-        ageTime: object.nextDecayTime
+        ageTime: object.decayTime
     };
 
     bulk.insert(creep);

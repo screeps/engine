@@ -15,11 +15,7 @@ module.exports = function(object, scope) {
         }
     };
 
-    if(!object.hits || (object.hits < object.hitsMax)) {
-        return;
-    }
-
-    const behavior = object.strongholdBehavior || 'default';
+    const behavior = object.deployTime ? 'deploy' : object.strongholdBehavior || 'default';
     if(!stronghold.behaviors[behavior]) {
         return;
     }

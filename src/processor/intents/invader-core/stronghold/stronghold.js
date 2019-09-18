@@ -2,6 +2,7 @@ const _ = require('lodash'),
     utils = require('../../../../utils'),
     driver = utils.getDriver(),
     C = driver.constants,
+    strongholds = driver.strongholds,
     creeps = require('./creeps'),
     fortifier = require('./fortifier'),
     simpleMelee = require('./simple-melee');
@@ -17,7 +18,64 @@ const range = function(a, b) {
     return Math.max(Math.abs(a.x-b.x), Math.abs(a.y-b.y));
 };
 
-const reserveController = function(context) {
+const deployStronghold = function deployStronghold(context) {
+    const { scope, core, ramparts, bulk, gameTime } = context;
+    const { roomObjects } = scope;
+
+    if(core.deployTime && (core.deployTime <= gameTime)) {
+        const decayTime = gameTime + C.STRONGHOLD_DECAY_TICKS;
+
+        bulk.update(core, {
+            deployTime: null,
+            decayTime,
+            hits: C.INVADER_CORE_HITS,
+            hitsMax: C.INVADER_CORE_HITS
+        });
+
+        _.forEach(ramparts, rampart => {bulk.remove(rampart._id); delete roomObjects[rampart._id]});
+
+        const template = strongholds.templates[core.templateName];
+
+        const objectOptions = {};
+        objectOptions[C.STRUCTURE_RAMPART] = {
+            hits: C.STRONGHOLD_RAMPART_HITS[template.rewardLevel],
+            hitsMax: C.STRONGHOLD_RAMPART_HITS[template.rewardLevel],
+            nextDecayTime: decayTime
+        };
+        objectOptions[C.STRUCTURE_TOWER] = {
+            hits: C.TOWER_HITS,
+            hitsMax: C.TOWER_HITS,
+            store:{ energy: C.TOWER_CAPACITY },
+            storeCapacityResource: { energy: C.TOWER_CAPACITY },
+            actionLog: {attack: null, heal: null, repair: null}
+        };
+        objectOptions[C.STRUCTURE_CONTAINER] = {
+            notifyWhenAttacked: false,
+            hits: C.CONTAINER_HITS,
+            hitsMax: C.CONTAINER_HITS,
+            nextDecayTime: decayTime,
+            store: { energy: 0 },
+            storeCapacity: 0
+        };
+        objectOptions[C.STRUCTURE_ROAD] = {
+            notifyWhenAttacked: false,
+            hits: C.ROAD_HITS,
+            hitsMax: C.ROAD_HITS,
+            nextDecayTime: decayTime
+        };
+
+        const structures = _.map(template.structures, i => {
+                const s = _.merge(i, { x: 0+core.x+i.dx, y: 0+core.y+i.dy, room: core.room, user: core.user, strongholdId: core.strongholdId, decayTime }, objectOptions[i.type]||{});
+                delete s.dx;
+                delete s.dy;
+                return s;
+            });
+
+        _.forEach(structures, s => { if(s.type != C.STRUCTURE_INVADER_CORE) bulk.insert(s) });
+    }
+};
+
+const reserveController = function reserveController (context) {
     const { core, intents, roomController } = context;
 
     if(roomController) {
@@ -25,7 +83,7 @@ const reserveController = function(context) {
     }
 };
 
-const refillTowers = function(context) {
+const refillTowers = function refillTowers(context) {
     const {core, intents, towers} = context;
     const underchargedTowers = _.filter(towers, t => 2*t.store.energy <= t.storeCapacityResource.energy);
     if(_.some(underchargedTowers)) {
@@ -39,7 +97,7 @@ const refillTowers = function(context) {
     return false;
 };
 
-const refillCreeps = function(context) {
+const refillCreeps = function refillCreeps(context) {
     const {core, intents, defenders} = context;
 
     const underchargedCreeps = _.filter(defenders, c => (c.storeCapacity > 0) && (2*c.store.energy <= c.storeCapacity));
@@ -54,7 +112,7 @@ const refillCreeps = function(context) {
     return false;
 };
 
-const focusClosest = function(context) {
+const focusClosest = function focusClosest(context) {
     const {core, intents, defenders, hostiles, towers} = context;
 
     if(!_.some(hostiles)) {
@@ -86,7 +144,7 @@ const focusClosest = function(context) {
     return true;
 };
 
-const maintainCreep = function(name, setup, context, behavior) {
+const maintainCreep = function maintainCreep(name, setup, context, behavior) {
     const {core, intents, defenders} = context;
     const creep = _.find(defenders, {name});
     if(creep && behavior) {
@@ -101,7 +159,7 @@ const maintainCreep = function(name, setup, context, behavior) {
     })
 };
 
-const antinuke = function(context) {
+const antinuke = function antinuke(context) {
     const { core, ramparts, roomObjects, bulk, gameTime } = context;
     if(!!(gameTime % 10)) {
         return;
@@ -132,6 +190,10 @@ const antinuke = function(context) {
 
 module.exports = {
     behaviors: {
+        'deploy': function(context) {
+            reserveController(context);
+            deployStronghold(context);
+        },
         'default': function(context){
             reserveController(context);
             refillTowers(context);
@@ -144,6 +206,8 @@ module.exports = {
             antinuke(context);
             maintainCreep('fortifier', creeps['fortifier'], context, fortifier);
             maintainCreep('defender1', creeps['weakDefender'], context, simpleMelee);
+
+            focusClosest(context);
         }
     }
 };
