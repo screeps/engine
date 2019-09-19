@@ -24,8 +24,8 @@ module.exports = function(object, target, damage, attackType, scope) {
     }
     else {
         if(attackType != C.EVENT_ATTACK_TYPE_NUKE && (target.type == 'constructedWall' || target.type == 'rampart')) {
-            var effect = _.find(target.effects, {power: C.PWR_FORTIFY});
-            if(effect && effect.endTime > gameTime) {
+            const effect = _.find(target.effects, e => (e.power == C.PWR_FORTIFY || e.effect == C.EFFECT_INVULNERABILITY) && (e.endTime > gameTime));
+            if(effect) {
                 return;
             }
         }

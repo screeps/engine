@@ -29,8 +29,14 @@ const deployStronghold = function deployStronghold(context) {
             deployTime: null,
             decayTime,
             hits: C.INVADER_CORE_HITS,
-            hitsMax: C.INVADER_CORE_HITS
+            hitsMax: C.INVADER_CORE_HITS,
+            effects: null
         });
+        bulk.update(core, { effects: [{
+                effect: C.EFFECT_COLLAPSE_TIMER,
+                endTime: gameTime + C.STRONGHOLD_DECAY_TICKS,
+                duration: C.STRONGHOLD_DECAY_TICKS
+            }]});
 
         _.forEach(ramparts, rampart => {bulk.remove(rampart._id); delete roomObjects[rampart._id]});
 
@@ -65,7 +71,19 @@ const deployStronghold = function deployStronghold(context) {
         };
 
         const structures = _.map(template.structures, i => {
-                const s = _.merge(i, { x: 0+core.x+i.dx, y: 0+core.y+i.dy, room: core.room, user: core.user, strongholdId: core.strongholdId, decayTime }, objectOptions[i.type]||{});
+                const s = _.merge(i, {
+                        x: 0+core.x+i.dx,
+                        y: 0+core.y+i.dy,
+                        room: core.room,
+                        user: core.user,
+                        strongholdId: core.strongholdId,
+                        decayTime,
+                        effects: [{
+                            effect: C.EFFECT_COLLAPSE_TIMER,
+                            endTime: gameTime + C.STRONGHOLD_DECAY_TICKS,
+                            duration: C.STRONGHOLD_DECAY_TICKS
+                        }]
+                    }, objectOptions[i.type]||{});
                 delete s.dx;
                 delete s.dy;
                 return s;

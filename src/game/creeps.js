@@ -600,8 +600,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_INVALID_TARGET;
         }
 
-        var effect = _.find(target.effects, {power: C.PWR_FORTIFY});
-        if(effect && effect.ticksRemaining > 0) {
+        const effect = _.find(target.effects, e => (e.power == C.PWR_FORTIFY || e.effect == C.EFFECT_INVULNERABILITY) && (e.ticksRemaining > 0));
+        if(effect) {
             return C.ERR_INVALID_TARGET;
         }
 
@@ -636,8 +636,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NOT_IN_RANGE;
         }
 
-        var effect = _.find(target.effects, {power: C.PWR_FORTIFY});
-        if(effect && effect.ticksRemaining > 0) {
+        const effect = _.find(target.effects, e => (e.power == C.PWR_FORTIFY || e.effect == C.EFFECT_INVULNERABILITY) && (e.ticksRemaining > 0));
+        if(effect) {
             return C.ERR_INVALID_TARGET;
         }
 
@@ -1024,8 +1024,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NO_BODYPART;
         }
 
-        var effect = _.find(target.effects, {power: C.PWR_FORTIFY});
-        if(effect && effect.ticksRemaining > 0) {
+        const effect = _.find(target.effects, e => (e.power == C.PWR_FORTIFY || e.effect == C.EFFECT_INVULNERABILITY) && (e.ticksRemaining > 0));
+        if(effect) {
             return C.ERR_INVALID_TARGET;
         }
 

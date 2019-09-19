@@ -14,6 +14,10 @@ module.exports = function(object, scope) {
         }
     }
 
+    if(object.type == 'invaderCore') {
+        require('../invader-core/destroy')(object, scope);
+    }
+
     const ruin = {
         type: 'ruin',
         room: object.room,
@@ -28,6 +32,14 @@ module.exports = function(object, scope) {
     }
     if(object.store) {
         ruin.store = object.store;
+    }
+
+    if(object.effects) {
+        const keepEffects = _.filter(object.effects, {effect: C.EFFECT_COLLAPSE_TIMER});
+        if(_.some(keepEffects)) {
+            ruin.effects = keepEffects;
+            ruin.decayTime = _.max([ruin.decayTime, _.map(keepEffects, 'endTime')]);
+        }
     }
 
     bulk.insert(ruin);

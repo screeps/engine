@@ -34,7 +34,7 @@ module.exports = function(object, intent, scope) {
     amount = Math.min(power, target.hits),
     energyGain = Math.floor(amount * C.DISMANTLE_COST);
 
-    var effect = _.find(target.effects, e => e.endTime >= gameTime && (e.power == C.PWR_SHIELD || e.power == C.PWR_FORTIFY));
+    var effect = _.find(target.effects, e => e.endTime >= gameTime && (e.power == C.PWR_SHIELD || e.power == C.PWR_FORTIFY || e.effect == C.EFFECT_INVULNERABILITY));
     if(effect) {
         energyGain = 0;
     }
