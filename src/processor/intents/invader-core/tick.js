@@ -6,22 +6,14 @@ var _ = require('lodash'),
 module.exports = function(object, scope) {
     if(!object || object.type != 'invaderCore') return;
 
-    const {roomObjects, bulk, gameTime} = scope;
-
-    if(object.nextDecayTime && gameTime >= object.nextDecayTime) {
-        const existingStructures = _.filter(roomObjects, {strongholdId: object.strongholdId});
-        existingStructures.forEach(s => {bulk.remove(s._id); delete roomObjects[s._id]});
-        return;
-    }
+    const {roomObjects, bulk} = scope;
 
     if(object.spawning) {
         object.spawning.remainingTime--;
 
         if(object.spawning.remainingTime <= 0) {
-
-            var spawningCreep = _.find(roomObjects, {type: 'creep', name: object.spawning.name, x: object.x, y: object.y});
-
-            var bornOk = require('../spawns/_born-creep')(object, spawningCreep, scope);
+            const spawningCreep = _.find(roomObjects, {type: 'creep', name: object.spawning.name, x: object.x, y: object.y});
+            const bornOk = require('../spawns/_born-creep')(object, spawningCreep, scope);
 
             if(bornOk) {
                 bulk.update(object, {spawning: null});
