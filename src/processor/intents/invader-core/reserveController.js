@@ -26,7 +26,7 @@ module.exports = function(object, intent, scope) {
         };
     }
 
-    const effect = 200;
+    const effect = C.INVADER_CORE_CONTROLLER_POWER * C.CONTROLLER_RESERVE;
     target.reservation.endTime += effect;
     if(target.reservation.endTime > gameTime + C.CONTROLLER_RESERVE_MAX) {
         return;

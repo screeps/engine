@@ -73,7 +73,7 @@ const deployStronghold = function deployStronghold(context) {
         };
 
         const structures = _.map(template.structures, i => {
-                const s = _.merge(i, {
+            const s = _.merge({}, i, {
                         x: 0+core.x+i.dx,
                         y: 0+core.y+i.dy,
                         room: core.room,
@@ -99,7 +99,12 @@ const reserveController = function reserveController (context) {
     const { core, intents, roomController } = context;
 
     if(roomController) {
-        intents.set(core._id, 'reserveController', {id: roomController._id});
+        if(!roomController.reservation || roomController.reservation.user === core.user) {
+            intents.set(core._id, 'reserveController', {id: roomController._id});
+        }
+        else {
+            intents.set(core._id, 'attackController', {id: roomController._id});
+        }
     }
 };
 

@@ -339,8 +339,8 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 if(collapseEffect && collapseEffect.endTime <= gameTime) {
                     bulk.remove(object._id);
                     delete roomObjects[object._id];
+                    return;
                 }
-                return;
             }
 
             if (object.type == 'invaderCore')
