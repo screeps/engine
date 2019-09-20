@@ -100,11 +100,15 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             }
             if (object.type == 'controller') {
                 scope.roomController = object;
+                if(object.reservation && object.reservation.user == '2' &&
+                    (object.reservation.endTime - gameTime) < (C.CONTROLLER_RESERVE_MAX - C.INVADER_CORE_CONTROLLER_POWER * C.CONTROLLER_RESERVE)) {
+                    roomInfo.active = true;
+                }
             }
             if (object.type == 'observer') {
                 object.observeRoom = null;
             }
-            if (object.user && object.user != '3' && !object.userNotActive && object.type != 'flag') {
+            if (object.user && object.user != '3' && !object.userNotActive && object.type != 'flag' && !object.strongholdId) {
                 roomInfo.active = true;
             }
             if(object.type == 'powerBank' && gameTime > object.decayTime - 500) {
@@ -121,9 +125,6 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 roomNukes.push(object);
             }
             if(object.type == 'tombstone') {
-                roomInfo.active = true;
-            }
-            if(object.type == 'ruin') {
                 roomInfo.active = true;
             }
             if(object.type == 'portal') {
