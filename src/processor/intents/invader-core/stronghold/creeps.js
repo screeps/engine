@@ -19,5 +19,17 @@ module.exports = {
     'weakDefender': makeBody([
         {part: C.ATTACK, count: 15},
         {part: C.MOVE, count: 15}
-    ])
+    ]),
+    'fullDefender': makeBody([
+        {part: C.ATTACK, count: 25},
+        {part: C.MOVE, count: 25}
+    ]),
+    'boostedDefender': makeBody([
+        {part: C.ATTACK, count: 25, boost: 'UH2O'},
+        {part: C.MOVE, count: 25}
+    ]),
+    'fullBoostedDefender': makeBody([
+        {part: C.ATTACK, count: 40, boost: 'XUH2O'},
+        {part: C.MOVE, count: 10, boost: 'XZGO2'}
+    ]),
 };

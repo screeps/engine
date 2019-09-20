@@ -73,7 +73,7 @@ const deployStronghold = function deployStronghold(context) {
         };
 
         const structures = _.map(template.structures, i => {
-            const s = _.merge({}, i, {
+                const s = Object.assign({}, i, {
                         x: 0+core.x+i.dx,
                         y: 0+core.y+i.dy,
                         room: core.room,
@@ -177,11 +177,13 @@ const maintainCreep = function maintainCreep(name, setup, context, behavior) {
         return;
     }
 
-    intents.set(core._id, 'createCreep', {
-        name,
-        body: setup.body,
-        boosts: setup.boosts
-    })
+    if(!core.spawning) {
+        intents.set(core._id, 'createCreep', {
+            name,
+            body: setup.body,
+            boosts: setup.boosts
+        });
+    }
 };
 
 const antinuke = function antinuke(context) {
@@ -224,15 +226,45 @@ module.exports = {
             refillTowers(context);
             focusClosest(context);
         },
+        'bunker2': function(context) {
+            reserveController(context);
+            refillTowers(context) || refillCreeps(context);
+
+            maintainCreep('defender1', creeps['weakDefender'], context, simpleMelee);
+
+            focusClosest(context);
+        },
+        'bunker3': function(context) {
+            reserveController(context);
+            refillTowers(context);
+
+            maintainCreep('defender1', creeps['fullDefender'], context, simpleMelee);
+            maintainCreep('defender2', creeps['fullDefender'], context, simpleMelee);
+
+            focusClosest(context);
+        },
+        'bunker4': function(context) {
+            reserveController(context);
+            refillTowers(context);
+
+            maintainCreep('defender1', creeps['boostedDefender'], context, simpleMelee);
+            maintainCreep('defender2', creeps['boostedDefender'], context, simpleMelee);
+            maintainCreep('defender3', creeps['boostedDefender'], context, simpleMelee);
+
+            focusClosest(context);
+        },
         'bunker5': function(context) {
             reserveController(context);
             refillTowers(context) || refillCreeps(context);
 
             antinuke(context);
             maintainCreep('fortifier', creeps['fortifier'], context, fortifier);
-            maintainCreep('defender1', creeps['weakDefender'], context, simpleMelee);
+            maintainCreep('defender1', creeps['fullBoostedDefender'], context, simpleMelee);
+            maintainCreep('defender2', creeps['fullBoostedDefender'], context, simpleMelee);
+            maintainCreep('defender3', creeps['fullBoostedDefender'], context, simpleMelee);
+            maintainCreep('defender4', creeps['fullBoostedDefender'], context, simpleMelee);
 
             focusClosest(context);
-        }
+        },
     }
 };
