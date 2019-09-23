@@ -95,14 +95,17 @@ const deployStronghold = function deployStronghold(context) {
     }
 };
 
-const reserveController = function reserveController (context) {
-    const { core, intents, roomController } = context;
+const handleController = function reserveController (context) {
+    const { gameTime, core, intents, roomController } = context;
 
     if(roomController) {
-        if(!roomController.reservation || roomController.reservation.user === core.user) {
+        if(roomController.user === core.user) {
+            if(!((core.deployTime-gameTime) % 25)) {
+                intents.set(core._id, 'upgradeController', {id: roomController._id});
+            }
+        } else if(!roomController.reservation || roomController.reservation.user === core.user) {
             intents.set(core._id, 'reserveController', {id: roomController._id});
-        }
-        else {
+        } else {
             intents.set(core._id, 'attackController', {id: roomController._id});
         }
     }
@@ -218,16 +221,16 @@ const antinuke = function antinuke(context) {
 module.exports = {
     behaviors: {
         'deploy': function(context) {
-            reserveController(context);
+            handleController(context);
             deployStronghold(context);
         },
         'default': function(context){
-            reserveController(context);
+            handleController(context);
             refillTowers(context);
             focusClosest(context);
         },
         'bunker2': function(context) {
-            reserveController(context);
+            handleController(context);
             refillTowers(context) || refillCreeps(context);
 
             maintainCreep('defender1', creeps['weakDefender'], context, simpleMelee);
@@ -235,7 +238,7 @@ module.exports = {
             focusClosest(context);
         },
         'bunker3': function(context) {
-            reserveController(context);
+            handleController(context);
             refillTowers(context);
 
             maintainCreep('defender1', creeps['fullDefender'], context, simpleMelee);
@@ -244,7 +247,7 @@ module.exports = {
             focusClosest(context);
         },
         'bunker4': function(context) {
-            reserveController(context);
+            handleController(context);
             refillTowers(context);
 
             maintainCreep('defender1', creeps['boostedDefender'], context, simpleMelee);
@@ -254,7 +257,7 @@ module.exports = {
             focusClosest(context);
         },
         'bunker5': function(context) {
-            reserveController(context);
+            handleController(context);
             refillTowers(context) || refillCreeps(context);
 
             antinuke(context);

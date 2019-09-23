@@ -10,4 +10,7 @@ module.exports = function(object, objectIntents, scope) {
 
     if(objectIntents.attackController)
         require('./attackController')(object, objectIntents.attackController, scope);
+
+    if(objectIntents.upgradeController)
+        require('./upgradeController')(object, objectIntents.upgradeController, scope);
 };

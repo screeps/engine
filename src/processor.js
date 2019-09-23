@@ -74,8 +74,9 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 object._actionLog = object.actionLog;
                 object.actionLog = {
                     transferEnergy: null,
-                    build: null,
-                    reserveController: null
+                    reserveController: null,
+                    attackController: null,
+                    upgradeController: null
                 };
             }
             if (object.type == 'link') {
