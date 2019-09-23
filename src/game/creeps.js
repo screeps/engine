@@ -1013,7 +1013,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
         if(!target || !target.id || !register.structures[target.id] ||
         !(target instanceof globals.Structure) && !(target instanceof globals.StructureSpawn) ||
-        (target instanceof globals.StructurePowerBank)) {
+        !C.CONSTRUCTION_COST[target.structureType]) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
