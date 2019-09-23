@@ -30,9 +30,7 @@ module.exports = function(object, scope) {
     if(object.user) {
         ruin.user = object.user
     }
-    if(object.store) {
-        ruin.store = object.store;
-    }
+    ruin.store = object.store || {};
 
     if(object.effects) {
         const keepEffects = _.filter(object.effects, {effect: C.EFFECT_COLLAPSE_TIMER});
