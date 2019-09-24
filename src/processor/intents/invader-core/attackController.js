@@ -3,7 +3,7 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, intent, {roomObjects, bulk, roomController, gameTime, eventLog}) {
+module.exports = function(object, intent, {roomObjects, bulk, roomController, gameTime, eventLog, roomInfo}) {
 
     if(object.type != 'invaderCore') {
         return;
@@ -35,6 +35,8 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ga
         target._upgradeBlocked = gameTime + C.CONTROLLER_ATTACK_BLOCKED_UPGRADE;
     }
     object.actionLog.reserveController = {x: target.x, y: target.y};
+
+    roomInfo.active = true;
 
     eventLog.push({event: C.EVENT_ATTACK_CONTROLLER, objectId: object._id})
 };
