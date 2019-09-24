@@ -35,21 +35,8 @@ module.exports = function(object, intent, scope) {
         }];
     }
 
-    const upgradePower = strongholds.upgradePowers[object.level-1][target.level-1];
+    const upgradePower = 1;
     target.downgradeTime = gameTime + C.INVADER_CORE_CONTROLLER_DOWNGRADE;
-    if(target.level < 8) {
-        const nextLevelProgress = C.CONTROLLER_LEVELS[target.level];
-        if (target.progress + upgradePower >= nextLevelProgress) {
-            target.progress = target.progress + upgradePower - nextLevelProgress;
-            target.level++;
-            if(target.level == 8) {
-                target.progress = 0;
-            }
-        }
-        else {
-            target.progress = (target.progress||0) + upgradePower;
-        }
-    }
 
     target._upgraded += upgradePower;
 
@@ -58,8 +45,6 @@ module.exports = function(object, intent, scope) {
     const effects = target.effects;
     bulk.update(target, { effects: null });
     bulk.update(target, {
-        level: target.level,
-        progress: target.progress,
         downgradeTime: target.downgradeTime,
         effects
     });
