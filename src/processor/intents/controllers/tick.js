@@ -11,7 +11,7 @@ module.exports = function(object, {bulk, bulkUsers, gameTime, roomInfo, users}) 
         bulk.update(object, {reservation: null});
     }
 
-    if(!object.user) {
+    if(!object.user || object.user == "2") {
         return;
     }
 

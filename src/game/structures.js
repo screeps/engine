@@ -1297,7 +1297,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(Math.abs(tx-x) > C.NUKE_RANGE || Math.abs(ty-y) > C.NUKE_RANGE) {
             return C.ERR_NOT_IN_RANGE;
         }
-        if(!this.energy < this.energyCapacity || this.ghodium < this.ghodiumCapacity) {
+        if(this.energy < this.energyCapacity || this.ghodium < this.ghodiumCapacity) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
 
