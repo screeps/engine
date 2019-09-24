@@ -898,6 +898,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.room.controller && !this.room.controller.my && this.room.controller.safeMode) {
             return C.ERR_NO_BODYPART;
         }
+        if(_.any(target.effects, e => e.effect == C.EFFECT_INVULNERABILITY && e.ticksRemaining > 0)) {
+            return C.ERR_INVALID_TARGET;
+        }
 
         intents.set(this.id, 'attackController', {id: target.id});
         return C.OK;

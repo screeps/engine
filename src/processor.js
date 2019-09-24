@@ -78,6 +78,9 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                     attackController: null,
                     upgradeController: null
                 };
+                if(object.deployTime) {
+                    roomInfo.active = true;
+                }
             }
             if (object.type == 'link') {
                 object._actionLog = object.actionLog;
@@ -105,11 +108,14 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                     (object.reservation.endTime - gameTime) < (C.CONTROLLER_RESERVE_MAX - C.INVADER_CORE_CONTROLLER_POWER * C.CONTROLLER_RESERVE)) {
                     roomInfo.active = true;
                 }
+                if(object.user && object.user !== '2') {
+                    roomInfo.active = true;
+                }
             }
             if (object.type == 'observer') {
                 object.observeRoom = null;
             }
-            if (object.user && object.user != '3' && !object.userNotActive && object.type != 'flag' && !object.strongholdId) {
+            if (object.user && object.user != '3' && !object.userNotActive && object.type != 'flag' && !object.strongholdId && object.type !== 'controller') {
                 roomInfo.active = true;
             }
             if(object.type == 'powerBank' && gameTime > object.decayTime - 500) {

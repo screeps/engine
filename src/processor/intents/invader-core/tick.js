@@ -6,7 +6,7 @@ var _ = require('lodash'),
 module.exports = function(object, scope) {
     if(!object || object.type != 'invaderCore') return;
 
-    const {roomObjects, bulk} = scope;
+    const {roomObjects, bulk, roomInfo} = scope;
 
     if(object.spawning) {
         object.spawning.remainingTime--;
@@ -28,6 +28,7 @@ module.exports = function(object, scope) {
     }
 
     if(!_.isEqual(object.actionLog, object._actionLog)) {
+        roomInfo.active = true;
         bulk.update(object, {actionLog: object.actionLog});
     }
 };

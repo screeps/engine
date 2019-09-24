@@ -100,7 +100,7 @@ const handleController = function reserveController (context) {
 
     if(roomController) {
         if(roomController.user === core.user) {
-            if(!((core.deployTime-gameTime) % 25)) {
+            if(roomController.downgradeTime - gameTime < C.INVADER_CORE_CONTROLLER_DOWNGRADE - 25) {
                 intents.set(core._id, 'upgradeController', {id: roomController._id});
             }
         } else if(!roomController.reservation || roomController.reservation.user === core.user) {

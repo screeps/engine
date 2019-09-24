@@ -26,20 +26,17 @@ module.exports = function(object, intent, scope) {
 
     const effect = _.find(target.effects, {effect: C.EFFECT_INVULNERABILITY});
     if(effect) {
-        effect.endTime = gameTime + 5000;
-        console.log(`Effects found, new time ${effect.endTime}`);
+        effect.endTime = gameTime + C.INVADER_CORE_CONTROLLER_DOWNGRADE;
     } else {
         target.effects = [{
             effect: C.EFFECT_INVULNERABILITY,
-            endTime: gameTime + 5000,
-            duration: 5000
+            endTime: gameTime + C.INVADER_CORE_CONTROLLER_DOWNGRADE,
+            duration: C.INVADER_CORE_CONTROLLER_DOWNGRADE
         }];
-        console.log(`Effects not found, creating ${JSON.stringify(target.effects)}`);
     }
 
     const upgradePower = strongholds.upgradePowers[object.level-1][target.level-1];
-    console.log(`${object._id}: upgrade power ${upgradePower}`);
-    target.downgradeTime = gameTime + 5000;
+    target.downgradeTime = gameTime + C.INVADER_CORE_CONTROLLER_DOWNGRADE;
     if(target.level < 8) {
         const nextLevelProgress = C.CONTROLLER_LEVELS[target.level];
         if (target.progress + upgradePower >= nextLevelProgress) {
@@ -58,8 +55,6 @@ module.exports = function(object, intent, scope) {
 
     object.actionLog.upgradeController = {x: target.x, y: target.y};
 
-    console.log(`Updating ${JSON.stringify(target)}`);
-
     const effects = target.effects;
     bulk.update(target, { effects: null });
     bulk.update(target, {
@@ -68,7 +63,6 @@ module.exports = function(object, intent, scope) {
         downgradeTime: target.downgradeTime,
         effects
     });
-    console.log(`Updated: ${JSON.stringify(target)}`);
 
     eventLog.push({event: C.EVENT_UPGRADE_CONTROLLER, objectId: object._id, data: {
             amount: upgradePower, energySpent: 0

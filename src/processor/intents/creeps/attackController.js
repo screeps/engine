@@ -26,6 +26,9 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ga
         roomController.upgradeBlocked > gameTime) {
         return;
     }
+    if(_.any(target.effects, e => e.effect == C.EFFECT_INVULNERABILITY && e.endTime > gameTime)) {
+        return;
+    }
 
     if(target.reservation) {
         var effect = Math.floor(_.filter(object.body, (i) => i.hits > 0 && i.type == C.CLAIM).length * C.CONTROLLER_RESERVE);
