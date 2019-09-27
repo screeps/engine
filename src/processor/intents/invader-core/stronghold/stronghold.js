@@ -72,26 +72,34 @@ const deployStronghold = function deployStronghold(context) {
             nextDecayTime: decayTime
         };
 
-        const structures = _.map(template.structures, i => {
-                const s = Object.assign({}, i, {
-                        x: 0+core.x+i.dx,
-                        y: 0+core.y+i.dy,
-                        room: core.room,
-                        user: core.user,
-                        strongholdId: core.strongholdId,
-                        decayTime,
-                        effects: [{
-                            effect: C.EFFECT_COLLAPSE_TIMER,
-                            endTime: gameTime + C.STRONGHOLD_DECAY_TICKS,
-                            duration: C.STRONGHOLD_DECAY_TICKS
-                        }]
-                    }, objectOptions[i.type]||{});
-                delete s.dx;
-                delete s.dy;
-                return s;
-            });
+        _.forEach(template.structures, i => {
+            const x = 0+core.x+i.dx, y = 0+core.y+i.dy;
+            const objectsToRemove =_.filter(roomObjects, o => !o.strongholdId && o.x == x && o.y == y);
+            if(_.some(objectsToRemove)) {
+                _.forEach(objectsToRemove, o => bulk.remove(o._id));
+            }
 
-        _.forEach(structures, s => { if(s.type != C.STRUCTURE_INVADER_CORE) bulk.insert(s) });
+            if(i.type == C.STRUCTURE_INVADER_CORE) {
+                return;
+            }
+
+            const s = Object.assign({}, i, {
+                    x,
+                    y,
+                    room: core.room,
+                    user: core.user,
+                    strongholdId: core.strongholdId,
+                    decayTime,
+                    effects: [{
+                        effect: C.EFFECT_COLLAPSE_TIMER,
+                        endTime: gameTime + C.STRONGHOLD_DECAY_TICKS,
+                        duration: C.STRONGHOLD_DECAY_TICKS
+                    }]
+                }, objectOptions[i.type]||{});
+            delete s.dx;
+            delete s.dy;
+            bulk.insert(s);
+        });
     }
 };
 
