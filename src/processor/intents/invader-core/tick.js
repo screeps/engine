@@ -6,7 +6,25 @@ var _ = require('lodash'),
 module.exports = function(object, scope) {
     if(!object || object.type != 'invaderCore') return;
 
-    const {roomObjects, bulk, roomInfo} = scope;
+    const {roomObjects, roomController, bulk, roomInfo, gameTime} = scope;
+
+    const collapseEffect = _.find(object.effects, {effect: C.EFFECT_COLLAPSE_TIMER});
+    if(collapseEffect && collapseEffect.endTime <= gameTime) {
+        if(roomController) {
+            bulk.update(roomController, {
+                user: null,
+                level: 0,
+                progress: 0,
+                downgradeTime: null,
+                safeMode: null,
+                safeModeAvailable: 0,
+                safeModeCooldown: null,
+                isPowerEnabled: false,
+                effects: null
+            });
+        }
+        return;
+    }
 
     if(object.spawning) {
         object.spawning.remainingTime--;

@@ -342,15 +342,6 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 return;
             }
 
-            if(object.effects) {
-                const collapseEffect = _.find(object.effects, {effect: C.EFFECT_COLLAPSE_TIMER});
-                if(collapseEffect && collapseEffect.endTime <= gameTime) {
-                    bulk.remove(object._id);
-                    delete roomObjects[object._id];
-                    return;
-                }
-            }
-
             if (object.type == 'invaderCore')
                 require('./processor/intents/invader-core/tick')(object, scope);
             if (object.type == 'energy')
@@ -413,6 +404,15 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
 
             if (object.type == 'storage') {
                 require('./processor/intents/storages/tick')(object, scope);
+            }
+
+            if(object.effects) {
+                const collapseEffect = _.find(object.effects, {effect: C.EFFECT_COLLAPSE_TIMER});
+                if(collapseEffect && collapseEffect.endTime <= gameTime) {
+                    bulk.remove(object._id);
+                    delete roomObjects[object._id];
+                    return;
+                }
             }
 
             if(object.type == 'powerBank' || object.type == 'deposit') {
