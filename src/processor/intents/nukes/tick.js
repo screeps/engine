@@ -20,12 +20,12 @@ module.exports = function(object, scope) {
                 return;
             }
             if (target.type == 'creep') {
-                require('../creeps/_die')(target, 0, true, scope);
+                require('../creeps/_die')(target, 0, true, scope, C.EVENT_ATTACK_TYPE_NUKE);
             }
             if (target.type == 'powerCreep') {
                 bulk.update(target, {hits: 0});
             }
-            if(target.type == 'constructionSite' || target.type == 'energy') {
+            if(target.type == 'constructionSite' || target.type == 'energy' || target.type == 'tombstone' || target.type == 'ruin') {
                 bulk.remove(target._id);
                 delete roomObjects[target._id];
             }

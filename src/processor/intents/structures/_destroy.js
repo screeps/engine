@@ -3,7 +3,7 @@ const _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function(object, scope) {
+module.exports = function(object, scope, attackType) {
     const {gameTime, bulk, roomObjects} = scope;
 
     if(object.type == 'spawn' && object.spawning) {
@@ -18,29 +18,32 @@ module.exports = function(object, scope) {
         require('../invader-core/destroy')(object, scope);
     }
 
-    const ruin = {
-        type: 'ruin',
-        room: object.room,
-        x: object.x,
-        y: object.y,
-        structureType: object.type,
-        destroyTime: gameTime,
-        decayTime: gameTime + (C.RUIN_DECAY_STRUCTURES[object.type] || C.RUIN_DECAY)
-    };
-    if(object.user) {
-        ruin.user = object.user
-    }
-    ruin.store = object.store || {};
-
-    if(object.effects) {
-        const keepEffects = _.filter(object.effects, {effect: C.EFFECT_COLLAPSE_TIMER});
-        if(_.some(keepEffects)) {
-            ruin.effects = keepEffects;
-            ruin.decayTime = _.max([ruin.decayTime, _.map(keepEffects, 'endTime')]);
+    if(!attackType || attackType != C.EVENT_ATTACK_TYPE_NUKE) {
+        const ruin = {
+            type: 'ruin',
+            room: object.room,
+            x: object.x,
+            y: object.y,
+            structureType: object.type,
+            destroyTime: gameTime,
+            decayTime: gameTime + (C.RUIN_DECAY_STRUCTURES[object.type] || C.RUIN_DECAY)
+        };
+        if(object.user) {
+            ruin.user = object.user
         }
+        ruin.store = object.store || {};
+
+        if(object.effects) {
+            const keepEffects = _.filter(object.effects, {effect: C.EFFECT_COLLAPSE_TIMER});
+            if(_.some(keepEffects)) {
+                ruin.effects = keepEffects;
+                ruin.decayTime = _.max([ruin.decayTime, _.map(keepEffects, 'endTime')]);
+            }
+        }
+
+        bulk.insert(ruin);
     }
 
-    bulk.insert(ruin);
     bulk.remove(object._id);
     delete roomObjects[object._id];
 };
