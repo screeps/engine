@@ -67,7 +67,9 @@ module.exports = function(object, scope) {
                 });
             }
 
-            if (roomController.user) {
+            if (roomController.user &&
+                !_.some(roomController.effects, e => e.effect == C.EFFECT_INVULNERABILITY && e.endTime > gameTime) &&
+                !roomController.upgradeBlocked || roomController.upgradeBlocked < gameTime) {
                 bulk.update(roomController, {
                     upgradeBlocked: gameTime + C.CONTROLLER_NUKE_BLOCKED_UPGRADE
                 });
