@@ -463,7 +463,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
 
-        const storedAmount = data(target.id).storeCapacityResource ? data(target.id).store[resourceType] : utils.calcResources(target);
+        const storedAmount = data(target.id).storeCapacityResource ? data(target.id).store[resourceType]||0 : utils.calcResources(target);
         const targetCapacity = utils.capacityForResource(data(target.id), resourceType);
 
         if(!data(target.id).store || storedAmount >= targetCapacity) {

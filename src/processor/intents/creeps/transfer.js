@@ -38,6 +38,10 @@ module.exports = function(object, intent, {roomObjects, bulk, eventLog}) {
         amount = targetCapacity - storedAmount;
     }
 
+    if(!amount) {
+        return;
+    }
+
     target.store[resourceType] = (target.store[resourceType] || 0) + amount;
     bulk.update(target, {store: {[resourceType]: target.store[resourceType]}});
 
