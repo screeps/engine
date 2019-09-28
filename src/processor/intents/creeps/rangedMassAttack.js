@@ -44,6 +44,9 @@ module.exports = function(object, intent, scope) {
         if(target.type == 'creep' && target.spawning) {
             continue;
         }
+        if(_.some(target.effects, e => e.endTime >= gameTime && (e.power == C.PWR_FORTIFY || e.effect == C.EFFECT_INVULNERABILITY))) {
+            continue;
+        }
 
         var distance = Math.max(Math.abs(object.x - target.x), Math.abs(object.y - target.y));
 
