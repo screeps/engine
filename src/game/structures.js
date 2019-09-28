@@ -527,7 +527,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     StructurePowerBank.prototype.constructor = StructurePowerBank;
 
     utils.defineGameObjectProperties(StructurePowerBank.prototype, data, {
-        power: (o) => o.power,
+        power: (o) => o.store.power,
         ticksToDecay: (o) => o.nextDecayTime ? o.nextDecayTime - runtimeData.time : o.decayTime ? o.decayTime - runtimeData.time : undefined,
         my: () => false,
         owner: () => ({username: 'Power Bank'})
