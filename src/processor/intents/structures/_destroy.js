@@ -25,7 +25,7 @@ module.exports = function(object, scope) {
         y: object.y,
         structureType: object.type,
         destroyTime: gameTime,
-        decayTime: gameTime + C.RUIN_DECAY
+        decayTime: gameTime + (C.RUIN_DECAY_STRUCTURES[object.type] || C.RUIN_DECAY)
     };
     if(object.user) {
         ruin.user = object.user
