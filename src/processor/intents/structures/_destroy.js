@@ -40,10 +40,9 @@ module.exports = function(object, scope, attackType) {
         ruin.store = object.store || {};
 
         if(object.effects) {
-            const keepEffects = _.filter(object.effects, {effect: C.EFFECT_COLLAPSE_TIMER});
-            if(_.some(keepEffects)) {
-                ruin.effects = keepEffects;
-                ruin.decayTime = _.max([ruin.decayTime, _.map(keepEffects, 'endTime')]);
+            const collapseEffect = _.find(object.effects, {effect: C.EFFECT_COLLAPSE_TIMER});
+            if(collapseEffect) {
+                ruin.decayTime = _.max([ruin.decayTime, collapseEffect.endTime]);
             }
         }
 
