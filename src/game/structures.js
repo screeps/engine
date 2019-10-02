@@ -37,23 +37,22 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
      * @constructor
      */
     var Structure = register.wrapFn(function(id) {
+        if(id) {
+            this.id = id;
+            const _data = data(id);
+            globals.RoomObject.call(this, _data.x, _data.y, _data.room, _data.effects);
 
-        var _data = data(id);
-        globals.RoomObject.call(this, _data.x, _data.y, _data.room, _data.effects);
-        this.id = id;
+            if(_data.type == C.STRUCTURE_CONTROLLER) {
+                register.rooms[_data.room].controller = this;
+            }
 
-        var objectData = data(id);
+            if(_data.type == C.STRUCTURE_STORAGE) {
+                register.rooms[_data.room].storage = this;
+            }
 
-        if(objectData.type == C.STRUCTURE_CONTROLLER) {
-            register.rooms[objectData.room].controller = this;
-        }
-
-        if(objectData.type == C.STRUCTURE_STORAGE) {
-            register.rooms[objectData.room].storage = this;
-        }
-
-        if(objectData.type == C.STRUCTURE_TERMINAL) {
-            register.rooms[objectData.room].terminal = this;
+            if(_data.type == C.STRUCTURE_TERMINAL) {
+                register.rooms[_data.room].terminal = this;
+            }
         }
     });
 
@@ -67,10 +66,13 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     });
 
     Structure.prototype.toString = register.wrapFn(function() {
-        return `[structure (${data(this.id).type}) #${this.id}]`;
+        return `[structure (${this.structureType}) #${this.id}]`;
     });
 
     Structure.prototype.destroy = register.wrapFn(function() {
+        if(!this.room) {
+            return C.ERR_INVALID_TARGET;
+        }
         if(!this.room.controller || !this.room.controller.my) {
             return C.ERR_NOT_OWNER;
         }
@@ -85,7 +87,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     });
 
     Structure.prototype.notifyWhenAttacked = register.wrapFn(function(enabled) {
-
+        if(!this.room) {
+            return C.ERR_INVALID_TARGET;
+        }
         if(this.my === false || (this.room.controller && this.room.controller.owner && !this.room.controller.my)) {
             return C.ERR_NOT_OWNER;
         }
@@ -108,7 +112,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!C.CONTROLLER_STRUCTURES[data(this.id).type]) {
             return true;
         }
-        if(!this.room.controller) {
+        if(!this.room || !this.room.controller) {
             return false;
         }
         return utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id));

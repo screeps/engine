@@ -37,15 +37,36 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     utils.defineGameObjectProperties(Ruin.prototype, data, {
         structureType: o => o.structureType,
-        owner: o => _.isUndefined(o.user) ? undefined : new Object({username: runtimeData.users[o.user].username}),
-        my: o => _.isUndefined(o.user) ? undefined : o.user == runtimeData.user._id,
         destroyTime: o => o.destroyTime,
         ticksToDecay: o => o.decayTime - runtimeData.time,
         store: _storeGetter,
+        structure: o => {
+            if(o.structure.user) {
+                const structure = new globals.OwnedStructure();
+                Object.defineProperties(structure, {
+                    id: { enumerable: true, get() { return o.structure.id; }},
+                    hits: { enumerable: true, get() { return o.structure.hits; }},
+                    hitsMax: { enumerable: true, get() { return o.structure.hitsMax; }},
+                    structureType: { enumerable: true, get() { return o.structure.type }},
+                    owner: { enumerable: true, get() { return { username: runtimeData.users[o.structure.user].username } }},
+                    my: { enumerable: true, get() { return o.structure.user == runtimeData.user._id }}
+                });
+                return structure;
+            }
+
+            const structure = new globals.Structure();
+            Object.defineProperties(structure, {
+                id: { enumerable: true, get() { return o.structure.id; }},
+                hits: { enumerable: true, get() { return o.structure.hits }},
+                hitsMax: { enumerable: true, get() { return o.structure.hitsMax }},
+                structureType: { enumerable: true, get() { return o.structure.type }}
+            });
+            return structure;
+        }
     });
 
     Ruin.prototype.toString = register.wrapFn(function() {
-        return `[ruin (${this.structureType}) #${this.id}]`;
+        return `[ruin (${this.structure.structureType}) #${this.id}]`;
     });
 
     Object.defineProperty(globals, 'Ruin', {enumerable: true, value: Ruin});

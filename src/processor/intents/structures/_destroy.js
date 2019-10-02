@@ -24,7 +24,13 @@ module.exports = function(object, scope, attackType) {
             room: object.room,
             x: object.x,
             y: object.y,
-            structureType: object.type,
+            structure: {
+                id: object._id.toString(),
+                type: object.type,
+                hits: 0,
+                hitsMax: object.hitsMax,
+                user: object.user
+            },
             destroyTime: gameTime,
             decayTime: gameTime + (C.RUIN_DECAY_STRUCTURES[object.type] || C.RUIN_DECAY)
         };
