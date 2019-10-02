@@ -551,9 +551,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     StructurePowerSpawn.prototype.constructor = StructurePowerSpawn;
 
     utils.defineGameObjectProperties(StructurePowerSpawn.prototype, data, {
-        energy: o => o.store ? o.store.energy : 0,
+        energy: o => o.store ? o.store.energy||0 : 0,
         energyCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.energy : 0,
-        power: o => o.store ? o.store.power : 0,
+        power: o => o.store ? o.store.power||0 : 0,
         powerCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.power : 0,
         store: _storeGetter
     });
