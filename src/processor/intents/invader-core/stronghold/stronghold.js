@@ -34,6 +34,7 @@ const deployStronghold = function deployStronghold(context) {
         });
         bulk.update(core, { effects: [{
                 effect: C.EFFECT_COLLAPSE_TIMER,
+                power: C.EFFECT_COLLAPSE_TIMER,
                 endTime: gameTime + C.STRONGHOLD_DECAY_TICKS,
                 duration: C.STRONGHOLD_DECAY_TICKS
             }]});
@@ -92,6 +93,7 @@ const deployStronghold = function deployStronghold(context) {
                     decayTime,
                     effects: [{
                         effect: C.EFFECT_COLLAPSE_TIMER,
+                        power: C.EFFECT_COLLAPSE_TIMER,
                         endTime: gameTime + C.STRONGHOLD_DECAY_TICKS,
                         duration: C.STRONGHOLD_DECAY_TICKS
                     }]

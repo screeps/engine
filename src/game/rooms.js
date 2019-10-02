@@ -1604,6 +1604,7 @@ exports.makePos = function(_register) {
         if(effects) {
             this.effects = _(effects).map(i => ({
                 power: i.power,
+                effect: i.effect,
                 level: i.level,
                 ticksRemaining: i.endTime - runtimeData.time
             })).filter(i => i.ticksRemaining > 0).value();

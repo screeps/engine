@@ -275,6 +275,7 @@ module.exports = function(object, intent, scope) {
         var effects = Object.values(target.effects || []);
         _.remove(effects, {power: intent.power});
         effects.push({
+            effect: intent.power,
             power: intent.power,
             level: creepPower.level,
             endTime: gameTime +
