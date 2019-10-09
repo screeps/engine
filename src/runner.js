@@ -6,13 +6,13 @@ var q = require('q'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-function runUser(userId, onlyInRoom) {
+function runUser(userId) {
 
-    driver.config.emit('runnerLoopStage','runUser', userId, onlyInRoom);
+    driver.config.emit('runnerLoopStage','runUser', userId);
 
     //driver.influxAccumulator.resetTime();
 
-    return driver.makeRuntime(userId, onlyInRoom)
+    return driver.makeRuntime(userId)
         .then(saveResult, saveResult);
 
     function saveResult(runResult) {
@@ -31,7 +31,7 @@ function runUser(userId, onlyInRoom) {
 
         var promises = [];
         if(runResult.memory) {
-            promises.push(driver.saveUserMemory(userId, runResult.memory, onlyInRoom));
+            promises.push(driver.saveUserMemory(userId, runResult.memory));
         }
         if(runResult.memorySegments) {
             promises.push(driver.saveUserMemorySegments(userId, runResult.memorySegments));
@@ -64,14 +64,7 @@ driver.connect('runner')
         return usersQueue.fetch()
             .then((_userId) => {
                 userId = fetchedUserId = _userId;
-                var onlyInRoom;
-                var m = userId.match(/^Invader:(.*)$/);
-                if(m) {
-                    userId = '2';
-                    onlyInRoom = m[1];
-                }
-
-                return runUser(userId, onlyInRoom);
+                return runUser(userId);
             })
             .catch((error) => console.error('Error in runner loop:', _.isObject(error) && error.stack || error))
             .then(() => usersQueue.markDone(fetchedUserId))
