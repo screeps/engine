@@ -26,9 +26,14 @@ module.exports = function(object, scope) {
         return;
     }
 
-    const rewards = coreRewards[object.depositType].slice(0, 1+templates[object.templateName].rewardLevel);
-    // TODO: generate real amounts
-    const store = _.reduce(rewards, (acc, resource) => { acc[resource] = 1; return acc;}, {});
+    const densities = [1, 10, 220, 1400, 5100, 14000, 31500];
+    const amounts = [0, 5000, 25000, 50000, 250000, 500000];
+
+    const rewardLevel = templates[object.templateName].rewardLevel;
+    const rewards = coreRewards[object.depositType].slice(0, 2+rewardLevel);
+    const rewardDensities = densities.slice(0, 2+rewardLevel);
+
+    const store = utils.calcReward(_.object(rewards, rewardDensities), amounts[rewardLevel]);
 
     bulk.update(object, { store });
 };

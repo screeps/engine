@@ -1180,3 +1180,23 @@ exports.capacityForResource = function(object, resourceType) {
         object.storeCapacityResource[resourceType] ||
         Math.max(0, (object.storeCapacity||0) - _.sum(object.storeCapacityResource));
 };
+
+exports.calcReward = function(resourceDensities, targetDensity) {
+    let resources = [];
+    let densities = [];
+    _.forEach(resourceDensities, (density, resource) => {
+        resources.push(resource);
+        densities.push(density);
+    });
+
+    let result = _.times(resources.length, 0);
+    let order = _.shuffle(_.range(resources.length));
+    let currentDensity = 0;
+    for (let i = 0; i < order.length - 1; i++) {
+        result[order[i]] = Math.round(Math.random() * (targetDensity - currentDensity) / densities[order[i]]);
+        currentDensity += result[order[i]] * densities[order[i]];
+    }
+    result[order.length - 1] = Math.round((targetDensity - currentDensity) / densities[order.length - 1]);
+
+    return _.object(resources, result);
+};

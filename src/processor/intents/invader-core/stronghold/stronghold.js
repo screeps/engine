@@ -43,8 +43,6 @@ const deployStronghold = function deployStronghold(context) {
 
         const template = strongholds.templates[core.templateName];
 
-        const store = _.reduce(strongholds.containerRewards, (acc, resource) => { acc[resource] = 1; return acc;}, { energy: 0 });
-
         const objectOptions = {};
         objectOptions[C.STRUCTURE_RAMPART] = {
             hits: C.STRONGHOLD_RAMPART_HITS[template.rewardLevel],
@@ -63,7 +61,7 @@ const deployStronghold = function deployStronghold(context) {
             hits: C.CONTAINER_HITS,
             hitsMax: C.CONTAINER_HITS,
             nextDecayTime: decayTime,
-            store,
+            store: {},
             storeCapacity: 0
         };
         objectOptions[C.STRUCTURE_ROAD] = {
@@ -100,6 +98,11 @@ const deployStronghold = function deployStronghold(context) {
                 }, objectOptions[i.type]||{});
             delete s.dx;
             delete s.dy;
+
+            if(i.type == C.STRUCTURE_CONTAINER) {
+                s.store = utils.calcReward(strongholds.containerRewards, 2000);
+            }
+
             bulk.insert(s);
         });
     }
