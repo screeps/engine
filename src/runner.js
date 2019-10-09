@@ -23,18 +23,11 @@ function runUser(userId, onlyInRoom) {
         if(runResult.console) {
             driver.sendConsoleMessages(userId, runResult.console);
         }
+        if(runResult.error) {
+            driver.sendConsoleError(userId, runResult.error);
+        }
 
         //driver.resetUserRoomVisibility(userId);
-
-        /*return q.when().then(() => runResult.memory ? driver.saveUserMemory(userId, runResult.memory, onlyInRoom) : undefined)
-        .then(() => driver.influxAccumulator.mark('saveUserMemory'))
-        .then(() => runResult.intents ? driver.saveUserIntents(userId, runResult.intents) : undefined)
-        .then(() => driver.influxAccumulator.mark('saveUserIntents'))
-        .then(() => {
-            if(runResult.error) {
-                return q.reject(runResult.error);
-            }
-        });*/
 
         var promises = [];
         if(runResult.memory) {
@@ -53,9 +46,6 @@ function runUser(userId, onlyInRoom) {
         .then(() => {
             driver.config.emit('runnerLoopStage','saveResultFinish', runResult);
             //driver.influxAccumulator.mark('saveUser');
-            if(runResult.error) {
-                return q.reject(runResult.error);
-            }
         })
     }
 }
@@ -83,9 +73,8 @@ driver.connect('runner')
 
                 return runUser(userId, onlyInRoom);
             })
-            .catch((error) => driver.sendConsoleError(userId, error))
-            .then(() => usersQueue.markDone(fetchedUserId))
             .catch((error) => console.error('Error in runner loop:', _.isObject(error) && error.stack || error))
+            .then(() => usersQueue.markDone(fetchedUserId))
             .finally(() => driver.config.emit('runnerLoopStage','finish', userId));
     });
 
