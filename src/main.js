@@ -126,12 +126,15 @@ driver.connect('main')
         driver.queue.create('rooms', 'write'),
         driver.queue.create('users', 'write'),
     ]))
+    .catch((error) => {
+        console.error('Error connecting to driver:', error);
+        process.exit(1);
+    })
     .then((data) => {
         roomsQueue = data[0];
         usersQueue = data[1];
         loop();
-    })
-    .catch((error) => console.log('Error connecting to driver:', error));
+    });
 
 if(typeof self == 'undefined') {
     setInterval(() => {

@@ -526,59 +526,62 @@ function saveRoomHistory(roomId, objects, gameTime) {
 }
 
 
-driver.connect('processor').then(() => driver.queue.create('rooms', 'read'))
-.then(_roomsQueue => {
+driver.connect('processor')
+    .then(() => driver.queue.create('rooms', 'read'))
+    .catch((error) => {
+        console.error('Error connecting to driver:', error);
+        process.exit(1);
+    })
+    .then(_roomsQueue => {
 
-    roomsQueue = _roomsQueue;
+        roomsQueue = _roomsQueue;
 
-    function loop() {
+        function loop() {
 
-        var roomId;
+            var roomId;
 
-        driver.config.emit('processorLoopStage','start');
+            driver.config.emit('processorLoopStage','start');
 
-        roomsQueue.fetch()
-            .then((_roomId) => {
-                driver.config.emit('processorLoopStage','getRoomData', _roomId);
-                roomId = _roomId;
-                return q.all([
-                    driver.getRoomIntents(_roomId),
-                    driver.getRoomObjects(_roomId),
-                    driver.getRoomTerrain(_roomId),
-                    driver.getGameTime(),
-                    driver.getRoomInfo(_roomId),
-                    driver.getRoomFlags(_roomId),
-                ])
-            })
-            .then((result) => {
-                driver.config.emit('processorLoopStage','processRoom', roomId);
-                processRoom(roomId, {
-                    intents: result[0],
-                    roomObjects: result[1].objects,
-                    users: result[1].users,
-                    roomTerrain: result[2],
-                    gameTime: result[3],
-                    roomInfo: result[4],
-                    flags: result[5]
+            roomsQueue.fetch()
+                .then((_roomId) => {
+                    driver.config.emit('processorLoopStage','getRoomData', _roomId);
+                    roomId = _roomId;
+                    return q.all([
+                        driver.getRoomIntents(_roomId),
+                        driver.getRoomObjects(_roomId),
+                        driver.getRoomTerrain(_roomId),
+                        driver.getGameTime(),
+                        driver.getRoomInfo(_roomId),
+                        driver.getRoomFlags(_roomId),
+                    ])
                 })
-                .catch((error) => console.log('Error processing room '+roomId+':', _.isObject(error) ? (error.stack || error) : error))
+                .then((result) => {
+                    driver.config.emit('processorLoopStage','processRoom', roomId);
+                    processRoom(roomId, {
+                        intents: result[0],
+                        roomObjects: result[1].objects,
+                        users: result[1].users,
+                        roomTerrain: result[2],
+                        gameTime: result[3],
+                        roomInfo: result[4],
+                        flags: result[5]
+                    })
+                    .catch((error) => console.log('Error processing room '+roomId+':', _.isObject(error) ? (error.stack || error) : error))
+                    .then(() => {
+                        return driver.clearRoomIntents(roomId);
+                    })
+                    .then(() => roomsQueue.markDone(roomId));
+                })
+                .catch((error) => console.error('Error in processor loop:', _.isObject(error) && error.stack || error))
                 .then(() => {
-                    return driver.clearRoomIntents(roomId);
-                })
-                .then(() => roomsQueue.markDone(roomId));
-            })
-            .catch((error) => console.error('Error in processor loop:', _.isObject(error) && error.stack || error))
-            .then(() => {
-                driver.config.emit('processorLoopStage','finish', roomId);
-                setTimeout(loop, 0)
-            });
-    }
+                    driver.config.emit('processorLoopStage','finish', roomId);
+                    setTimeout(loop, 0)
+                });
+        }
 
-    loop();
+        loop();
 
-}).catch((error) => {
-    console.log('Error connecting to driver:', error);
-});
+    });
 
 
 if(typeof self == 'undefined') {

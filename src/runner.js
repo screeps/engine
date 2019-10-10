@@ -51,29 +51,31 @@ function runUser(userId) {
 }
 
 driver.connect('runner')
-.then(() => driver.queue.create('users', 'read'))
-.then(_usersQueue => {
+    .then(() => driver.queue.create('users', 'read'))
+    .catch((error) => {
+        console.error('Error connecting to driver:', error);
+        process.exit(1);
+    })
+    .then(_usersQueue => {
 
-    var usersQueue = _usersQueue;
+        var usersQueue = _usersQueue;
 
-    driver.startLoop('runner', function() {
-        var userId, fetchedUserId;
+        driver.startLoop('runner', function() {
+            var userId, fetchedUserId;
 
-        driver.config.emit('runnerLoopStage','start');
+            driver.config.emit('runnerLoopStage','start');
 
-        return usersQueue.fetch()
-            .then((_userId) => {
-                userId = fetchedUserId = _userId;
-                return runUser(userId);
-            })
-            .catch((error) => console.error('Error in runner loop:', _.isObject(error) && error.stack || error))
-            .then(() => usersQueue.markDone(fetchedUserId))
-            .finally(() => driver.config.emit('runnerLoopStage','finish', userId));
+            return usersQueue.fetch()
+                .then((_userId) => {
+                    userId = fetchedUserId = _userId;
+                    return runUser(userId);
+                })
+                .catch((error) => console.error('Error in runner loop:', _.isObject(error) && error.stack || error))
+                .then(() => usersQueue.markDone(fetchedUserId))
+                .finally(() => driver.config.emit('runnerLoopStage','finish', userId));
+        });
+
     });
-
-}).catch((error) => {
-    console.log('Error connecting to driver:', error);
-});
 
 
 if(typeof self == 'undefined') {
