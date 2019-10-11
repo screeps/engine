@@ -102,7 +102,7 @@ module.exports = function(object, intent, scope) {
         }
 
         case C.PWR_OPERATE_EXTENSION: {
-            if(!target.store || target.type != 'storage' && target.type != 'terminal' && target.type !== 'container') {
+            if(!target.store || target.type != 'storage' && target.type != 'terminal' && target.type != 'factory' && target.type !== 'container') {
                 return;
             }
             var effect = _.find(target.effects, {power: C.PWR_DISRUPT_TERMINAL});
