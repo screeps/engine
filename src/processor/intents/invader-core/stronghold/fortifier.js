@@ -2,16 +2,22 @@ const _ = require('lodash'),
     utils = require('../../../../utils'),
     driver = utils.getDriver(),
     C = driver.constants,
-    fakeRuntime = require('../../../common/fake-runtime');
+    fakeRuntime = require('../../../common/fake-runtime'),
+    defence = require('./defence');
 
 module.exports = function(creep, context) {
-    const { ramparts, intents, scope } = context;
+    const { ramparts, intents } = context;
 
     if(!creep.store.energy || !_.some(ramparts)) {
         return;
     }
 
-    const weakestRampart = _.max(ramparts, r => r.hitsMax - r.hits);
+    const repairRamparts = _.filter(ramparts, r => r.hitsTarget &&  r.hits < r.hitsTarget);
+    if(!_.some(repairRamparts)) {
+        return;
+    }
+
+    const weakestRampart = _.min(repairRamparts, 'hits');
     if(!weakestRampart) {
         return;
     }
@@ -21,7 +27,9 @@ module.exports = function(creep, context) {
         return;
     }
 
-    fakeRuntime.walkTo(creep, weakestRampart, { range: 3}, context);
-    const weakestInRange = _.max(_.filter(ramparts, r => utils.dist(creep, r) <= 3), r => r.hitsMax - r.hits);
+    const safeMatrixCallback = defence.createSafeMatrixCallback(context);
+
+    fakeRuntime.walkTo(creep, weakestRampart, { range: 3, costCallback: safeMatrixCallback }, context);
+    const weakestInRange = _.min(_.filter(repairRamparts, r => utils.dist(creep, r) <= 3), 'hits');
     intents.set(creep._id, 'repair', {id: weakestInRange._id, x: weakestInRange.x, y: weakestInRange.y});
 };

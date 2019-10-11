@@ -2,33 +2,17 @@ const _ = require('lodash'),
     utils = require('../../../../utils'),
     driver = utils.getDriver(),
     C = driver.constants,
-    fakeRuntime = require('../../../common/fake-runtime');
+    fakeRuntime = require('../../../common/fake-runtime'),
+    defence = require('./defence');
 
 module.exports = function(creep, context) {
-    const { hostiles, ramparts, intents, scope, roomObjects } = context;
+    const { hostiles, intents, scope } = context;
 
     if(!_.some(hostiles)) {
         return;
     }
 
-    const safeMatrixCallback = function safeMatrixCallback(room) {
-        const matrix = new fakeRuntime.CostMatrix();
-        for(let i = 0; i < 50; i++)
-            for(let j = 0; j < 50; j++)
-                matrix.set(i, j, Infinity);
-
-        for(let rampart of ramparts) {
-            matrix.set(rampart.x, rampart.y, 1);
-        }
-
-        _.forEach(roomObjects, object => {
-            if(object.type != 'creep' && _.includes(C.OBSTACLE_OBJECT_TYPES, object.type)) {
-                matrix.set(object.x, object.y, Infinity);
-            }
-        });
-
-        return matrix;
-    };
+    const safeMatrixCallback = defence.createSafeMatrixCallback(context);
 
     const target = fakeRuntime.findClosestByPath(creep, hostiles, { costCallback: safeMatrixCallback }, scope);
 

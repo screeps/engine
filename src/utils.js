@@ -1181,7 +1181,7 @@ exports.capacityForResource = function(object, resourceType) {
         Math.max(0, (object.storeCapacity||0) - _.sum(object.storeCapacityResource));
 };
 
-exports.calcReward = function(resourceDensities, targetDensity) {
+exports.calcReward = function(resourceDensities, targetDensity, itemsLimit) {
     let resources = [];
     let densities = [];
     _.forEach(resourceDensities, (density, resource) => {
@@ -1189,14 +1189,17 @@ exports.calcReward = function(resourceDensities, targetDensity) {
         densities.push(density);
     });
 
-    let result = _.times(resources.length, 0);
     let order = _.shuffle(_.range(resources.length));
+    if(itemsLimit) {
+        order = order.slice(0, itemsLimit);
+    }
+    let result = _.times(order.length, 0);
     let currentDensity = 0;
     for (let i = 0; i < order.length - 1; i++) {
-        result[order[i]] = Math.round(Math.random() * (targetDensity - currentDensity) / densities[order[i]]);
-        currentDensity += result[order[i]] * densities[order[i]];
+        result[i] = Math.round(Math.random() * (targetDensity - currentDensity) / densities[order[i]]);
+        currentDensity += result[i] * densities[order[i]];
     }
     result[order.length - 1] = Math.round((targetDensity - currentDensity) / densities[order.length - 1]);
 
-    return _.object(resources, result);
+    return _.object(order.map(i => resources[i]), result);
 };

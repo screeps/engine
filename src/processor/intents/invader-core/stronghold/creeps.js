@@ -28,8 +28,12 @@ module.exports = {
         {part: C.ATTACK, count: 25, boost: 'UH2O'},
         {part: C.MOVE, count: 25}
     ]),
-    'fullBoostedDefender': makeBody([
-        {part: C.ATTACK, count: 40, boost: 'XUH2O'},
-        {part: C.MOVE, count: 10, boost: 'XZGO2'}
+    'fullBoostedMelee': makeBody([
+        {part: C.ATTACK, count: 44, boost: 'XUH2O'},
+        {part: C.MOVE, count: 6, boost: 'XZHO2'}
+    ]),
+    'fullBoostedRanger': makeBody([
+        {part: C.RANGED_ATTACK, count: 44, boost: 'XKHO2'},
+        {part: C.MOVE, count: 6, boost: 'XZHO2'}
     ]),
 };
