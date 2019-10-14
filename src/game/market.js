@@ -63,6 +63,9 @@ exports.make = function(runtimeData, intents, register) {
         }),
 
         createOrder: register.wrapFn(function(type, resourceType, price, totalAmount, roomName) {
+            if(_.isObject(type)) {
+                var {type, resourceType, price, totalAmount, roomName} = type;
+            }
             if(!_.contains(C.RESOURCES_ALL, resourceType) && !_.contains(C.INTERSHARD_RESOURCES, resourceType)) {
                 return C.ERR_INVALID_ARGS;
             }
