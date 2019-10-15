@@ -41,9 +41,9 @@ module.exports = function(object, {roomObjects, bulkObjects, bulkUsersPowerCreep
                     bulkObjects.update(container, {store: {[resourceType]: container.store[resourceType]}});
                     amount -= toContainerAmount;
                 }
-                if(amount > 0){
-                    tombstone.store[resourceType] = (tombstone.store[resourceType] || 0) + amount;
-                }
+            }
+            if(amount > 0){
+                tombstone.store[resourceType] = (tombstone.store[resourceType] || 0) + amount;
             }
         })
     }
