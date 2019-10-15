@@ -18,16 +18,11 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     var Store = register.wrapFn(function(object) {
 
-        Object.defineProperties(this,
-            C.RESOURCES_ALL.reduce((result, resource) => {
-                result[resource] = {
-                    value: object.store[resource]||0,
-                    enumerable: object.store[resource],
-                    configurable: true,
-                    writable: true
-                };
-                return result;
-            }, {}));
+        Object.entries(object.store).forEach(([resourceType, resourceAmount]) => {
+            if(resourceAmount) {
+                this[resourceType] = resourceAmount;
+            }
+        });
 
         Object.defineProperties(this, {
             getCapacity: {
@@ -60,6 +55,17 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             toString: {
                 value: function toString() {
                     return `[store]`;
+                }
+            }
+        });
+
+        return new Proxy(this, {
+            get(target, name) {
+                if(target[name]) {
+                    return target[name];
+                }
+                if(C.RESOURCES_ALL.indexOf(name) !== -1) {
+                    return 0;
                 }
             }
         });
