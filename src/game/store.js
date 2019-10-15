@@ -40,7 +40,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                             return null;
                         }
                         if(this._sum === undefined) {
-                            this._sum = _.sum(object.store);
+                            Object.defineProperty(this, '_sum', {
+                                value: _.sum(object.store)
+                            });
                         }
                         return this._sum;
                     }
