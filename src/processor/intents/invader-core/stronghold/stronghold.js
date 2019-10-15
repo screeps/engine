@@ -24,7 +24,7 @@ const deployStronghold = function deployStronghold(context) {
     const { scope, core, ramparts, bulk, gameTime } = context;
     const { roomObjects } = scope;
 
-    if(core.deployTime && (core.deployTime <= gameTime)) {
+    if(core.deployTime && (core.deployTime <= (gameTime-1))) {
         const decayTime = gameTime + C.STRONGHOLD_DECAY_TICKS;
 
         bulk.update(core, {
