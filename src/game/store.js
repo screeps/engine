@@ -61,7 +61,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
         return new Proxy(this, {
             get(target, name) {
-                if(target[name]) {
+                if(target[name] !== undefined) {
                     return target[name];
                 }
                 if(C.RESOURCES_ALL.indexOf(name) !== -1) {
