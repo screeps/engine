@@ -7,7 +7,7 @@ module.exports = function(object, target, damage, attackType, scope) {
 
     const {roomObjects, bulk, roomController, gameTime, roomInfo, eventLog} = scope;
 
-    if(!target.hits) {
+    if(!target._id || !target.hits) {
         return;
     }
 
