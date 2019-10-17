@@ -35,13 +35,14 @@ module.exports = function(object, intent, {roomObjects, bulk, gameTime, eventLog
         };
     }
 
-    target.reservation.endTime += effect;
-    if(target.reservation.endTime > gameTime + C.CONTROLLER_RESERVE_MAX) {
+
+    if(target.reservation.endTime + effect > gameTime + C.CONTROLLER_RESERVE_MAX) {
         return;
     }
 
     object.actionLog.reserveController = {x: target.x, y: target.y};
 
+    target.reservation.endTime += effect;
     bulk.update(target, {reservation: target.reservation});
 
     eventLog.push({event: C.EVENT_RESERVE_CONTROLLER, objectId: object._id, data: {amount: effect}});
