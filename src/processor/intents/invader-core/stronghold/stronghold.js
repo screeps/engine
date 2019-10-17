@@ -190,7 +190,7 @@ const focusClosest = function focusClosest(context) {
 };
 
 const focusMax = function focusMax(context) {
-    const {intents, defenders, hostiles, towers} = context;
+    const {intents, defenders, hostiles, towers, gameTime} = context;
 
     if(!_.some(hostiles)) {
         return false;
