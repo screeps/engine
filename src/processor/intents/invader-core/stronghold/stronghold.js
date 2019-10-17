@@ -25,7 +25,8 @@ const deployStronghold = function deployStronghold(context) {
     const { roomObjects } = scope;
 
     if(core.deployTime && (core.deployTime <= (gameTime-1))) {
-        const decayTime = gameTime + C.STRONGHOLD_DECAY_TICKS;
+        const duration = Math.round(C.STRONGHOLD_DECAY_TICKS * (0.9 + Math.random() * 0.2));
+        const decayTime = gameTime + duration;
 
         bulk.update(core, {
             deployTime: null,
@@ -37,8 +38,8 @@ const deployStronghold = function deployStronghold(context) {
         bulk.update(core, { effects: [{
                 effect: C.EFFECT_COLLAPSE_TIMER,
                 power: C.EFFECT_COLLAPSE_TIMER,
-                endTime: gameTime + C.STRONGHOLD_DECAY_TICKS,
-                duration: C.STRONGHOLD_DECAY_TICKS
+                endTime: gameTime + duration,
+                duration
             }]});
 
         _.forEach(ramparts, rampart => {bulk.remove(rampart._id); delete roomObjects[rampart._id]});
@@ -95,8 +96,8 @@ const deployStronghold = function deployStronghold(context) {
                     effects: [{
                         effect: C.EFFECT_COLLAPSE_TIMER,
                         power: C.EFFECT_COLLAPSE_TIMER,
-                        endTime: gameTime + C.STRONGHOLD_DECAY_TICKS,
-                        duration: C.STRONGHOLD_DECAY_TICKS
+                        endTime: gameTime + duration,
+                        duration
                     }]
                 }, objectOptions[i.type]||{});
             delete s.dx;
