@@ -325,7 +325,7 @@ function _findClosestByPath2(fromPos, objects, opts) {
         if(i.pos) {
             i = i.pos;
         }
-        return {range: 1, pos: i};
+        return {range: opts.range || 1, pos: i};
     });
 
     if(opts.avoid) {
