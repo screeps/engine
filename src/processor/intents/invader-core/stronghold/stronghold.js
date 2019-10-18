@@ -24,23 +24,23 @@ const deployStronghold = function deployStronghold(context) {
     const { scope, core, ramparts, bulk, gameTime } = context;
     const { roomObjects } = scope;
 
-    if(core.deployTime && (core.deployTime <= (gameTime-1))) {
+    if(core.deployTime && (core.deployTime <= (1+gameTime))) {
         const duration = Math.round(C.STRONGHOLD_DECAY_TICKS * (0.9 + Math.random() * 0.2));
         const decayTime = gameTime + duration;
 
+        core.effects.push({
+            effect: C.EFFECT_COLLAPSE_TIMER,
+            power: C.EFFECT_COLLAPSE_TIMER,
+            endTime: gameTime + duration,
+            duration
+        });
         bulk.update(core, {
             deployTime: null,
             decayTime,
             hits: C.INVADER_CORE_HITS,
             hitsMax: C.INVADER_CORE_HITS,
-            effects: null
+            effects: core.effects
         });
-        bulk.update(core, { effects: [{
-                effect: C.EFFECT_COLLAPSE_TIMER,
-                power: C.EFFECT_COLLAPSE_TIMER,
-                endTime: gameTime + duration,
-                duration
-            }]});
 
         _.forEach(ramparts, rampart => {bulk.remove(rampart._id); delete roomObjects[rampart._id]});
 
