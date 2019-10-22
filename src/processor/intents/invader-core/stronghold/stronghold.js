@@ -9,6 +9,8 @@ const _ = require('lodash'),
     fortifier = require('./fortifier'),
     simpleMelee = require('./simple-melee');
 
+const towerRefillChance = [0,0.1,0.3,0.5,1,1];
+
 const range = function(a, b) {
     if(
         _.isUndefined(a) || _.isUndefined(a.x) || _.isUndefined(a.y) || _.isUndefined(a.room) ||
@@ -130,7 +132,11 @@ const handleController = function reserveController (context) {
 
 const refillTowers = function refillTowers(context) {
     const {core, intents, towers, ramparts} = context;
-    const underchargedTowers = _.filter(towers, t => (2*t.store.energy <= t.storeCapacityResource.energy) && _.some(ramparts, {x: t.x, y: t.y}));
+    if(towerRefillChance[core.level] < Math.random()) {
+        return false;
+    }
+
+    const underchargedTowers = _.filter(towers, t => (2*t.store.energy <= C.TOWER_ENERGY_COST) && _.some(ramparts, {x: t.x, y: t.y}));
     if(_.some(underchargedTowers)) {
         const towerToCharge = _.min(underchargedTowers, 'store.energy');
         if(towerToCharge) {
