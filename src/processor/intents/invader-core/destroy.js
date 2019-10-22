@@ -36,4 +36,6 @@ module.exports = function(object, scope) {
     const store = utils.calcReward(_.object(rewards, rewardDensities), amounts[rewardLevel]);
 
     bulk.update(object, { store });
+
+    driver.config.emit('strongholdDestroyed', object, scope);
 };
