@@ -48,8 +48,8 @@ exports.make = function(runtimeData, intents, register) {
                     return {};
                 }
                 cachedHistory[resourceType] = JSON.parse(JSON.stringify(runtimeData.market.history[resourceType] || {}));
-                return cachedHistory[resourceType];
             }
+            return cachedHistory[resourceType];
         }),
 
         getOrderById: register.wrapFn(function(id) {
