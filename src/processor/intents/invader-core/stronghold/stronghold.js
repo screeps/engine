@@ -9,7 +9,7 @@ const _ = require('lodash'),
     fortifier = require('./fortifier'),
     simpleMelee = require('./simple-melee');
 
-const towerRefillChance = [0,0.1,0.3,0.5,1,1];
+const towerRefillChance = [0,0.01,0.1,0.3,1,1];
 
 const range = function(a, b) {
     if(
@@ -136,7 +136,7 @@ const refillTowers = function refillTowers(context) {
         return false;
     }
 
-    const underchargedTowers = _.filter(towers, t => (2*t.store.energy <= C.TOWER_ENERGY_COST) && _.some(ramparts, {x: t.x, y: t.y}));
+    const underchargedTowers = _.filter(towers, t => (t.store.energy <= 2*C.TOWER_ENERGY_COST) && _.some(ramparts, {x: t.x, y: t.y}));
     if(_.some(underchargedTowers)) {
         const towerToCharge = _.min(underchargedTowers, 'store.energy');
         if(towerToCharge) {
