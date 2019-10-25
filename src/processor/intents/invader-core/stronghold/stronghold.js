@@ -92,7 +92,6 @@ const deployStronghold = function deployStronghold(context) {
                     x,
                     y,
                     room: core.room,
-                    user: core.user,
                     strongholdId: core.strongholdId,
                     decayTime,
                     effects: [{
@@ -104,6 +103,10 @@ const deployStronghold = function deployStronghold(context) {
                 }, objectOptions[i.type]||{});
             delete s.dx;
             delete s.dy;
+
+            if(i.type == C.STRUCTURE_TOWER || i.type == C.STRUCTURE_RAMPART) {
+                s.user = core.user;
+            }
 
             if(i.type == C.STRUCTURE_CONTAINER) {
                 s.store = utils.calcReward(strongholds.containerRewards, containerAmounts[template.rewardLevel], 3);
