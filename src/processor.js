@@ -440,6 +440,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 //userVisibility[object.user] = true;
 
                 if(object.type != 'constructionSite' && !object.newbieWall &&
+                    object.type != 'ruin' && object.type != 'tombstone' &&
                    (object.type != 'rampart' || !object.isPublic)) {
                     mapView[object.user] = mapView[object.user] || [];
                     mapView[object.user].push([object.x, object.y]);
