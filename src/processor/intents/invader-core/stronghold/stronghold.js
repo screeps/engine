@@ -77,6 +77,7 @@ const deployStronghold = function deployStronghold(context) {
             nextDecayTime: decayTime
         };
 
+        let createdStructureCounter = 1;
         _.forEach(template.structures, i => {
             const x = 0+core.x+i.dx, y = 0+core.y+i.dy;
             const objectsToRemove =_.filter(roomObjects, o => !o.strongholdId && o.x == x && o.y == y);
@@ -113,6 +114,8 @@ const deployStronghold = function deployStronghold(context) {
             }
 
             bulk.insert(s);
+            roomObjects['deployedStructure'+createdStructureCounter] = s;
+            createdStructureCounter++;
         });
     }
 };
