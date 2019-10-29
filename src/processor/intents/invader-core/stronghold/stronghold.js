@@ -289,6 +289,9 @@ const antinuke = function antinuke(context) {
 
     const baseLevel = C.STRONGHOLD_RAMPART_HITS[core.level];
     for(let rampart of ramparts) {
+        if(_.some(roomObjects, {type: C.STRUCTURE_CONTAINER, x: rampart.x, y: rampart.y})) {
+            continue;
+        }
         let hitsTarget = baseLevel;
         _.forEach(nukes, n => {
             const range = utils.dist(rampart, n);

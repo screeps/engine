@@ -12,24 +12,24 @@ module.exports = function(creep, context) {
         return;
     }
 
-    const repairRamparts = _.filter(ramparts, r => r.hitsTarget &&  r.hits < r.hitsTarget);
+    const repairRamparts = _.filter(ramparts, r => r.hitsTarget && r.hits < r.hitsTarget);
     if(!_.some(repairRamparts)) {
         return;
     }
 
-    const weakestRampart = _.min(repairRamparts, 'hits');
-    if(!weakestRampart) {
+    const target = _.first(repairRamparts);
+    if(!target) {
         return;
     }
 
-    if(utils.dist(creep, weakestRampart) <= 3) {
-        intents.set(creep._id, 'repair', {id: weakestRampart._id, x: weakestRampart.x, y: weakestRampart.y});
+    if(utils.dist(creep, target) <= 3) {
+        intents.set(creep._id, 'repair', {id: target._id, x: target.x, y: target.y});
         return;
     }
 
     const safeMatrixCallback = defence.createSafeMatrixCallback(context);
 
-    fakeRuntime.walkTo(creep, weakestRampart, { range: 3, costCallback: safeMatrixCallback }, context);
-    const weakestInRange = _.min(_.filter(repairRamparts, r => utils.dist(creep, r) <= 3), 'hits');
-    intents.set(creep._id, 'repair', {id: weakestInRange._id, x: weakestInRange.x, y: weakestInRange.y});
+    fakeRuntime.walkTo(creep, target, { range: 3, costCallback: safeMatrixCallback }, context);
+    const targetInRange = _.first(_.filter(repairRamparts, r => utils.dist(creep, r) <= 3));
+    intents.set(creep._id, 'repair', {id: targetInRange._id, x: targetInRange.x, y: targetInRange.y});
 };
