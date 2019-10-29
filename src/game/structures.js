@@ -1271,9 +1271,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     StructureNuker.prototype.constructor = StructureNuker;
 
     utils.defineGameObjectProperties(StructureNuker.prototype, data, {
-        energy: o => o.store ? o.store.energy : 0,
+        energy: o => o.store ? o.store.energy || 0 : 0,
         energyCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.energy : 0,
-        ghodium: o => o.store ? o.store.G : 0,
+        ghodium: o => o.store ? o.store.G || 0 : 0,
         ghodiumCapacity: o => o.storeCapacityResource ? o.storeCapacityResource.G : 0,
         cooldown: o => o.cooldownTime && o.cooldownTime > runtimeData.time ? o.cooldownTime - runtimeData.time : 0,
         store: _storeGetter
