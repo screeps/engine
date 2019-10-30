@@ -61,7 +61,7 @@ module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, stats, 
             nextLevelProgress = 4;
         }
         if (target.progress + boostedEffect >= nextLevelProgress &&
-            target.downgradeTime >= gameTime + C.CONTROLLER_DOWNGRADE[target.level]) {
+            target.downgradeTime + C.CONTROLLER_DOWNGRADE_RESTORE >= gameTime + C.CONTROLLER_DOWNGRADE[target.level]) {
 
             target.progress = target.progress + boostedEffect - nextLevelProgress;
             target.level++;
