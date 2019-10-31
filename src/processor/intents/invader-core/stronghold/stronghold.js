@@ -2,12 +2,9 @@ const _ = require('lodash'),
     utils = require('../../../../utils'),
     driver = utils.getDriver(),
     C = driver.constants,
-    fakeRuntime = require('../../../common/fake-runtime'),
     strongholds = driver.strongholds,
     defence = require('./defence'),
-    creeps = require('./creeps'),
-    fortifier = require('./fortifier'),
-    simpleMelee = require('./simple-melee');
+    creeps = require('./creeps');
 
 const towerRefillChance = [0,0.01,0.1,0.3,1,1];
 
@@ -280,6 +277,21 @@ const maintainCreep = function maintainCreep(name, setup, context, behavior) {
     }
 };
 
+const maintainPopulation = function(context) {
+    const {core} = context;
+
+    if(!core.population) {
+        return;
+    }
+
+    for(let i in core.population) {
+        maintainCreep(`defender${i}`,
+            creeps.bodies[core.population[i].body],
+            context,
+            creeps.behaviors[core.population[i].behavior]);
+    }
+};
+
 const antinuke = function antinuke(context) {
     const { core, ramparts, roomObjects, bulk, gameTime } = context;
     if(!!(gameTime % 10)) {
@@ -329,7 +341,14 @@ module.exports = {
             handleController(context);
             refillTowers(context) || refillCreeps(context);
 
-            maintainCreep('defender1', creeps['weakDefender'], context, simpleMelee);
+            const { core, bulk } = context;
+            if(!core.population) {
+                bulk.update(core, {
+                    population: [{body: 'weakDefender', behavior: 'simple-melee'}]
+                });
+            }
+
+            maintainPopulation(context);
 
             focusClosest(context);
         },
@@ -337,8 +356,17 @@ module.exports = {
             handleController(context);
             refillTowers(context);
 
-            maintainCreep('defender1', creeps['fullDefender'], context, simpleMelee);
-            maintainCreep('defender2', creeps['fullDefender'], context, simpleMelee);
+            const { core, bulk } = context;
+            if(!core.population) {
+                bulk.update(core, {
+                    population: [
+                        {body: 'fullDefender', behavior: 'simple-melee'},
+                        {body: 'fullDefender', behavior: 'simple-melee'},
+                    ]
+                });
+            }
+
+            maintainPopulation(context);
 
             focusClosest(context);
         },
@@ -346,16 +374,43 @@ module.exports = {
             handleController(context);
             refillTowers(context);
 
-            maintainCreep('defender1', creeps['boostedDefender'], context, simpleMelee);
-            maintainCreep('defender2', creeps['boostedDefender'], context, simpleMelee);
-            maintainCreep('defender3', creeps['boostedDefender'], context, simpleMelee);
-            maintainCreep('defender4', creeps['boostedDefender'], context, simpleMelee);
+
+            const { core, bulk } = context;
+            if(!core.population) {
+                const populationDeck = [
+                    {body: 'fortifier', behavior: 'fortifier'},
+                    ...new Array(4).fill({body: 'boostedDefender', behavior: 'coordinated'}),
+                    ...new Array(3).fill({body: 'boostedRanger', behavior: 'coordinated'})
+                ];
+
+                bulk.update(core, {
+                    population: _(populationDeck).shuffle().take(4).value()
+                });
+            }
+
+            maintainPopulation(context);
 
             focusMax(context);
         },
         'bunker5': function(context) {
             handleController(context);
             refillTowers(context) || refillCreeps(context);
+
+            const { core, bulk } = context;
+            if(!core.population) {
+                const populationDeck = _.shuffle([
+                    {body: 'fortifier', behavior: 'fortifier'},
+                    ...new Array(7).fill({body: 'fullBoostedMelee', behavior: 'coordinated'}),
+                    ...new Array(9).fill({body: 'fullBoostedRanger', behavior: 'coordinated'})
+                ]);
+
+                bulk.update(core, {
+                    population: [
+                        {body: 'fortifier', behavior: 'fortifier'},
+                        ..._(populationDeck).shuffle().take(8).value()
+                    ]
+                });
+            }
 
             antinuke(context);
 
@@ -379,30 +434,9 @@ module.exports = {
             if(_.some(rangerSpots) && _.some(rangers)) {
                 Object.assign(spots, defence.distribute(rangerSpots, rangers));
             }
+            context.spots = spots;
 
-            const coordinatedDefender = (creep, context) => {
-                for(let spot in spots) {
-                    const creep = context.roomObjects[spots[spot]];
-                    if(!creep) {
-                        continue;
-                    }
-                    if(50*creep.x+creep.y == spot) {
-                        continue;
-                    }
-                    const safeMatrixCallback = defence.createSafeMatrixCallback(context);
-                    fakeRuntime.walkTo(creep, {x:Math.floor(spot/50), y:spot%50, room: creep.room},{ range: 0, costCallback: safeMatrixCallback }, context);
-                }
-            };
-
-            maintainCreep('fortifier', creeps['fortifier'], context, fortifier);
-            maintainCreep('defender1', creeps['fullBoostedMelee'], context, coordinatedDefender);
-            maintainCreep('defender2', creeps['fullBoostedMelee'], context, coordinatedDefender);
-            maintainCreep('defender3', creeps['fullBoostedRanger'], context, coordinatedDefender);
-            maintainCreep('defender4', creeps['fullBoostedRanger'], context, coordinatedDefender);
-            maintainCreep('defender5', creeps['fullBoostedRanger'], context, coordinatedDefender);
-            maintainCreep('defender6', creeps['fullBoostedRanger'], context, coordinatedDefender);
-            maintainCreep('defender7', creeps['fullBoostedRanger'], context, coordinatedDefender);
-            maintainCreep('defender8', creeps['fullBoostedRanger'], context, coordinatedDefender);
+            maintainPopulation(context);
 
             focusMax(context);
         },
