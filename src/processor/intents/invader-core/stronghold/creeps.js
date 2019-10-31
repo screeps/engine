@@ -87,7 +87,9 @@ const behaviors = {
 
         fakeRuntime.walkTo(creep, target, { range: 3, costCallback: safeMatrixCallback }, context);
         const targetInRange = _.first(_.filter(repairRamparts, r => utils.dist(creep, r) <= 3));
-        intents.set(creep._id, 'repair', {id: targetInRange._id, x: targetInRange.x, y: targetInRange.y});
+        if(targetInRange) {
+            intents.set(creep._id, 'repair', {id: targetInRange._id, x: targetInRange.x, y: targetInRange.y});
+        }
     }
 };
 
