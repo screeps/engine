@@ -321,6 +321,31 @@ const antinuke = function antinuke(context) {
     }
 };
 
+const assignDefenders = function assignDefenders(context) {
+    let rangerSpots = [], meleeSpots = [];
+    _.forEach(context.hostiles, h => {
+        meleeSpots.push(..._.filter(context.ramparts, r => utils.dist(h, r) <= 1));
+        rangerSpots.push(..._.filter(context.ramparts, r => utils.dist(h, r) <= 3));
+    });
+    meleeSpots = _.unique(meleeSpots);
+    rangerSpots = _.unique(_.without(rangerSpots, ...meleeSpots));
+    const rangers = [], melees = [];
+    _.forEach(context.defenders, d => {
+        if(_.some(d.body, {type: C.ATTACK})) { melees.push(d._id.toString()); }
+        if(_.some(d.body, {type: C.RANGED_ATTACK})) { rangers.push(d._id.toString()); }
+    });
+
+    let spots = {};
+    if(_.some(meleeSpots) && _.some(melees)) {
+        spots = defence.distribute(meleeSpots, melees);
+    }
+    if(_.some(rangerSpots) && _.some(rangers)) {
+        Object.assign(spots, defence.distribute(rangerSpots, rangers));
+    }
+
+    return spots;
+};
+
 module.exports = {
     behaviors: {
         'deploy': function(context) {
@@ -388,6 +413,8 @@ module.exports = {
                 });
             }
 
+            context.spots = assignDefenders(context);
+
             maintainPopulation(context);
 
             focusMax(context);
@@ -414,27 +441,7 @@ module.exports = {
 
             antinuke(context);
 
-            let rangerSpots = [], meleeSpots = [];
-            _.forEach(context.hostiles, h => {
-                meleeSpots.push(..._.filter(context.ramparts, r => utils.dist(h, r) <= 1));
-                rangerSpots.push(..._.filter(context.ramparts, r => utils.dist(h, r) <= 3));
-            });
-            meleeSpots = _.unique(meleeSpots);
-            rangerSpots = _.unique(_.without(rangerSpots, ...meleeSpots));
-            const rangers = [], melees = [];
-            _.forEach(context.defenders, d => {
-                if(_.some(d.body, {type: C.ATTACK})) { melees.push(d._id.toString()); }
-                if(_.some(d.body, {type: C.RANGED_ATTACK})) { rangers.push(d._id.toString()); }
-            });
-
-            let spots = {};
-            if(_.some(meleeSpots) && _.some(melees)) {
-                spots = defence.distribute(meleeSpots, melees);
-            }
-            if(_.some(rangerSpots) && _.some(rangers)) {
-                Object.assign(spots, defence.distribute(rangerSpots, rangers));
-            }
-            context.spots = spots;
+            context.spots = assignDefenders(context);
 
             maintainPopulation(context);
 
