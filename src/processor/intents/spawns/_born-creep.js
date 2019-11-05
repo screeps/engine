@@ -26,8 +26,8 @@ module.exports = function(spawn, creep, scope) {
         newX = spawn.x + dx;
         newY = spawn.y + dy;
         isOccupied = _.any(roomObjects, checkObstacleFn) ||
-            utils.checkTerrain(roomTerrain, newX, newY, C.TERRAIN_MASK_WALL) ||
-            movement.isTileBusy(newX, newY);
+            movement.isTileBusy(newX, newY) ||
+            (utils.checkTerrain(roomTerrain, newX, newY, C.TERRAIN_MASK_WALL) && !_.any(roomObjects, {type: 'road', x: newX, y: newY}));
 
         if (!isOccupied) {
             break;
