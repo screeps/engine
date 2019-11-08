@@ -956,6 +956,12 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                     return {energy: 0};
                 }
             },
+            store: {
+                enumerable: true,
+                get() {
+                    return new globals.Store({store: {energy: 0}})
+                }
+            },
             fatigue: {
                 enumerable: true,
                 get() {
@@ -1110,6 +1116,12 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 enumerable: true,
                 get() {
                     return {energy: 0};
+                }
+            },
+            store: {
+                enumerable: true,
+                get() {
+                    return new globals.Store({store: {energy: 0}})
                 }
             },
             fatigue: {
