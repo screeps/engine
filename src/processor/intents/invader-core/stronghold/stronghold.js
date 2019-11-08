@@ -77,10 +77,25 @@ const deployStronghold = function deployStronghold(context) {
         let createdStructureCounter = 1;
         _.forEach(template.structures, i => {
             const x = 0+core.x+i.dx, y = 0+core.y+i.dy;
-            const objectsToRemove =_.filter(roomObjects, o => !o.strongholdId && o.x == x && o.y == y);
-            if(_.some(objectsToRemove)) {
-                _.forEach(objectsToRemove, o => bulk.remove(o._id));
-            }
+            _.forEach(roomObjects, o => {
+                if(o.strongholdId || o.x != x || o.y != y) {
+                    return;
+                }
+
+                if(o.type == 'creep' || o.type == 'powerCreep') {
+                    require('../../creeps/_die')(o, undefined, true, scope);
+                }
+                if(o.type == 'constructionSite') {
+                    delete roomObjects[o._id];
+                    bulk.remove(o._id);
+                    if(o.progress > 1) {
+                        require('../../creeps/_create-energy')(o.x, o.y, o.room, Math.floor(o.progress/2), 'energy', scope);
+                    }
+                }
+                if(C.CONSTRUCTION_COST[o.type]) {
+                    require('../../structures/_destroy')(o, scope);
+                }
+            });
 
             if(i.type == C.STRUCTURE_INVADER_CORE) {
                 return;
