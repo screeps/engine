@@ -71,7 +71,7 @@ exports.makeMap = function(runtimeData, register, globals) {
             if(fromRoom == toRoom) {
                 return [];
             }
-           
+
 			if(!/(W|E)\d+(N|S)\d+$/.test(fromRoom) || !/(W|E)\d+(N|S)\d+$/.test(toRoom)) {
 				return C.ERR_NO_PATH;
 			}
@@ -194,7 +194,7 @@ exports.makeMap = function(runtimeData, register, globals) {
         describeExits,
 
         isRoomProtected(roomName) {
-            register.deprecated('Method `Game.map.isRoomProtected` is deprecated and will be removed. Please use `Game.map.isRoomAvailable` instead.');
+            register.deprecated('Method `Game.map.isRoomProtected` is deprecated and will be removed. Please use `Game.map.getRoomStatus` instead.');
             if(!/^(W|E)\d+(N|S)\d+$/.test(roomName)) {
                 return null;
             }
@@ -202,12 +202,35 @@ exports.makeMap = function(runtimeData, register, globals) {
         },
 
         isRoomAvailable(roomName) {
+            register.deprecated('Method `Game.map.isRoomAvailable` is deprecated and will be removed. Please use `Game.map.getRoomStatus` instead.');
             if(!/^(W|E)\d+(N|S)\d+$/.test(roomName)) {
                 return false;
             }
             return _.contains(runtimeData.accessibleRooms, roomName);
         },
-        
+
+        getRoomStatus(roomName) {
+            if(!/^(W|E)\d+(N|S)\d+$/.test(roomName)) {
+                return undefined;
+            }
+
+            if(!runtimeData.roomStatusData) {
+                throw new Error('No runtime status data');
+            }
+
+            if(!_.isUndefined(runtimeData.roomStatusData.closed[roomName])) {
+                return { status: 'closed', timestamp: runtimeData.roomStatusData.closed[roomName] };
+            }
+            if(!_.isUndefined(runtimeData.roomStatusData.novice[roomName])) {
+                return { status: 'novice', timestamp: runtimeData.roomStatusData.novice[roomName] };
+            }
+            if(!_.isUndefined(runtimeData.roomStatusData.respawn[roomName])) {
+                return { status: 'respawn', timestamp: runtimeData.roomStatusData.respawn[roomName] };
+            }
+
+            return { status: 'normal', timestamp: null };
+        },
+
         getTerrainAt(x, y, roomName) {
             register.deprecated('Method `Game.map.getTerrainAt` is deprecated and will be removed. Please use a faster method `Game.map.getRoomTerrain` instead.');
             if(_.isObject(x)) {
@@ -233,11 +256,11 @@ exports.makeMap = function(runtimeData, register, globals) {
             }
             return 'plain';
         },
-        
+
         getRoomTerrain(roomName) {
             return new globals.Room.Terrain(roomName);
         },
-        
+
         getRoomLinearDistance(roomName1, roomName2, continuous) {
             return utils.calcRoomsDistance(roomName1, roomName2, continuous);
         },

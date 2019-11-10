@@ -78,6 +78,7 @@ function loop() {
             console.log('Game time set to', gameTime);
             if(+gameTime > lastAccessibleRoomsUpdate + 20) {
                 driver.updateAccessibleRoomsList();
+                driver.updateRoomStatusData();
                 lastAccessibleRoomsUpdate = +gameTime;
             }
 
