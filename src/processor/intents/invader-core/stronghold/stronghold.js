@@ -412,7 +412,7 @@ module.exports = {
         },
         'bunker4': function(context) {
             handleController(context);
-            refillTowers(context);
+            refillTowers(context) || refillCreeps(context);
 
 
             const { core, bulk } = context;
