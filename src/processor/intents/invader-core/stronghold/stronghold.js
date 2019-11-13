@@ -50,6 +50,7 @@ const deployStronghold = function deployStronghold(context) {
         objectOptions[C.STRUCTURE_RAMPART] = {
             hits: C.STRONGHOLD_RAMPART_HITS[template.rewardLevel],
             hitsMax: C.RAMPART_HITS_MAX[8],
+            hitsTarget: C.STRONGHOLD_RAMPART_HITS[core.level],
             nextDecayTime: decayTime
         };
         objectOptions[C.STRUCTURE_TOWER] = {
