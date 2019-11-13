@@ -20,12 +20,20 @@ module.exports = function(object, scope) {
         return;
     }
 
-    const creeps = [], defenders = [], hostiles = [], towers = [], ramparts = [];
+    const creeps = [],
+        defenders = [], damagedDefenders=[],
+        hostiles = [],
+        towers = [],
+        ramparts = [],
+        damagedRoads = [];
     _.forEach(roomObjects, o => {
         if((o.type == 'creep' || o.type == 'powerCreep') && !o.spawning) {
             creeps.push(o);
             if(o.user == user) {
                 defenders.push(o);
+                if(o.hits < o.hitsMax) {
+                    damagedDefenders.push(o);
+                }
             } else if(o.user != '3') {
                 hostiles.push(o);
             }
@@ -37,10 +45,14 @@ module.exports = function(object, scope) {
         }
         if(o.type == C.STRUCTURE_RAMPART && o.user == user) {
             ramparts.push(o);
+            return;
+        }
+        if(object.strongholdId == o.strongholdId && o.type == C.STRUCTURE_ROAD && o.hits < o.hitsMax) {
+            damagedRoads.push(o);
         }
     });
 
-    const context = {scope, intents, roomObjects, gameTime, bulk, creeps, defenders, hostiles, towers, ramparts, roomController, core: object};
+    const context = {scope, intents, roomObjects, gameTime, bulk, creeps, defenders, damagedDefenders, hostiles, towers, ramparts, damagedRoads, roomController, core: object};
 
     stronghold.behaviors[behavior](context);
 

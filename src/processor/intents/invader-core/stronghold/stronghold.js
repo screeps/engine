@@ -181,6 +181,30 @@ const refillCreeps = function refillCreeps(context) {
     return false;
 };
 
+const towersMaintenance = function towersMaintenance(context) {
+    const {intents, towers, ramparts, damagedDefenders, damagedRoads} = context;
+    if(!towers.length || (!damagedDefenders.length && !damagedRoads.length)) {
+        return;
+    }
+
+    const protectedCreeps = _.filter(damagedDefenders, d => _.some(ramparts, {x: d.x, y: d.y}));
+    if(_.some(protectedCreeps)) {
+        const creep = _.first(protectedCreeps);
+        const tower = _.first(towers);
+        intents.set(tower._id, 'heal', {id: creep._id});
+        _.pull(towers, tower);
+        return;
+    }
+
+    const protectedRoads = _.filter(damagedRoads, r => _.some(ramparts, {x: r.x, y: r.y}));
+    if(_.some(protectedRoads)) {
+        const road = _.first(damagedRoads);
+        const tower = _.first(towers);
+        intents.set(tower._id, 'repair', {id: road._id});
+        _.pull(towers, tower);
+    }
+};
+
 const focusClosest = function focusClosest(context) {
     const {core, intents, defenders, hostiles, towers} = context;
 
@@ -432,6 +456,7 @@ module.exports = {
 
             maintainPopulation(context);
 
+            towersMaintenance(context);
             focusMax(context);
         },
         'bunker5': function(context) {
@@ -460,6 +485,7 @@ module.exports = {
 
             maintainPopulation(context);
 
+            towersMaintenance(context);
             focusMax(context);
         },
     }
