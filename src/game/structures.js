@@ -357,6 +357,55 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
+    StructureLab.prototype.reverseReaction = register.wrapFn(function(lab1, lab2){
+        if(!this.my) {
+            return C.ERR_NOT_OWNER;
+        }
+        if(this.cooldown > 0) {
+            return C.ERR_TIRED;
+        }
+        if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
+            return C.ERR_RCL_NOT_ENOUGH;
+        }
+        if(!lab1 || !lab1.id || !register.structures[lab1.id] ||
+            !(lab1 instanceof globals.Structure) || lab1.structureType != C.STRUCTURE_LAB || lab1.id == this.id) {
+            register.assertTargetObject(lab1);
+            return C.ERR_INVALID_TARGET;
+        }
+        if(!lab2 || !lab2.id || !register.structures[lab2.id] ||
+            !(lab2 instanceof globals.Structure) || lab2.structureType != C.STRUCTURE_LAB || lab2.id == this.id) {
+            register.assertTargetObject(lab2);
+            return C.ERR_INVALID_TARGET;
+        }
+        if(this.pos.getRangeTo(lab1) > 2 || this.pos.getRangeTo(lab2) > 2) {
+            return C.ERR_NOT_IN_RANGE;
+        }
+        var reactionAmount = C.LAB_REACTION_AMOUNT;
+        var effect = _.find(this.effects, i => i.power == C.PWR_OPERATE_LAB);
+        if(effect && effect.ticksRemaining > 0) {
+            reactionAmount += C.POWER_INFO[C.PWR_OPERATE_LAB].effect[effect.level-1];
+        }
+        if(!this.mineralType || (this.mineralAmount < reactionAmount)) {
+            return C.ERR_NOT_ENOUGH_RESOURCES;
+        }
+        const variants = utils.getReactionVariants(this.mineralType);
+        const variant = _.find(variants, v =>
+            (!lab1.mineralType || lab1.mineralType == v[0]) &&
+            (!lab2.mineralType || lab2.mineralType == v[1]));
+        if(!variant) {
+            return C.ERR_INVALID_ARGS;
+        }
+        if(
+            ((lab1.mineralAmount + reactionAmount) > lab1.mineralCapacity) ||
+            ((lab2.mineralAmount + reactionAmount) > lab2.mineralCapacity)
+        ) {
+            return C.ERR_FULL;
+        }
+
+        intents.set(this.id, 'reverseReaction', {lab1: lab1.id, lab2: lab2.id});
+        return C.OK;
+    });
+
     StructureLab.prototype.boostCreep = register.wrapFn(function(target, bodyPartsCount) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;

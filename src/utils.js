@@ -832,6 +832,12 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                 lab2: ""+objectIntentsResult.runReaction.lab2
             };
         }
+        if(objectIntentsResult.reverseReaction) {
+            objectIntents.reverseReaction = {
+                lab1: ""+objectIntentsResult.reverseReaction.lab1,
+                lab2: ""+objectIntentsResult.reverseReaction.lab2
+            };
+        }
         if(objectIntentsResult.boostCreep) {
             objectIntents.boostCreep = {
                 id: ""+objectIntentsResult.boostCreep.id,
@@ -1202,4 +1208,16 @@ exports.calcReward = function(resourceDensities, targetDensity, itemsLimit) {
     result[order.length - 1] = Math.max(0, Math.round((targetDensity - currentDensity) / densities[order.length - 1]));
 
     return _.object(order.map(i => resources[i]), result);
+};
+
+exports.getReactionVariants = function getReactionVarients(compound) {
+    const result = [];
+    for(let r1 in C.REACTIONS) {
+        for(let r2 in C.REACTIONS[r1]) {
+            if(C.REACTIONS[r1][r2] == compound) {
+                result.push([r1, r2]);
+            }
+        }
+    }
+    return result;
 };
