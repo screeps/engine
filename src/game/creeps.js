@@ -840,7 +840,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             (!runtimeData.user.gcl || runtimeData.user.gcl < utils.calcNeededGcl(controllersClaimed + 1))) {
             return C.ERR_GCL_NOT_ENOUGH;
         }
-        if (controllersClaimed >= C.GCL_NOVICE && runtimeData.rooms[this.room.name].novice > Date.now()) {
+        if (controllersClaimed >= C.GCL_NOVICE && runtimeData.rooms[data(this.id).room].novice > Date.now()) {
             return C.ERR_FULL;
         }
         if(!target || !target.id || !register.structures[target.id] || !(target instanceof globals.Structure)) {
