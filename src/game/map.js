@@ -14,6 +14,8 @@ exports.makeMap = function(runtimeData, register, globals) {
     var originX, originY;
     var toX, toY;
 
+    const accessibleRooms = JSON.parse(runtimeData.accessibleRooms);
+
     function describeExits(roomName) {
         if(!/^(W|E)\d+(N|S)\d+$/.test(roomName)) {
             return null;
@@ -198,7 +200,7 @@ exports.makeMap = function(runtimeData, register, globals) {
             if(!/^(W|E)\d+(N|S)\d+$/.test(roomName)) {
                 return null;
             }
-            return !_.contains(runtimeData.accessibleRooms, roomName);
+            return !_.contains(accessibleRooms, roomName);
         },
 
         isRoomAvailable(roomName) {
@@ -206,7 +208,7 @@ exports.makeMap = function(runtimeData, register, globals) {
             if(!/^(W|E)\d+(N|S)\d+$/.test(roomName)) {
                 return false;
             }
-            return _.contains(runtimeData.accessibleRooms, roomName);
+            return _.contains(accessibleRooms, roomName);
         },
 
         getRoomStatus(roomName) {
