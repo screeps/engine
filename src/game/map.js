@@ -195,14 +195,6 @@ exports.makeMap = function(runtimeData, register, globals) {
 
         describeExits,
 
-        isRoomProtected(roomName) {
-            register.deprecated('Method `Game.map.isRoomProtected` is deprecated and will be removed. Please use `Game.map.getRoomStatus` instead.');
-            if(!/^(W|E)\d+(N|S)\d+$/.test(roomName)) {
-                return null;
-            }
-            return !_.contains(accessibleRooms, roomName);
-        },
-
         isRoomAvailable(roomName) {
             register.deprecated('Method `Game.map.isRoomAvailable` is deprecated and will be removed. Please use `Game.map.getRoomStatus` instead.');
             if(!/^(W|E)\d+(N|S)\d+$/.test(roomName)) {
