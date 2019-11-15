@@ -107,6 +107,9 @@ module.exports = function(creep, context) {
         const pos = fakeRuntime.RoomPosition.sUnpackLocal(creep['memory_move']['path'][0], creep.room);
         const structures = _.filter(roomObjects, o => !!C.CONTROLLER_STRUCTURES[o.type] && o.type != 'spawn' && o.x == pos.x && o.y == pos.y);
         if(structures.length > 0) {
+            if(fakeRuntime.hasActiveBodyparts(creep, C.RANGED_ATTACK)) {
+                intents.set(creep._id, 'rangedAttack', { id: structures[0]._id })
+            }
             if(fakeRuntime.hasActiveBodyparts(creep, C.WORK)) {
                 intents.set(creep._id, 'dismantle', { id: structures[0]._id });
             } else {
