@@ -1196,10 +1196,10 @@ exports.calcReward = function(resourceDensities, targetDensity, itemsLimit) {
     let result = _.times(order.length, 0);
     let currentDensity = 0;
     for (let i = 0; i < order.length - 1; i++) {
-        result[i] = Math.round(Math.random() * (targetDensity - currentDensity) / densities[order[i]]);
+        result[i] = Math.max(0, Math.round(Math.random() * (targetDensity - currentDensity) / densities[order[i]]));
         currentDensity += result[i] * densities[order[i]];
     }
-    result[order.length - 1] = Math.round((targetDensity - currentDensity) / densities[order.length - 1]);
+    result[order.length - 1] = Math.max(0, Math.round((targetDensity - currentDensity) / densities[order.length - 1]));
 
     return _.object(order.map(i => resources[i]), result);
 };
