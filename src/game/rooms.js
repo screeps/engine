@@ -418,8 +418,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
      */
     var Room = register.wrapFn(function(id) {
 
-        var objectData = data(id);
-
         var gameInfo, gameId = id, match = id.match(/survival_(.*)$/);
         if(match) {
             gameId = match[1];
@@ -428,7 +426,10 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             gameInfo = runtimeData.games[gameId];
         }
 
-        this.name = id;
+        Object.defineProperty(this, 'name', {
+            value: id,
+            enumerable: true
+        });
 
         this.energyAvailable = 0;
         this.energyCapacityAvailable = 0;
