@@ -36,12 +36,12 @@ module.exports = function(object, intent, scope) {
 
         const energyReturn = boostedParts[r]*C.LAB_UNBOOST_ENERGY;
         if(energyReturn>0) {
-            require('../creeps/_create-energy')(target.x, target.y, target.room, energyReturn, C.RESOURCE_ENERGY, scope);
+            require('../_create-energy')(target.x, target.y, target.room, energyReturn, C.RESOURCE_ENERGY, scope);
         }
 
         const mineralReturn = boostedParts[r]*C.LAB_UNBOOST_MINERAL;
         if(mineralReturn > 0) {
-            require('../creeps/_create-energy')(target.x, target.y, target.room, mineralReturn, r, scope);
+            require('../_create-energy')(target.x, target.y, target.room, mineralReturn, r, scope);
         }
 
         return a + boostedParts[r]*utils.calcTotalReactionsTime(r)*C.LAB_UNBOOST_MINERAL/C.LAB_REACTION_AMOUNT;

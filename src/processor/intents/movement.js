@@ -226,7 +226,7 @@ exports.execute = function(object, scope) {
         if (constructionSite) {
             bulk.remove(constructionSite._id);
             if(constructionSite.progress > 1) {
-                require('./creeps/_create-energy')(constructionSite.x, constructionSite.y,
+                require('./_create-energy')(constructionSite.x, constructionSite.y,
                     constructionSite.room, Math.floor(constructionSite.progress/2), 'energy', scope);
             }
         }

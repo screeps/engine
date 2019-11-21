@@ -3,28 +3,13 @@ const _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
-module.exports = function (object, {roomObjects, bulk, gameTime}) {
-    if (!object.decayTime || gameTime >= object.decayTime - 1) {
+module.exports = function (object, scope) {
+    const {roomObjects, bulk, gameTime} = scope;
 
+    if (!object.decayTime || gameTime >= object.decayTime - 1) {
         if(object.store) {
             _.forEach(object.store, (amount, resourceType)=>{
-                if (amount > 0) {
-                    var existingDrop = _.find(roomObjects, {type: 'energy', x: object.x, y: object.y, resourceType});
-                    if (existingDrop) {
-                        bulk.update(existingDrop, {
-                            [resourceType]: existingDrop[resourceType] + amount
-                        });
-                    } else {
-                        bulk.insert({
-                            type: 'energy',
-                            x: object.x,
-                            y: object.y,
-                            room: object.room,
-                            [resourceType]: amount,
-                            resourceType
-                        })
-                    }
-                }
+                require('../_create-energy')(object.x, object.y, object.room, amount, resourceType, scope);
             });
         }
 

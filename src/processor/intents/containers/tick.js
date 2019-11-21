@@ -14,8 +14,7 @@ module.exports = function(object, scope) {
             if(object.store) {
                 _.forEach(object.store, (amount, resourceType) => {
                     if (amount > 0) {
-                        require('../creeps/_create-energy')(object.x, object.y, object.room,
-                            amount, resourceType, scope);
+                        require('../_create-energy')(object.x, object.y, object.room, amount, resourceType, scope);
                     }
                 });
             }

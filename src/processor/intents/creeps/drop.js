@@ -16,7 +16,7 @@ module.exports = function(object, intent, scope) {
 
     if(intent.amount > 0) {
         object.store[intent.resourceType] -= intent.amount;
-        require('./_create-energy')(object.x, object.y, object.room, intent.amount, intent.resourceType, scope);
+        require('../_create-energy')(object.x, object.y, object.room, intent.amount, intent.resourceType, scope);
     }
 
     bulk.update(object, {store:{[intent.resourceType]: object.store[intent.resourceType]}});

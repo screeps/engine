@@ -1,5 +1,5 @@
 var _ = require('lodash'),
-    utils =  require('../../../utils'),
+    utils =  require('../../utils'),
     driver = utils.getDriver(),
     C = driver.constants;
 

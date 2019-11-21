@@ -90,7 +90,7 @@ const deployStronghold = function deployStronghold(context) {
                     delete roomObjects[o._id];
                     bulk.remove(o._id);
                     if(o.progress > 1) {
-                        require('../../creeps/_create-energy')(o.x, o.y, o.room, Math.floor(o.progress/2), 'energy', scope);
+                        require('../../_create-energy')(o.x, o.y, o.room, Math.floor(o.progress/2), 'energy', scope);
                     }
                 }
                 if(C.CONSTRUCTION_COST[o.type]) {

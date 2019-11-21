@@ -15,6 +15,6 @@ module.exports = function(userId, intent, scope) {
 
     bulk.remove(object._id);
     if(object.progress > 1) {
-        require('../creeps/_create-energy')(object.x, object.y, object.room, Math.floor(object.progress/2), 'energy', scope);
+        require('../_create-energy')(object.x, object.y, object.room, Math.floor(object.progress/2), 'energy', scope);
     }
 };
