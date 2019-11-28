@@ -814,9 +814,9 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
             objectIntents.destroy = {};
         }
         if(objectIntentsResult.observeRoom) {
-            objectIntents.observeRoom = {
-                roomName: ""+objectIntentsResult.observeRoom.roomName
-            };
+            const roomName = ""+objectIntentsResult.observeRoom.roomName;
+            objectIntents.observeRoom = { roomName };
+            intents[roomName] = intents[roomName] || {}; // invoke target room activation
         }
         if(objectIntentsResult.processPower) {
             objectIntents.processPower = {};
