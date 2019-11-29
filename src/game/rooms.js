@@ -1022,7 +1022,14 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             }
         }
         if(this.controller && this.controller.level > 0 && !this.controller.my) {
-            return C.ERR_RCL_NOT_ENOUGH;
+            return C.ERR_NOT_OWNER;
+        }
+        if(this.controller &&
+            this.controller.reservation &&
+            register.objectsByRoom[this.name] &&
+            register.objectsByRoom[this.name][this.controller.id] &&
+            (register.objectsByRoom[this.name][this.controller.id].reservation.user != runtimeData.user._id)) {
+            return C.ERR_NOT_OWNER;
         }
         const roomName = ""+this.name;
         if(!utils.checkControllerAvailability(structureType, register.objectsByRoom[this.name], this.controller)) {
