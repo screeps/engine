@@ -29,7 +29,7 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ga
         return;
     }
 
-    if(target.type == 'nuker') {
+    if(target.type == 'nuker' || target.type == 'powerBank') {
         return;
     }
 

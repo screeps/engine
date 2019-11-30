@@ -519,7 +519,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_NOT_OWNER;
         }
 
-        if(register.structures[target.id] && register.structures[target.id].structureType == C.STRUCTURE_NUKER) {
+        if(register.structures[target.id] && register.structures[target.id].structureType == C.STRUCTURE_NUKER || register.structures[target.id].structureType == C.STRUCTURE_POWER_BANK) {
             return C.ERR_INVALID_TARGET;
         }
 
