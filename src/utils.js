@@ -146,8 +146,8 @@ exports.checkConstructionSite = function(objects, structureType, x, y) {
 
     if(_.isString(objects) || objects instanceof Uint8Array) {
         if(borderTiles) {
-            for(var i in borderTiles) {
-                if(!exports.checkTerrain(objects, borderTiles[i][0], borderTiles[i][1], C.TERRAIN_MASK_WALL)) {
+            for(var t of borderTiles) {
+                if(!exports.checkTerrain(objects, t[0], t[1], C.TERRAIN_MASK_WALL)) {
                     return false;
                 }
             }
