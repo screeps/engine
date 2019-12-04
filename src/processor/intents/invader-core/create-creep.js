@@ -9,7 +9,7 @@ module.exports = function(object, intent, scope) {
 
     if(!object.level || !C.INVADER_CORE_CREEP_SPAWN_TIME[object.level]) return;
 
-    const {bulk} = scope;
+    const {gameTime, bulk} = scope;
 
     intent.body = intent.body.slice(0, C.MAX_CREEP_SIZE);
 
@@ -60,7 +60,7 @@ module.exports = function(object, intent, scope) {
         spawning: {
             name: intent.name,
             needTime: C.INVADER_CORE_CREEP_SPAWN_TIME[object.level] * body.length,
-            remainingTime: C.INVADER_CORE_CREEP_SPAWN_TIME[object.level] * body.length
+            spawnTime: gameTime + C.INVADER_CORE_CREEP_SPAWN_TIME[object.level] * body.length
         }
     });
 };

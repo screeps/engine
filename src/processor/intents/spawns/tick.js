@@ -9,26 +9,23 @@ module.exports = function(object, scope) {
 
     if(!object || object.type != 'spawn') return;
 
-    var effect = _.find(object.effects, {power: C.PWR_DISRUPT_SPAWN});
+    if(object.spawning) {
+        const effect = _.find(object.effects, {power: C.PWR_DISRUPT_SPAWN});
+        if(effect && effect.endTime > gameTime) {
+            bulk.update(object, {spawning: {spawnTime: 1+object.spawning.spawnTime}});
+        } else {
+            if(gameTime >= object.spawning.spawnTime-1) {
+                const spawningCreep = _.find(roomObjects, {type: 'creep', name: object.spawning.name, x: object.x, y: object.y});
 
-    if(object.spawning && (!effect || effect.endTime <= gameTime)) {
-        object.spawning.remainingTime--;
+                const bornOk = require('./_born-creep')(object, spawningCreep, scope);
 
-        if(object.spawning.remainingTime <= 0) {
-
-            var spawningCreep = _.find(roomObjects, {type: 'creep', name: object.spawning.name, x: object.x, y: object.y});
-
-            var bornOk = require('./_born-creep')(object, spawningCreep, scope);
-
-            if(bornOk) {
-                bulk.update(object, {spawning: null});
+                if(bornOk) {
+                    bulk.update(object, {spawning: null});
+                }
+                else {
+                    bulk.update(object, {spawning: {spawnTime: 1+gameTime}});
+                }
             }
-            else {
-                bulk.update(object, {spawning: {remainingTime: 0}});
-            }
-        }
-        else {
-            bulk.update(object, {spawning: {remainingTime: object.spawning.remainingTime}});
         }
     }
 

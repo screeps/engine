@@ -57,7 +57,7 @@ module.exports = function(spawn, intent, scope) {
         spawning: {
             name: intent.name,
             needTime,
-            remainingTime: needTime,
+            spawnTime: gameTime + needTime,
             directions
         }
     });

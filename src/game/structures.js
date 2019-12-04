@@ -1292,7 +1292,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         });
         this.name = data(spawnId).spawning.name;
         this.needTime = data(spawnId).spawning.needTime;
-        this.remainingTime = data(spawnId).spawning.remainingTime;
+        this.remainingTime = data(spawnId).spawning.spawnTime - runtimeData.time;
         this.directions = data(spawnId).spawning.directions;
     });
 

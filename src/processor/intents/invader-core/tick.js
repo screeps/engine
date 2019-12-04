@@ -27,9 +27,7 @@ module.exports = function(object, scope) {
     }
 
     if(object.spawning) {
-        object.spawning.remainingTime--;
-
-        if(object.spawning.remainingTime <= 0) {
+        if(gameTime >= object.spawning.spawnTime-1) {
             const spawningCreep = _.find(roomObjects, {type: 'creep', name: object.spawning.name, x: object.x, y: object.y});
             const bornOk = require('../spawns/_born-creep')(object, spawningCreep, scope);
 
@@ -37,11 +35,8 @@ module.exports = function(object, scope) {
                 bulk.update(object, {spawning: null});
             }
             else {
-                bulk.update(object, {spawning: {remainingTime: 0}});
+                bulk.update(object, {spawning: {spawnTime: 1+gameTime}});
             }
-        }
-        else {
-            bulk.update(object, {spawning: {remainingTime: object.spawning.remainingTime}});
         }
     }
 
