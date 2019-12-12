@@ -51,7 +51,8 @@ const creeps = {
             {type: C.CARRY, hits: 100},
             {type: C.CARRY, hits: 100},
             {type: C.MOVE, hits: 100}
-        ]
+        ],
+        carryCapacity: 100
     },
     halfLocomotive: {
         name: 'halfLocomotive',
