@@ -380,6 +380,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.pos.getRangeTo(lab1) > 2 || this.pos.getRangeTo(lab2) > 2) {
             return C.ERR_NOT_IN_RANGE;
         }
+        if(lab1 == lab2) {
+            return C.ERR_INVALID_ARGS;
+        }
         var reactionAmount = C.LAB_REACTION_AMOUNT;
         var effect = _.find(this.effects, i => i.power == C.PWR_OPERATE_LAB);
         if(effect && effect.ticksRemaining > 0) {

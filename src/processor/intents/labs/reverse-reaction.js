@@ -10,6 +10,10 @@ module.exports = function(object, intent, scope) {
         return;
     }
 
+    if(intent.lab1 == intent.lab2) {
+        return;
+    }
+
     let reactionAmount = C.LAB_REACTION_AMOUNT;
     const effect = _.find(object.effects, {power: C.PWR_OPERATE_LAB});
     if(effect && effect.endTime > gameTime) {
