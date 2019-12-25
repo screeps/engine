@@ -94,7 +94,7 @@ module.exports = function(object, dropRate, violentDeath, {roomObjects, bulk, st
         bulk.insert(tombstone);
     }
 
-    eventLog.push({event: C.EVENT_OBJECT_DESTROYED, objectId: object._id, type: 'creep'});
+    eventLog.push({event: C.EVENT_OBJECT_DESTROYED, objectId: object._id, data: { type: 'creep' }});
 
     if (violentDeath && stats && object.user != '3' && object.user != '2') {
         stats.inc('creepsLost', object.user, object.body.length);
