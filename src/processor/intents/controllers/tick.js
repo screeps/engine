@@ -22,12 +22,20 @@ module.exports = function(object, {bulk, bulkUsers, gameTime, roomInfo, users}) 
         delete object._upgradeBlocked;
     }
 
+    if(object._safeModeActivated && !(object.upgradeBlocked > gameTime)) {
+        bulk.update(object, {
+            safeModeAvailable: object.safeModeAvailable - 1,
+            safeMode: gameTime + C.SAFE_MODE_DURATION,
+            safeModeCooldown: roomInfo.novice > Date.now() ? null : gameTime + C.SAFE_MODE_COOLDOWN
+        });
+    }
+
     if(!object.downgradeTime || object.tutorial) {
         bulk.update(object, {downgradeTime: gameTime + C.CONTROLLER_DOWNGRADE[object.level] + 1});
         return;
     }
 
-    if(object._upgraded) {
+    if(object._upgraded && !(object.upgradeBlocked > gameTime)) {
         bulk.update(object, {downgradeTime: Math.min(
             object.downgradeTime + C.CONTROLLER_DOWNGRADE_RESTORE + 1,
             gameTime + C.CONTROLLER_DOWNGRADE[object.level] + 1)});
