@@ -87,9 +87,20 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
     object.actionLog.build = {x: target.x, y: target.y};
     bulk.update(object, {store:{energy: object.store.energy}});
 
-    eventLog.push({event: C.EVENT_BUILD, objectId: object._id, data: {targetId: target._id, amount: boostedEffect}});
+    const incomplete = target.progress < target.progressTotal;
+    eventLog.push({
+        event: C.EVENT_BUILD,
+        objectId: object._id,
+        data: {
+            targetId: target._id,
+            amount: boostedEffect,
+            structureType: target.structureType,
+            x: target.x,
+            y: target.y,
+            incomplete
+        }});
 
-    if(target.progress < target.progressTotal) {
+    if(incomplete) {
         bulk.update(target, {
             progress: target.progress
         });
