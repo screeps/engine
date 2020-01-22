@@ -35,7 +35,7 @@ module.exports = () => {
                 return;
             }
             if(!activateRooms[creep.interRoom.room]) {
-                bulkRooms.update(creep.interRoom.room, {active: true});
+                driver.activateRoom(creep.interRoom.room);
             }
             activateRooms[creep.interRoom.room] = true;
 
