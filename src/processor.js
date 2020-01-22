@@ -28,7 +28,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             roomSpawns = [], roomExtensions = [], roomNukes = [], keepers = [], invaders = [], invaderCore = null,
             oldRoomInfo = _.clone(roomInfo);
 
-        roomInfo.active = false;
+        let activateRoom = false;
 
         var terrainItem = roomTerrain[_.findKey(roomTerrain)];
         if (terrainItem.terrain) {
@@ -79,7 +79,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                     upgradeController: null
                 };
                 if(object.deployTime) {
-                    roomInfo.active = true;
+                    activateRoom = true;
                 }
             }
             if (object.type == 'link') {
@@ -107,36 +107,36 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 scope.roomController = object;
                 if(object.reservation && object.reservation.user == '2' &&
                     (object.reservation.endTime - gameTime) < (C.CONTROLLER_RESERVE_MAX - C.INVADER_CORE_CONTROLLER_POWER * C.CONTROLLER_RESERVE)) {
-                    roomInfo.active = true;
+                    activateRoom = true;
                 }
                 if(object.user && object.user !== '2') {
-                    roomInfo.active = true;
+                    activateRoom = true;
                 }
             }
             if (object.type == 'observer') {
                 object.observeRoom = null;
             }
             if (object.user && object.user != '3' && !object.userNotActive && object.type != 'flag' && !object.strongholdId && object.type !== 'controller') {
-                roomInfo.active = true;
+                activateRoom = true;
             }
             if(object.type == 'powerBank' && gameTime > object.decayTime - 500) {
-                roomInfo.active = true;
+                activateRoom = true;
             }
             if(object.type == 'deposit' && gameTime > object.decayTime - 500) {
-                roomInfo.active = true;
+                activateRoom = true;
             }
             if(object.type == 'energy') {
-                roomInfo.active = true;
+                activateRoom = true;
             }
             if(object.type == 'nuke') {
-                roomInfo.active = true;
+                activateRoom = true;
                 roomNukes.push(object);
             }
             if(object.type == 'tombstone') {
-                roomInfo.active = true;
+                activateRoom = true;
             }
             if(object.type == 'portal') {
-                roomInfo.active = true;
+                activateRoom = true;
             }
             if (object.type == 'constructedWall' && object.decayTime && object.user) {
                 hasNewbieWalls = true;
@@ -493,13 +493,18 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
         resultPromises.push(bulkFlags.execute());
         resultPromises.push(driver.saveRoomEventLog(roomId, eventLog));
 
+        if(roomInfo.active) { // may be set in intents
+            activateRoom = true;
+            delete roomInfo.active;
+        }
+
+        if(activateRoom) {
+            driver.activateRoom(roomId);
+            saveRoomHistory(roomId, objectsToHistory, gameTime);
+        }
 
         if(!_.isEqual(roomInfo, oldRoomInfo)) {
             resultPromises.push(driver.saveRoomInfo(roomId, roomInfo));
-        }
-
-        if(roomInfo.active) {
-            saveRoomHistory(roomId, objectsToHistory, gameTime);
         }
 
         if (Date.now() > lastRoomsStatsSaveTime + 30 * 1000) {
