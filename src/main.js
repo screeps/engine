@@ -42,12 +42,12 @@ function loop() {
         .then(() => {
             stage = 'getRooms';
             driver.config.emit('mainLoopStage',stage);
-            return driver.getAllRooms();
+            return driver.getAllRoomsNames();
         })
         .then((rooms) => {
             stage = 'addRoomsToQueue';
             driver.config.emit('mainLoopStage',stage, rooms);
-            return roomsQueue.addMulti(_.map(rooms, (room) => room._id.toString()))
+            return roomsQueue.addMulti(rooms);
         })
         .then(() => {
             stage = 'waitForRooms';
