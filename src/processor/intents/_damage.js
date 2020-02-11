@@ -48,7 +48,9 @@ module.exports = function(object, target, damage, attackType, scope) {
 
             require('./structures/_destroy')(target, scope, attackType);
 
-            eventLog.push({event: C.EVENT_OBJECT_DESTROYED, objectId: target._id, type: object.type});
+            eventLog.push({event: C.EVENT_OBJECT_DESTROYED, objectId: target._id, data: {
+                type: object.type
+            }});
         }
     }
     else {
