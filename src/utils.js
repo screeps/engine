@@ -411,7 +411,7 @@ exports.comparatorDistance = function(target) {
     }
 };
 
-exports.storeIntents = function(userId, userIntents, userRuntimeData) {
+exports.storeIntents = function(userId, userIntents, userRuntimeData, customIntentTypes) {
     var intents = {};
 
     for(var i in userIntents) {
@@ -422,12 +422,12 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
         }
 
         if(i == 'room') {
-            driver.system.sanitizeUserRoomIntents(userIntents.room, intents);
+            driver.system.sanitizeUserRoomIntents(userIntents.room, intents, customIntentTypes);
             continue;
         }
 
         if(i == 'global') {
-            intents.global = driver.system.sanitizeUserIntents(userIntents.global);
+            intents.global = driver.system.sanitizeUserIntents(userIntents.global, customIntentTypes);
             continue;
         }
 
@@ -437,31 +437,9 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
         }
 
         intents[object.room] = intents[object.room] || {};
-        intents[object.room][i] = driver.system.sanitizeUserIntents(userIntents[i]);
-
-        // for(var iCustomType in driver.config.customIntentTypes) {
-        //     if(objectIntentsResult[iCustomType]) {
-        //         objectIntents[iCustomType] = {};
-        //         for(var prop in driver.config.customIntentTypes[iCustomType]) {
-        //             switch(driver.config.customIntentTypes[iCustomType][prop]) {
-        //                 case 'string': {
-        //                     objectIntents[iCustomType][prop] = "" + objectIntentsResult[iCustomType][prop];
-        //                     break;
-        //                 }
-        //                 case 'number': {
-        //                     objectIntents[iCustomType][prop] = +objectIntentsResult[iCustomType][prop];
-        //                     break;
-        //                 }
-        //                 case 'boolean': {
-        //                     objectIntents[iCustomType][prop] = !!objectIntentsResult[iCustomType][prop];
-        //                     break;
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
-
+        intents[object.room][i] = driver.system.sanitizeUserIntents(userIntents[i], customIntentTypes);
     }
+
     return intents;
 }
 
