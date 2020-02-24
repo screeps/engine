@@ -53,13 +53,16 @@ exports.make = function(runtimeData, intents, register) {
         }),
 
         getOrderById: register.wrapFn(function(id) {
-            const order = runtimeData.market.orders.all[id] || this.orders[id];
-            if(!order) {
-                return null;
+            if(this.orders[id]) {
+                return JSON.parse(JSON.stringify(this.orders[id]));
             }
-            const result = JSON.parse(JSON.stringify(order));
-            result.price /= 1000;
-            return result;
+            const order = runtimeData.market.orders.all[id];
+            if(order) {
+                const result = JSON.parse(JSON.stringify(order));
+                result.price /= 1000;
+                return result;
+            }
+            return null;
         }),
 
         createOrder: register.wrapFn(function(type, resourceType, price, totalAmount, roomName) {
