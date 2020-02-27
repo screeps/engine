@@ -539,7 +539,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                     intents.global.createOrder.push({
                         type: ""+iCreateOrder.type,
                         resourceType: ""+iCreateOrder.resourceType,
-                        price: parseInt(iCreateOrder.price*1000),
+                        price: parseInt(Math.round(iCreateOrder.price*1000)),
                         totalAmount: parseInt(iCreateOrder.totalAmount),
                         roomName: iCreateOrder.roomName ? ""+iCreateOrder.roomName : undefined
                     })
@@ -558,7 +558,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                     intents.global.changeOrderPrice = intents.global.changeOrderPrice || [];
                     intents.global.changeOrderPrice.push({
                         orderId: ""+iChangeOrderPrice.orderId,
-                        newPrice: parseInt(iChangeOrderPrice.newPrice*1000),
+                        newPrice: parseInt(Math.round(iChangeOrderPrice.newPrice*1000)),
                     });
                 });
             }
