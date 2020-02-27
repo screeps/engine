@@ -357,6 +357,59 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
+    //TODO move to @screeps/common/lib/constants.js
+    C.REVERSE_REACTIONS = {};
+    for(var a in C.REACTIONS){
+        for(var b in C.REACTIONS[a]){
+            C.REVERSE_REACTIONS[C.REACTIONS[a][b]] = [a,b];
+        }
+    }
+
+    StructureLab.prototype.reverseReaction = register.wrapFn(function(lab1, lab2) {
+        if(!this.my) {
+            return C.ERR_NOT_OWNER;
+        }
+        if(this.cooldown > 0) {
+            return C.ERR_TIRED;
+        }
+        if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
+            return C.ERR_RCL_NOT_ENOUGH;
+        }
+        if(!lab1 || !lab1.id || !register.structures[lab1.id] ||
+        !(lab1 instanceof globals.Structure) || lab1.structureType != C.STRUCTURE_LAB || lab1.id == this.id) {
+            register.assertTargetObject(lab1);
+            return C.ERR_INVALID_TARGET;
+        }
+        if(!lab2 || !lab1.id || !register.structures[lab2.id] ||
+        !(lab2 instanceof globals.Structure) || lab2.structureType != C.STRUCTURE_LAB || lab2.id == this.id) {
+            register.assertTargetObject(lab2);
+            return C.ERR_INVALID_TARGET;
+        }
+        if(this.pos.getRangeTo(lab1) > 2 || this.pos.getRangeTo(lab2) > 2) {
+            return C.ERR_NOT_IN_RANGE;
+        }
+        if(this.mineralAmount < C.LAB_REACTION_AMOUNT) {
+            return C.ERR_NOT_ENOUGH_RESOURCES;
+        }
+        if(lab1.mineralAmount > lab1.mineralCapacity - C.LAB_REACTION_AMOUNT || lab2.mineralAmount > lab2.mineralCapacity - C.LAB_REACTION_AMOUNT) {
+            return C.ERR_FULL;
+        }
+        if(lab1.mineralType === C.REVERSE_REACTIONS[this.mineralType][1]) {
+            [lab1, lab2] = [lab2, lab1]
+        }
+        if(!(
+             (lab1.mineralAmount === 0 || lab1.mineralType === C.REVERSE_REACTIONS[this.mineralType][0])
+             &&
+             (lab2.mineralAmount === 0 || lab2.mineralType === C.REVERSE_REACTIONS[this.mineralType][1])
+            )
+          ) {
+            return C.ERR_INVALID_ARGS;
+        }
+
+        intents.set(this.id, 'reverseReaction', {lab1: lab1.id, lab2: lab2.id});
+        return C.OK;
+    });
+
     StructureLab.prototype.boostCreep = register.wrapFn(function(target, bodyPartsCount) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;

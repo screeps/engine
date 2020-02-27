@@ -832,6 +832,12 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData) {
                 lab2: ""+objectIntentsResult.runReaction.lab2
             };
         }
+        if(objectIntentsResult.reverseReaction) {
+            objectIntents.reverseReaction = {
+                lab1: ""+objectIntentsResult.reverseReaction.lab1,
+                lab2: ""+objectIntentsResult.reverseReaction.lab2
+            };
+        }
         if(objectIntentsResult.boostCreep) {
             objectIntents.boostCreep = {
                 id: ""+objectIntentsResult.boostCreep.id,
