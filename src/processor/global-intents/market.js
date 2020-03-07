@@ -112,8 +112,8 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                     if (!intent.price || !intent.totalAmount) {
                         return;
                     }
-                    if (!_.contains(C.RESOURCES_ALL, intent.resourceType) && !_.contains(C.INTERSHARD_RESOURCES,
-                            intent.resourceType)) {
+                    if (!_.contains(C.RESOURCES_ALL, intent.resourceType) &&
+                        !_.contains(C.INTERSHARD_RESOURCES, intent.resourceType)) {
                         return;
                     }
                     if (!_.contains(C.INTERSHARD_RESOURCES, intent.resourceType) &&
@@ -146,6 +146,8 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                         bulk = bulkMarketOrders;
                         order.created = gameTime;
                     }
+
+                    console.log(`New order: ${JSON.stringify(order)}`);
 
                     bulk.insert(order);
 
@@ -400,7 +402,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
     directDeals.forEach(deal => {
 
         var order = ordersById[deal.orderId],
-            buyer, seller, userFieldNames = {[C.SUBSCRIPTION_TOKEN]: 'subscriptionTokens'};
+            buyer, seller;
 
         if(order.type == C.ORDER_SELL) {
             buyer = usersById[deal.user];
@@ -415,7 +417,10 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
             return;
         }
 
-        var amount = Math.min(deal.amount, order.remainingAmount, seller[userFieldNames[order.resourceType]] || 0);
+        seller.resources = seller.resources||{};
+        buyer.resources = buyer.resources||{};
+
+        var amount = Math.min(deal.amount, order.remainingAmount, seller.resources[order.resourceType] || 0);
         if(!amount || amount < 0) {
             return;
         }
@@ -427,7 +432,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
         }
 
         bulkUsers.inc(seller, 'money', dealCost);
-        bulkUsers.inc(seller, userFieldNames[order.resourceType], -amount);
+        bulkUsers.inc(seller, 'resources.' + order.resourceType, -amount);
 
         bulkUsersMoney.insert({
             date: new Date(),
@@ -447,7 +452,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
             resourceType: order.resourceType,
             user: ""+seller._id,
             change: -amount,
-            balance: seller[userFieldNames[order.resourceType]],
+            balance: seller.resources[order.resourceType],
             marketOrderId: ""+order._id,
             market: {
                 orderId: ""+order._id,
@@ -456,7 +461,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
         });
 
         bulkUsers.inc(buyer, 'money', -dealCost);
-        bulkUsers.inc(buyer, userFieldNames[order.resourceType], amount);
+        bulkUsers.inc(buyer, 'resources.' + order.resourceType, amount);
 
         bulkUsersMoney.insert({
             date: new Date(),
@@ -479,7 +484,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
             resourceType: order.resourceType,
             user: ""+buyer._id,
             change: amount,
-            balance: buyer[userFieldNames[order.resourceType]],
+            balance: buyer.resources[order.resourceType],
             market: {
                 orderId: ""+order._id,
                 anotherUser: ""+seller._id
@@ -493,13 +498,14 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                 order.resourceType) ? bulkMarketIntershardOrders : bulkMarketOrders;
 
             if (order._cancelled) {
+                console.log(`Removing ${order._id} (cancelled)`);
+                console.log(JSON.stringify(order));
                 bulk.remove(order._id);
                 return;
             }
 
             if(order.user && (nowTimestamp - order.createdTimestamp > C.MARKET_ORDER_LIFE_TIME)) {
                 const remainingFee = order.remainingAmount * order.price * C.MARKET_FEE;
-                console.log(`${order.id} remaining fee: ${remainingFee}`);
                 if(remainingFee > 0) {
                     const user = usersById[order.user];
                     bulkUsers.inc(user, 'money', remainingFee);
@@ -523,6 +529,8 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                     });
                 }
 
+                console.log(`Removing ${order._id} (expired: ${nowTimestamp} - ${order.createdTimestamp} > ${C.MARKET_ORDER_LIFE_TIME})`);
+                console.log(JSON.stringify(order));
                 bulk.remove(order._id);
                 return;
             }
@@ -535,8 +543,8 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
 
             if (order.type == C.ORDER_SELL) {
 
-                var availableResourceAmount = order.resourceType == C.SUBSCRIPTION_TOKEN ?
-                    (usersById[order.user].subscriptionTokens || 0) :
+                var availableResourceAmount = _.contains(C.INTERSHARD_RESOURCES, order.resourceType) ?
+                    ((usersById[order.user].resources||{})[order.resourceType] || 0) :
                     terminal && terminal.user == order.user ? terminal.store[order.resourceType] || 0 : 0;
 
                 availableResourceAmount = Math.min(availableResourceAmount, order.remainingAmount);

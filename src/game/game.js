@@ -156,9 +156,7 @@
                 progressTotal: Math.pow(gplLevel+1, 2) * 1000 - gplBaseProgress
             },
             market: {},
-            resources: {
-                [C.SUBSCRIPTION_TOKEN]: runtimeData.user.subscriptionTokens || 0
-            },
+            resources: JSON.parse(JSON.stringify(runtimeData.user.resources||{})),
             getObjectById(id) {
                 return register._objects[id] || null;
             },
