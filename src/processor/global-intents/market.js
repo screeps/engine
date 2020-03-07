@@ -147,8 +147,6 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                         order.created = gameTime;
                     }
 
-                    console.log(`New order: ${JSON.stringify(order)}`);
-
                     bulk.insert(order);
 
                     intent.price /= 1000;
@@ -257,7 +255,6 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                     if (ordersById[intent.orderId] && ordersById[intent.orderId].user == iUserIntents.user) {
                         ordersById[intent.orderId].remainingAmount = 0;
                         ordersById[intent.orderId]._cancelled = true;
-                        //console.log('Order cancelled ',JSON.stringify(ordersById[intent.orderId]));
                     }
                 });
             }
@@ -498,8 +495,6 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                 order.resourceType) ? bulkMarketIntershardOrders : bulkMarketOrders;
 
             if (order._cancelled) {
-                console.log(`Removing ${order._id} (cancelled)`);
-                console.log(JSON.stringify(order));
                 bulk.remove(order._id);
                 return;
             }
@@ -529,8 +524,6 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                     });
                 }
 
-                console.log(`Removing ${order._id} (expired: ${nowTimestamp} - ${order.createdTimestamp} > ${C.MARKET_ORDER_LIFE_TIME})`);
-                console.log(JSON.stringify(order));
                 bulk.remove(order._id);
                 return;
             }
