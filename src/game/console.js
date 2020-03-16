@@ -36,8 +36,9 @@ exports.makeConsole = function(id, sandboxedFunctionWrapper) {
         addVisual: {
             value: sandboxedFunctionWrapper(function(roomName, data) {
                 roomName = roomName || "";
+                const sizeLimit = roomName == "map" ? 1000 : 500;
                 visual[id][roomName] = visual[id][roomName] || "";
-                if(visual[id][roomName].length > 500*1024) {
+                if(visual[id][roomName].length > sizeLimit*1024) {
                     throw new Error(`RoomVisual size in room ${roomName} has exceeded 500 KB limit`);
                 }
                 visual[id][roomName] += JSON.stringify(data)+"\n";
