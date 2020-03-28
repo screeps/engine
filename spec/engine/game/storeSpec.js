@@ -154,53 +154,103 @@ describe('Store', () => {
         });
     });
 
-    // general purpose stores: storage, terminal, factory, container
-    describe('Container', () => {
-        let containerStore;
+    // active general purpose stores: storage, terminal, factory, container
+    describe('Storage (active)', () => {
+        let storageStore;
         beforeEach(()=>{
-            containerStore = new globals.Store({
-                type: "container",
+            storageStore = new globals.Store({
+                type: "storage",
                 store: { energy: 1000, H: 200, XGH2O: 100, purifier: 50, power: 10 },
                 storeCapacity: 2000
             });
         });
 
         it('Compatible with energy', () => {
-            expect(containerStore.getCapacity('energy')).toBe(2000);
-            expect(containerStore.getUsedCapacity('energy')).toBe(1000);
-            expect(containerStore.getFreeCapacity('energy')).toBe(640);
+            expect(storageStore.getCapacity('energy')).toBe(2000);
+            expect(storageStore.getUsedCapacity('energy')).toBe(1000);
+            expect(storageStore.getFreeCapacity('energy')).toBe(640);
         });
 
         it('Compatible with random resource', () => {
-            expect(containerStore.getCapacity()).toBe(2000);
-            expect(containerStore.getUsedCapacity()).toBe(1360);
-            expect(containerStore.getFreeCapacity()).toBe(640);
+            expect(storageStore.getCapacity()).toBe(2000);
+            expect(storageStore.getUsedCapacity()).toBe(1360);
+            expect(storageStore.getFreeCapacity()).toBe(640);
         });
 
         it('Compatible with power', () => {
-            expect(containerStore.getCapacity('power')).toBe(2000);
-            expect(containerStore.getUsedCapacity('power')).toBe(10);
-            expect(containerStore.getFreeCapacity('power')).toBe(640);
+            expect(storageStore.getCapacity('power')).toBe(2000);
+            expect(storageStore.getUsedCapacity('power')).toBe(10);
+            expect(storageStore.getFreeCapacity('power')).toBe(640);
         });
 
         it('Compatible with minerals', () => {
-            expect(containerStore.getCapacity('H')).toBe(2000);
-            expect(containerStore.getUsedCapacity('H')).toBe(200);
-            expect(containerStore.getUsedCapacity('O')).toBe(0);
-            expect(containerStore.getFreeCapacity('H')).toBe(640);
-            expect(containerStore.getFreeCapacity('O')).toBe(640);
+            expect(storageStore.getCapacity('H')).toBe(2000);
+            expect(storageStore.getUsedCapacity('H')).toBe(200);
+            expect(storageStore.getUsedCapacity('O')).toBe(0);
+            expect(storageStore.getFreeCapacity('H')).toBe(640);
+            expect(storageStore.getFreeCapacity('O')).toBe(640);
         });
 
         it('Compatible with boosts', () => {
-            expect(containerStore.getCapacity('XGH2O')).toBe(2000);
-            expect(containerStore.getUsedCapacity('XGH2O')).toBe(100);
-            expect(containerStore.getFreeCapacity('XGH2O')).toBe(640);
+            expect(storageStore.getCapacity('XGH2O')).toBe(2000);
+            expect(storageStore.getUsedCapacity('XGH2O')).toBe(100);
+            expect(storageStore.getFreeCapacity('XGH2O')).toBe(640);
         });
 
         it('Compatible with commodities', () => {
-            expect(containerStore.getCapacity('purifier')).toBe(2000);
-            expect(containerStore.getUsedCapacity('purifier')).toBe(50);
-            expect(containerStore.getFreeCapacity('purifier')).toBe(640);
+            expect(storageStore.getCapacity('purifier')).toBe(2000);
+            expect(storageStore.getUsedCapacity('purifier')).toBe(50);
+            expect(storageStore.getFreeCapacity('purifier')).toBe(640);
+        });
+    });
+
+    // inactive general purpose stores: storage, terminal, factory, container
+    describe('Storage (inactive)', () => {
+        let storageStore;
+        beforeEach(()=>{
+            storageStore = new globals.Store({
+                type: "storage",
+                store: { energy: 1000, H: 200, XGH2O: 100, purifier: 50, power: 10 },
+                storeCapacity: 0
+            });
+        });
+
+        it('Not compatible with energy', () => {
+            expect(storageStore.getCapacity('energy')).toBe(null);
+            expect(storageStore.getFreeCapacity('energy')).toBe(null);
+            expect(storageStore.getUsedCapacity('energy')).toBe(1000);
+        });
+
+        it('Not compatible with random resource', () => {
+            expect(storageStore.getCapacity()).toBe(null);
+            expect(storageStore.getFreeCapacity()).toBe(null);
+            expect(storageStore.getUsedCapacity()).toBe(1360);
+        });
+
+        it('Not compatible with power', () => {
+            expect(storageStore.getCapacity('power')).toBe(null);
+            expect(storageStore.getFreeCapacity('power')).toBe(null);
+            expect(storageStore.getUsedCapacity('power')).toBe(10);
+        });
+
+        it('Not compatible with minerals', () => {
+            expect(storageStore.getCapacity('H')).toBe(null);
+            expect(storageStore.getUsedCapacity('H')).toBe(200);
+            expect(storageStore.getUsedCapacity('O')).toBe(0);
+            expect(storageStore.getFreeCapacity('H')).toBe(null);
+            expect(storageStore.getFreeCapacity('O')).toBe(null);
+        });
+
+        it('Not compatible with boosts', () => {
+            expect(storageStore.getCapacity('XGH2O')).toBe(null);
+            expect(storageStore.getFreeCapacity('XGH2O')).toBe(null);
+            expect(storageStore.getUsedCapacity('XGH2O')).toBe(100);
+        });
+
+        it('Not compatible with commodities', () => {
+            expect(storageStore.getCapacity('purifier')).toBe(null);
+            expect(storageStore.getFreeCapacity('purifier')).toBe(null);
+            expect(storageStore.getUsedCapacity('purifier')).toBe(50);
         });
     });
 
@@ -239,9 +289,12 @@ describe('Store', () => {
             expect(tombstoneStore.getFreeCapacity('energy')).toBeNull();
         });
 
+        it('Contains 1360 resources tital', () => {
+            expect(tombstoneStore.getUsedCapacity()).toBe(1360);
+        });
+
         it('Not compatible with random resource', () => {
             expect(tombstoneStore.getCapacity()).toBeNull();
-            expect(tombstoneStore.getUsedCapacity()).toBeNull();
             expect(tombstoneStore.getFreeCapacity()).toBeNull();
         });
 
@@ -281,6 +334,10 @@ describe('Store', () => {
                 });
             });
 
+            it('Contains no resources', () => {
+                expect(labStore.getUsedCapacity()).toBe(0);
+            });
+
             it('Compatible with energy', () => {
                 expect(labStore.getCapacity('energy')).toBe(2000);
                 expect(labStore.getUsedCapacity('energy')).toBe(0);
@@ -289,7 +346,6 @@ describe('Store', () => {
 
             it('Not compatible with random resource', () => {
                 expect(labStore.getCapacity()).toBeNull();
-                expect(labStore.getUsedCapacity()).toBeNull();
                 expect(labStore.getFreeCapacity()).toBeNull();
             });
 
