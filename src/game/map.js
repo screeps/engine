@@ -222,7 +222,11 @@ exports.makeMap = function(runtimeData, register, globals) {
                 return { status: 'respawn', timestamp: runtimeData.roomStatusData.respawn[roomName] };
             }
 
-            return { status: 'normal', timestamp: null };
+            if(_.contains(accessibleRooms, roomName)) {
+                return { status: 'normal', timestamp: null };
+            }
+
+            return { status: 'closed', timestamp: null };
         },
 
         getTerrainAt(x, y, roomName) {
