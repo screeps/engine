@@ -362,7 +362,42 @@ describe('Store', () => {
             });
         });
 
-        describe('Non-empty', () => {
+        describe('Containing energy only', () => {
+            let labStore;
+            beforeEach(()=>{
+                labStore = new globals.Store({
+                    type: 'lab',
+                    store: {
+                        energy: 800
+                    },
+                    storeCapacity: 5000,
+                    storeCapacityResource: {
+                        energy: 2000,
+                        H: null
+                    }
+                });
+            });
+
+            it('Compatible with energy', () => {
+                expect(labStore.getCapacity('energy')).toBe(2000);
+                expect(labStore.getUsedCapacity('energy')).toBe(800);
+                expect(labStore.getFreeCapacity('energy')).toBe(1200);
+            });
+
+            it('Сompatible with mineral', () => {
+                expect(labStore.getCapacity('H')).toBe(3000);
+                expect(labStore.getUsedCapacity('H')).toBe(0);
+                expect(labStore.getFreeCapacity('H')).toBe(3000);
+            });
+
+            it('Not compatible with random resource', () => {
+                expect(labStore.getCapacity()).toBeNull();
+                expect(labStore.getUsedCapacity()).toBe(800);
+                expect(labStore.getFreeCapacity()).toBeNull();
+            });
+        });
+
+        describe('Containing energy and mineral', () => {
             let labStore;
             beforeEach(()=>{
                 labStore = new globals.Store({
