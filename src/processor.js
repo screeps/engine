@@ -540,6 +540,7 @@ driver.connect('processor')
         process.exit(1);
     })
     .then(_roomsQueue => {
+        console.log(`Config: ${JSON.stringify(config)}`);
 
         roomsQueue = _roomsQueue;
 
