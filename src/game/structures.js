@@ -1477,4 +1477,22 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     });
 
     Object.defineProperty(globals, 'StructureInvaderCore', {enumerable: true, value: StructureInvaderCore});
+
+    const StructureWarpContainer = register.wrapFn(function(id){
+        Structure.call(this, id);
+    });
+    StructureWarpContainer.prototype = Object.create(Structure.prototype);
+    StructureWarpContainer.prototype.constructor = StructureWarpContainer;
+
+    utils.defineGameObjectProperties(StructureWarpContainer.prototype, data, {
+        store: _storeGetter,
+        storeCapacity: o => o.storeCapacity,
+        cooldown: o => o.cooldownTime && o.cooldownTime > runtimeData.time ? o.cooldownTime - runtimeData.time : 0
+    });
+
+    StructureWarpContainer.prototype.toString = register.wrapFn(function() {
+        return `[warpContainer ${'#'+this.id}]`;
+    });
+
+    Object.defineProperty(globals, 'StructureWarpContainer', {enumerable: true, value: StructureWarpContainer})
 };

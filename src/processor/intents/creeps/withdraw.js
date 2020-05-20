@@ -47,8 +47,18 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ga
     object.store[intent.resourceType] = (object.store[intent.resourceType]||0) + amount;
     bulk.update(object, {store:{[intent.resourceType]: object.store[intent.resourceType]}});
 
-    target.store[intent.resourceType] -= amount;
-    bulk.update(target, {store:{[intent.resourceType]: target.store[intent.resourceType]}});
+    if(target.type == 'warpContainer') {
+        const targets = _.filter(roomObjects, {type: 'warpContainer'});
+        targets.forEach(function(t) {
+            t.store[intent.resourceType] -= amount;
+            bulk.update(t, {store:{[intent.resourceType]: t.store[intent.resourceType]}});
+        });
+        // TODO: cooldown
+    } else {
+        target.store[intent.resourceType] -= amount;
+        bulk.update(target, {store:{[intent.resourceType]: target.store[intent.resourceType]}});
+    }
+
     if(target.type == 'lab' && intent.resourceType != 'energy' && !target.store[intent.resourceType]) {
         bulk.update(target, {
             storeCapacityResource: {[intent.resourceType]: null},

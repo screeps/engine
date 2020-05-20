@@ -18,6 +18,10 @@ module.exports = function(object, scope, attackType) {
         require('../invader-core/destroy')(object, scope);
     }
 
+    if(object.type == 'warpContainer') {
+        require('../warpContainers/destroy')(object, scope);
+    }
+
     if(!attackType || attackType != C.EVENT_ATTACK_TYPE_NUKE) {
         const ruin = {
             type: 'ruin',

@@ -284,6 +284,19 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
             });
         }
 
+        if (target.structureType == 'warpContainer') {
+            const existingWarpContainer = _.find(roomObjects, {type: 'warpContainer'});
+            const store = existingWarpContainer ? existingWarpContainer.store : {};
+
+            _.extend(newObject, {
+                store,
+                storeCapacity: C.WARP_CONTAINER_CAPACITY,
+                hits: C.WARP_CONTAINER_HITS,
+                hitsMax: C.WARP_CONTAINER_HITS,
+                nextDecayTime: gameTime + C.WARP_CONTAINER_DECAY_TIME
+            });
+        }
+
         bulk.insert(newObject);
 
         roomObjects['createdStructure'+createdStructureCounter] = newObject;

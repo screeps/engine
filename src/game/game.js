@@ -236,7 +236,8 @@
             nuker: globals.StructureNuker,
             portal: globals.StructurePortal,
             factory: globals.StructureFactory,
-            invaderCore: globals.StructureInvaderCore
+            invaderCore: globals.StructureInvaderCore,
+            warpContainer: globals.StructureWarpContainer
         };
 
         var c = {};

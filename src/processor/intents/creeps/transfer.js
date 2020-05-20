@@ -42,8 +42,16 @@ module.exports = function(object, intent, {roomObjects, bulk, eventLog}) {
         return;
     }
 
-    target.store[resourceType] = (target.store[resourceType] || 0) + amount;
-    bulk.update(target, {store: {[resourceType]: target.store[resourceType]}});
+    if(target.type == 'warpContainer') {
+        const targets = _.filter(roomObjects, {type: 'warpContainer'});
+        targets.forEach(function(t) {
+            t.store[resourceType] = (t.store[resourceType] || 0) + amount;
+            bulk.update(t, {store: {[resourceType]: t.store[resourceType]}});
+        });
+    } else {
+        target.store[resourceType] = (target.store[resourceType] || 0) + amount;
+        bulk.update(target, {store: {[resourceType]: target.store[resourceType]}});
+    }
 
     object.store[resourceType] -= amount;
     bulk.update(object, {store: {[resourceType]: object.store[resourceType]}});
