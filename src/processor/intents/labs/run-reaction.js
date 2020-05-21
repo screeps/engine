@@ -16,8 +16,11 @@ module.exports = function(object, intent, {roomObjects, bulk, gameTime}) {
     }
 
     const lab1 = roomObjects[intent.lab1];
+    if(!lab1 || lab1.type != 'lab') {
+        return;
+    }
     const lab1MineralType = _(lab1.store).keys().filter(k => k != C.RESOURCE_ENERGY && lab1.store[k]).first();
-    if(!lab1 || lab1.type != 'lab' || !lab1MineralType || lab1.store[lab1MineralType] < reactionAmount) {
+    if(!lab1MineralType || lab1.store[lab1MineralType] < reactionAmount) {
         return;
     }
     if(Math.abs(lab1.x - object.x) > 2 || Math.abs(lab1.y - object.y) > 2) {
@@ -25,8 +28,11 @@ module.exports = function(object, intent, {roomObjects, bulk, gameTime}) {
     }
 
     const lab2 = roomObjects[intent.lab2];
+    if(!lab2 || lab2.type != 'lab') {
+        return;
+    }
     const lab2MineralType = _(lab2.store).keys().filter(k => k != C.RESOURCE_ENERGY && lab2.store[k]).first();
-    if(!lab2 || lab2.type != 'lab' || !lab2MineralType || lab2.store[lab2MineralType] < reactionAmount) {
+    if(!lab2MineralType || lab2.store[lab2MineralType] < reactionAmount) {
         return;
     }
     if(Math.abs(lab2.x - object.x) > 2 || Math.abs(lab2.y - object.y) > 2) {
