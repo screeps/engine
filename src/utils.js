@@ -738,3 +738,9 @@ exports.getReactionVariants = function getReactionVarients(compound) {
     }
     return result;
 };
+
+exports.calcTerminalCurrentLimit = function(object, gameTime) {
+    return Math.min(
+        C.TERMINAL_THROUGHPUT_MAX_LIMIT,
+        (object.limit || 0) + C.TERMINAL_THROUGHPUT*(gameTime - 1 - (object.limitUpdateTime||gameTime)));
+};

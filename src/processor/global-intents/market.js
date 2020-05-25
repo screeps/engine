@@ -24,8 +24,9 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
         }
         if(toTerminal.user) {
             var targetResourceTotal = utils.calcResources(toTerminal),
-                freeSpace = Math.max(0, toTerminal.storeCapacity - targetResourceTotal);
-            amount = Math.min(amount, freeSpace);
+                freeSpace = Math.max(0, toTerminal.storeCapacity - targetResourceTotal),
+                limit = utils.calcTerminalCurrentLimit(toTerminal, gameTime);
+            amount = Math.min(amount, freeSpace, limit);
         }
         if(!(amount > 0)) {
             return;
@@ -49,7 +50,13 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
         if(toTerminal.user) {
             toTerminal.store = toTerminal.store || {};
             toTerminal.store[resourceType] = (toTerminal.store[resourceType] || 0) + amount;
-            bulkObjects.update(toTerminal, {store: {[resourceType]: toTerminal.store[resourceType]}});
+            toTerminal.limit = limit - amount;
+            toTerminal.limitUpdateTime = gameTime;
+            bulkObjects.update(toTerminal, {
+                store: {[resourceType]: toTerminal.store[resourceType]},
+                limit: toTerminal.limit,
+                limitUpdateTime: toTerminal.limitUpdateTime
+            });
         }
 
         bulkObjects.update(fromTerminal, {store:{[resourceType]: fromTerminal.store[resourceType] - amount}});
@@ -315,8 +322,9 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
         }
         if(buyer.user) {
             var targetResourceTotal = utils.calcResources(buyer),
-                targetFreeSpace = Math.max(0, buyer.storeCapacity - targetResourceTotal);
-            amount = Math.min(amount, targetFreeSpace);
+                targetFreeSpace = Math.max(0, buyer.storeCapacity - targetResourceTotal),
+                targetLimit = utils.calcTerminalCurrentLimit(buyer, gameTime);
+            amount = Math.min(amount, targetFreeSpace, targetLimit);
         }
         if(!(amount > 0)) {
             return;
@@ -570,8 +578,9 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                 var newAmount = Math.min(Math.floor(userMoney / order.price), order.remainingAmount);
                 if (terminal && terminal.user) {
                     var targetResourceTotal = utils.calcResources(terminal),
-                        targetFreeSpace = Math.max(0, terminal.storeCapacity - targetResourceTotal);
-                    newAmount = Math.min(newAmount, targetFreeSpace);
+                        targetFreeSpace = Math.max(0, terminal.storeCapacity - targetResourceTotal),
+                        targetLimit = utils.calcTerminalCurrentLimit(terminal, gameTime);
+                    newAmount = Math.min(newAmount, targetFreeSpace, targetLimit);
                 }
 
                 var newActive = isOwner && newAmount > 0;

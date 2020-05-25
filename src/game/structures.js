@@ -708,7 +708,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     utils.defineGameObjectProperties(StructureTerminal.prototype, data, {
         store: _storeGetter,
         storeCapacity: o => o.storeCapacity,
-        cooldown: o => o.cooldownTime && o.cooldownTime > runtimeData.time ? o.cooldownTime - runtimeData.time : 0
+        cooldown: o => o.cooldownTime && o.cooldownTime > runtimeData.time ? o.cooldownTime - runtimeData.time : 0,
+        incomingLimit: o => utils.calcTerminalCurrentLimit(o, runtimeData.time)
     });
 
     StructureTerminal.prototype.send = register.wrapFn(function(resourceType, amount, targetRoomName, description) {
