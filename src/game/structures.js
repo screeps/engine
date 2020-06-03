@@ -709,7 +709,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         store: _storeGetter,
         storeCapacity: o => o.storeCapacity,
         cooldown: o => o.cooldownTime && o.cooldownTime > runtimeData.time ? o.cooldownTime - runtimeData.time : 0,
-        incomingLimit: o => utils.calcTerminalCurrentLimit(o, runtimeData.time)
+        incomingLimit: o => utils.calcTerminalCurrentLimit(o, runtimeData.time),
+        whitelist: o => o.whitelist ? o.whitelist.rooms || [] : []
     });
 
     StructureTerminal.prototype.send = register.wrapFn(function(resourceType, amount, targetRoomName, description) {
@@ -742,6 +743,21 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
 
         intents.set(this.id, 'send', {resourceType, amount, targetRoomName, description});
+        return C.OK;
+    });
+
+    StructureTerminal.prototype.setWhitelist = register.wrapFn(function(roomNames) {
+        if(!this.my) {
+            return C.ERR_NOT_OWNER;
+        }
+        if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
+            return C.ERR_RCL_NOT_ENOUGH;
+        }
+        if(!!roomNames && (!_.isArray(roomNames) || (roomNames.length > 100) || _.some(roomNames, r => !/^(W|E)\d+(N|S)\d+$/.test(r)))) {
+            return C.ERR_INVALID_ARGS;
+        }
+
+        intents.set(this.id, 'setWhitelist', {roomNames: roomNames || null});
         return C.OK;
     });
 

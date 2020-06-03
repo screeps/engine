@@ -19,6 +19,12 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
         if(!fromTerminal || !toTerminal || !transferFeeTerminal) {
             return false;
         }
+        if(!additionalFields['order'] &&
+            toTerminal.whitelist &&
+            toTerminal.whitelist.rooms &&
+            !_.includes(toTerminal.whitelist.rooms, fromTerminal.room)) {
+            return false;
+        }
         if(fromTerminal.user && (!fromTerminal.store || !fromTerminal.store[resourceType] || fromTerminal.store[resourceType] < amount)) {
             return false;
         }

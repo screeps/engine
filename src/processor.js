@@ -271,6 +271,9 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                         if (objectIntents.send) {
                             require('./processor/intents/terminal/send')(object, objectIntents.send, scope);
                         }
+                        if(objectIntents.setWhitelist) {
+                            require('./processor/intents/terminal/setWhitelist')(object, objectIntents.setWhitelist, scope);
+                        }
                     }
 
                     if (object.type == 'nuker') {
