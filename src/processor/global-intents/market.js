@@ -417,7 +417,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
         seller.resources = seller.resources||{};
         buyer.resources = buyer.resources||{};
 
-        var amount = Math.min(deal.amount, order.remainingAmount, seller.resources[order.resourceType] || 0);
+        var amount = Math.min(deal.amount, order.amount, order.remainingAmount, seller.resources[order.resourceType] || 0);
         if(!amount || amount < 0) {
             return;
         }
