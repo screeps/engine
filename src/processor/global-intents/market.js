@@ -430,6 +430,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
 
         bulkUsers.inc(seller, 'money', dealCost);
         bulkUsers.inc(seller, 'resources.' + order.resourceType, -amount);
+        seller.resources[order.resourceType] -= amount;
 
         bulkUsersMoney.insert({
             date: new Date(),
@@ -459,6 +460,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
 
         bulkUsers.inc(buyer, 'money', -dealCost);
         bulkUsers.inc(buyer, 'resources.' + order.resourceType, amount);
+        buyer.money -= dealCost;
 
         bulkUsersMoney.insert({
             date: new Date(),
