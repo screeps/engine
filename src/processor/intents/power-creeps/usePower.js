@@ -105,11 +105,14 @@ module.exports = function(object, intent, scope) {
             if(!target.store || target.type != 'storage' && target.type != 'terminal' && target.type != 'factory' && target.type !== 'container') {
                 return;
             }
+            if(target.user && target.user != roomController.user) {
+                return;
+            }
             var effect = _.find(target.effects, {power: C.PWR_DISRUPT_TERMINAL});
             if(effect && effect.endTime > gameTime) {
                 return;
             }
-            var extensions = _.filter(roomObjects, i => i.type == 'extension' && i.user == target.user && !i.off);
+            var extensions = _.filter(roomObjects, i => i.type == 'extension' && i.user == roomController.user && !i.off);
             var energySent = 0;
             var energyLimit = Math.min(
                 target.store.energy,
