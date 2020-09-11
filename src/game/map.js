@@ -342,6 +342,17 @@ exports.makeMap = function(runtimeData, register, globals) {
                             value: function() {
                                 return globals.console.getVisualSize("map");
                             }
+                        },
+                        export: {
+                            value: function(){
+                                return globals.console.getVisual("map");
+                            }
+                        },
+                        import: {
+                            value: function(data){
+                                globals.console.addVisual("map", "" + data);
+                                return this;
+                            }
                         }
                     });
                 }

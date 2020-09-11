@@ -36,12 +36,20 @@ exports.makeConsole = function(id, sandboxedFunctionWrapper) {
         addVisual: {
             value: sandboxedFunctionWrapper(function(roomName, data) {
                 roomName = roomName || "";
+                if(!data) {
+                    return;
+                }
                 const sizeLimit = roomName == "map" ? 1000 : 500;
                 visual[id][roomName] = visual[id][roomName] || "";
-                if(visual[id][roomName].length > sizeLimit*1024) {
-                    throw new Error(`RoomVisual size in room ${roomName} has exceeded 500 KB limit`);
+                const dataString = _.isString(data) ? data : JSON.stringify(data)+"\n";
+                if((visual[id][roomName].length + dataString.length) > sizeLimit*1024) {
+                    if(roomName == "map") {
+                        throw new Error( `MapVisual size has exceeded ${sizeLimit} KB limit`);
+                    }
+                    throw new Error( `RoomVisual size in room ${roomName} has exceeded ${sizeLimit} KB limit`);
                 }
-                visual[id][roomName] += JSON.stringify(data)+"\n";
+
+                visual[id][roomName] += dataString;
             })
         },
         getVisualSize: {
@@ -57,6 +65,11 @@ exports.makeConsole = function(id, sandboxedFunctionWrapper) {
             value: sandboxedFunctionWrapper(function(roomName) {
                 roomName = roomName || "";
                 visual[id][roomName] = "";
+            })
+        },
+        getVisual: {
+            value: sandboxedFunctionWrapper(function(roomName){
+                return visual[id][roomName || ""];
             })
         }
     });
