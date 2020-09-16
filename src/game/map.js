@@ -280,6 +280,9 @@ exports.makeMap = function(runtimeData, register, globals) {
                     Object.defineProperties(_visual, {
                         circle: {
                             value: function(pos, style) {
+                                if(!(pos instanceof globals.RoomPosition)) {
+                                    throw new Error('Invalid pos, RoomPosition expected')
+                                }
                                 globals.console.addVisual("map", {
                                     t: 'c',
                                     x: pos.x, y: pos.y, n: pos.roomName,
@@ -289,6 +292,12 @@ exports.makeMap = function(runtimeData, register, globals) {
                         },
                         line: {
                             value: function(pos1, pos2, style) {
+                                if(!(pos1 instanceof globals.RoomPosition)) {
+                                    throw new Error('Invalid pos1, RoomPosition expected')
+                                }
+                                if(!(pos2 instanceof globals.RoomPosition)) {
+                                    throw new Error('Invalid pos2, RoomPosition expected')
+                                }
                                 globals.console.addVisual("map", {
                                     t: 'l',
                                     x1: pos1.x, y1: pos1.y, n1: pos1.roomName,
@@ -299,6 +308,9 @@ exports.makeMap = function(runtimeData, register, globals) {
                         },
                         rect: {
                             value: function(pos, w, h, style) {
+                                if(!(pos instanceof globals.RoomPosition)) {
+                                    throw new Error('Invalid pos, RoomPosition expected')
+                                }
                                 globals.console.addVisual("map", {
                                     t: 'r',
                                     x: pos.x, y: pos.y, n: pos.roomName,
@@ -324,6 +336,9 @@ exports.makeMap = function(runtimeData, register, globals) {
                         },
                         text: {
                             value: function(text, pos, style) {
+                                if(!(pos instanceof globals.RoomPosition)) {
+                                    throw new Error('Invalid pos , RoomPosition expected')
+                                }
                                 globals.console.addVisual("map", {
                                     t: 't',
                                     text,
