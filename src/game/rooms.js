@@ -1181,6 +1181,15 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return this;
     });
 
+    RoomVisual.prototype.export = register.wrapFn(function() {
+        return globals.console.getVisual(this.roomName);
+    });
+
+    RoomVisual.prototype.import = register.wrapFn(function(data) {
+        globals.console.addVisual(this.roomName, "" + data);
+        return this;
+    });
+
     Object.defineProperty(globals, 'RoomVisual', {enumerable: true, value: RoomVisual});
 
 

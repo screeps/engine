@@ -79,6 +79,23 @@ describe('Utils', () => {
             });
         });
 
+        it('Lab with energy should be compatible with all resources', () => {
+            const lab = {
+                type: "lab",
+                store: { energy: 2000 },
+                storeCapacity: 5000,
+                storeCapacityResource: {energy: 2000 }
+            };
+
+            C.RESOURCES_ALL.forEach(r => {
+                if(r == 'energy') {
+                    expect(utils.capacityForResource(lab, r)).toBe(2000);
+                    return;
+                }
+                expect(utils.capacityForResource(lab, r)).toBe( 3000);
+            });
+        });
+
         it('Lab with a reagent should be compatible with energy and the reagent', () => {
             const lab = {
                 type: "lab",

@@ -36,7 +36,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             getUsedCapacity: {
                 value: function getUsedCapacity(resource) {
                     if(!resource) {
-                        if(object.storeCapacityResource || (utils.capacityForResource(object, resource) === 0)) {
+                        if(!!object.storeCapacityResource && (utils.capacityForResource(object, resource) === 0)) {
                             return null;
                         }
                         if(this._sum === undefined) {
@@ -46,7 +46,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                         }
                         return this._sum;
                     }
-                    return object.store[resource] || (utils.capacityForResource(object, resource) === 0 ? null : 0);
+                    return object.store[resource] || (!!object.storeCapacityResource && utils.capacityForResource(object, resource) === 0 ? null : 0);
                 }
             },
             getFreeCapacity: {
@@ -62,6 +62,10 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                     const capacity = this.getCapacity(resource);
                     if(!capacity) {
                         return null;
+                    }
+
+                    if(object.storeCapacityResource) {
+                        return capacity - this.getUsedCapacity(resource);
                     }
 
                     if(this._sum === undefined) {

@@ -53,13 +53,16 @@ exports.make = function(runtimeData, intents, register) {
         }),
 
         getOrderById: register.wrapFn(function(id) {
-            const order = runtimeData.market.orders.all[id] || this.orders[id];
-            if(!order) {
-                return null;
+            if(this.orders[id]) {
+                return JSON.parse(JSON.stringify(this.orders[id]));
             }
-            const result = JSON.parse(JSON.stringify(order));
-            result.price /= 1000;
-            return result;
+            const order = runtimeData.market.orders.all[id];
+            if(order) {
+                const result = JSON.parse(JSON.stringify(order));
+                result.price /= 1000;
+                return result;
+            }
+            return null;
         }),
 
         createOrder: register.wrapFn(function(type, resourceType, price, totalAmount, roomName) {
@@ -112,10 +115,8 @@ exports.make = function(runtimeData, intents, register) {
                 return C.ERR_INVALID_ARGS;
             }
             if(_.contains(C.INTERSHARD_RESOURCES, order.resourceType)) {
-                if(order.resourceType == C.SUBSCRIPTION_TOKEN) {
-                    if(order.type == C.ORDER_BUY && (runtimeData.user.subscriptionTokens||0) < amount) {
-                        return C.ERR_NOT_ENOUGH_RESOURCES;
-                    }
+                if(order.type == C.ORDER_BUY && (runtimeData.user.resources[order.resourceType]||0) < amount) {
+                    return C.ERR_NOT_ENOUGH_RESOURCES;
                 }
             }
             else {

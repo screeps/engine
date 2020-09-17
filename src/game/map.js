@@ -13,6 +13,7 @@ exports.makeMap = function(runtimeData, register, globals) {
     var heap, openClosed, parents;
     var originX, originY;
     var toX, toY;
+    let _visual;
 
     const accessibleRooms = JSON.parse(runtimeData.accessibleRooms);
 
@@ -61,7 +62,9 @@ exports.makeMap = function(runtimeData, register, globals) {
       return Math.abs(xx - toX) + Math.abs(yy - toY);
     }
 
-    return {
+
+
+    const map = {
 
         findRoute(fromRoom, toRoom, opts) {
             if(_.isObject(fromRoom)) {
@@ -222,7 +225,11 @@ exports.makeMap = function(runtimeData, register, globals) {
                 return { status: 'respawn', timestamp: runtimeData.roomStatusData.respawn[roomName] };
             }
 
-            return { status: 'normal', timestamp: null };
+            if(_.contains(accessibleRooms, roomName)) {
+                return { status: 'normal', timestamp: null };
+            }
+
+            return { status: 'closed', timestamp: null };
         },
 
         getTerrainAt(x, y, roomName) {
@@ -261,6 +268,98 @@ exports.makeMap = function(runtimeData, register, globals) {
 
         getWorldSize() {
             return driver.getWorldSize();
+        },
+    };
+
+    Object.defineProperties(map, {
+        visual: {
+            enumerable: true,
+            get() {
+                if(!_visual) {
+                    _visual = {};
+                    Object.defineProperties(_visual, {
+                        circle: {
+                            value: function(pos, style) {
+                                globals.console.addVisual("map", {
+                                    t: 'c',
+                                    x: pos.x, y: pos.y, n: pos.roomName,
+                                    s: style});
+                                return this;
+                            }
+                        },
+                        line: {
+                            value: function(pos1, pos2, style) {
+                                globals.console.addVisual("map", {
+                                    t: 'l',
+                                    x1: pos1.x, y1: pos1.y, n1: pos1.roomName,
+                                    x2: pos2.x, y2: pos2.y, n2: pos2.roomName,
+                                    s: style});
+                                return this;
+                            }
+                        },
+                        rect: {
+                            value: function(pos, w, h, style) {
+                                globals.console.addVisual("map", {
+                                    t: 'r',
+                                    x: pos.x, y: pos.y, n: pos.roomName,
+                                    w, h,
+                                    s: style});
+                                return this;
+                            }
+                        },
+                        poly: {
+                            value: function(points, style) {
+                                if(_.isArray(points) && _.some(points)) {
+                                    points = points.map(i => {
+                                        const p = i.pos || i;
+                                        return {x: p.x, y: p.y, n: p.roomName};
+                                    });
+                                    globals.console.addVisual("map", {
+                                        t: 'p',
+                                        points,
+                                        s: style});
+                                }
+                                return this;
+                            }
+                        },
+                        text: {
+                            value: function(text, pos, style) {
+                                globals.console.addVisual("map", {
+                                    t: 't',
+                                    text,
+                                    x: pos.x, y: pos.y, n: pos.roomName,
+                                    s: style});
+                                return this;
+                            }
+                        },
+                        clear: {
+                            value: function () {
+                                globals.console.clearVisual("map");
+                                return this;
+                            }
+                        },
+                        getSize: {
+                            value: function() {
+                                return globals.console.getVisualSize("map");
+                            }
+                        },
+                        export: {
+                            value: function(){
+                                return globals.console.getVisual("map");
+                            }
+                        },
+                        import: {
+                            value: function(data){
+                                globals.console.addVisual("map", "" + data);
+                                return this;
+                            }
+                        }
+                    });
+                }
+                return _visual;
+            }
         }
-    }
+    });
+
+    return map;
 };
