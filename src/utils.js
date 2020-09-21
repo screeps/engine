@@ -1,19 +1,9 @@
 var _ = require('lodash');
 
-var driver, C, offsetsByDirection;
+var driver, C, offsetsByDirection = [, [0,-1], [1,-1], [1,0], [1,1], [0,1], [-1,1], [-1,0], [-1,-1]];
 
 function loadDriver() {
     C = driver.constants;
-    offsetsByDirection = {
-        [C.TOP]: [0,-1],
-        [C.TOP_RIGHT]: [1,-1],
-        [C.RIGHT]: [1,0],
-        [C.BOTTOM_RIGHT]: [1,1],
-        [C.BOTTOM]: [0,1],
-        [C.BOTTOM_LEFT]: [-1,1],
-        [C.LEFT]: [-1,0],
-        [C.TOP_LEFT]: [-1,-1]
-    };
 }
 
 try {
@@ -32,7 +22,9 @@ exports.getDriver = function getDriver() {
 
 exports.getRuntimeDriver = function getRuntimeDriver() {
     try {
-        return require('~runtime-driver');
+        driver = require('~runtime-driver');
+        loadDriver();
+        return driver;
     }
     catch (e) {
         return exports.getDriver();
