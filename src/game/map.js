@@ -286,7 +286,7 @@ exports.makeMap = function(runtimeData, register, globals) {
                                 globals.console.addVisual("map", {
                                     t: 'c',
                                     x: pos.x, y: pos.y, n: pos.roomName,
-                                    s: style});
+                                    s: style || {}});
                                 return this;
                             }
                         },
@@ -302,7 +302,7 @@ exports.makeMap = function(runtimeData, register, globals) {
                                     t: 'l',
                                     x1: pos1.x, y1: pos1.y, n1: pos1.roomName,
                                     x2: pos2.x, y2: pos2.y, n2: pos2.roomName,
-                                    s: style});
+                                    s: style || {}});
                                 return this;
                             }
                         },
@@ -315,7 +315,7 @@ exports.makeMap = function(runtimeData, register, globals) {
                                     t: 'r',
                                     x: pos.x, y: pos.y, n: pos.roomName,
                                     w, h,
-                                    s: style});
+                                    s: style || {}});
                                 return this;
                             }
                         },
@@ -329,7 +329,7 @@ exports.makeMap = function(runtimeData, register, globals) {
                                     globals.console.addVisual("map", {
                                         t: 'p',
                                         points,
-                                        s: style});
+                                        s: style || {}});
                                 }
                                 return this;
                             }
@@ -343,7 +343,7 @@ exports.makeMap = function(runtimeData, register, globals) {
                                     t: 't',
                                     text,
                                     x: pos.x, y: pos.y, n: pos.roomName,
-                                    s: style});
+                                    s: style || {}});
                                 return this;
                             }
                         },
