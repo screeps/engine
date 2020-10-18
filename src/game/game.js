@@ -24,6 +24,7 @@
             nukes: {},
             powerCreeps: {},
             ruins: {},
+            customObjects: {}
         });
 
         if(spatial) {
@@ -372,6 +373,7 @@
 
             if(customObjectsInfo[object.type]) {
                 register._objects[i] = new globals[customObjectsInfo[object.type].name](i);
+                addObjectToRegister(register, 'customObjects', register._objects[i], object);
                 if(customObjectsInfo[object.type].findConstant) {
                     addObjectToFindCache(register, customObjectsInfo[object.type].findConstant, register._objects[i], object);
                 }

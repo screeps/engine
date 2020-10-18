@@ -50,7 +50,7 @@ module.exports = function(name, parent, properties, prototypeExtender, userOwned
         }
 
         if(prototypeExtender) {
-            prototypeExtender(_CustomObject.prototype, scope);
+            prototypeExtender(_CustomObject.prototype, scope, {utils});
         }
 
         scope.globals[name] = _CustomObject;

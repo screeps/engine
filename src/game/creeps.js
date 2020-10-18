@@ -440,11 +440,16 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
         if(!target ||
             !target.id ||
-            (!register.spawns[target.id] && !register.powerCreeps[target.id] && !register.creeps[target.id] && !register.structures[target.id]) ||
+            (!register.spawns[target.id] && !register.powerCreeps[target.id] && !register.creeps[target.id] && !register.structures[target.id] && !register.customObjects[target.id]) ||
             (!data(target.id).store && (register.structures[target.id].structureType != 'controller')) ||
             ((target instanceof globals.Creep) && target.spawning) ||
-            !(target instanceof globals.StructureSpawn) && !(target instanceof globals.Structure) && !(target instanceof globals.Creep) && !(target instanceof globals.PowerCreep)) {
+            !(target instanceof globals.StructureSpawn) &&
+            !(target instanceof globals.Structure) &&
+            !(target instanceof globals.Creep) &&
+            !(target instanceof globals.PowerCreep) &&
+            !register.customObjects[target.id]) {
             register.assertTargetObject(target);
+            console.log(`ERR_INVALID_TARGET case 1. Register ${(!register.spawns[target.id] && !register.powerCreeps[target.id] && !register.creeps[target.id] && !register.structures[target.id] && !register.customObjects[target.id])}, store ${(!data(target.id).store && (register.structures[target.id].structureType != 'controller'))}`);
             return C.ERR_INVALID_TARGET;
         }
 
@@ -453,6 +458,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
 
         if(!utils.capacityForResource(data(target.id), resourceType)) {
+            console.log(`ERR_INVALID_TARGET case 2`);
             return C.ERR_INVALID_TARGET;
         }
 
@@ -500,7 +506,13 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_INVALID_ARGS;
         }
 
-        if(!target || !target.id || !data(target.id).store || ((!register.structures[target.id] || !(target instanceof globals.Structure)) && !(target instanceof globals.Tombstone) && !(target instanceof globals.Ruin))) {
+        if(!target ||
+            !target.id ||
+            !data(target.id).store ||
+            ((!register.structures[target.id] || !(target instanceof globals.Structure)) &&
+                !(target instanceof globals.Tombstone) &&
+                !(target instanceof globals.Ruin) &&
+                !(register.customObjects[target.id]))) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
