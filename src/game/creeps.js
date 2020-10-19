@@ -449,7 +449,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             !(target instanceof globals.PowerCreep) &&
             !register.customObjects[target.id]) {
             register.assertTargetObject(target);
-            console.log(`ERR_INVALID_TARGET case 1. Register ${(!register.spawns[target.id] && !register.powerCreeps[target.id] && !register.creeps[target.id] && !register.structures[target.id] && !register.customObjects[target.id])}, store ${(!data(target.id).store && (register.structures[target.id].structureType != 'controller'))}`);
             return C.ERR_INVALID_TARGET;
         }
 
@@ -458,7 +457,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
 
         if(!utils.capacityForResource(data(target.id), resourceType)) {
-            console.log(`ERR_INVALID_TARGET case 2`);
             return C.ERR_INVALID_TARGET;
         }
 
