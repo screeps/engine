@@ -385,7 +385,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             }
         }
         else if(register.deposits[target.id] && (target instanceof globals.Deposit)) {
-            if(!target.pos.isNearTo(this.pos)) {
+            if(!target.pos.inRangeTo(this.pos, C.RANGE_HARVEST_DEPOSIT)) {
                 return C.ERR_NOT_IN_RANGE;
             }
             if(target.cooldown) {

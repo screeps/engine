@@ -9,7 +9,7 @@ module.exports = function(object, intent, {roomObjects, roomController, bulk, ga
     if(!target || target.type != 'powerBank' && target.type != 'powerSpawn') {
         return;
     }
-    if(utils.dist(object, target) > 1) {
+    if(utils.dist(object, target) > C.RANGE_RENEW_POWERCREEP) {
         return;
     }
 

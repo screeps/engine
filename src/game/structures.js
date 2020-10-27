@@ -1242,7 +1242,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!target.my) {
             return C.ERR_NOT_OWNER;
         }
-        if(!target.pos.isNearTo(this.pos)) {
+        if(!target.pos.inRangeTo(this.pos, C.RANGE_RENEW_CREEP)) {
             return C.ERR_NOT_IN_RANGE;
         }
         if(this.room.energyAvailable < Math.ceil(C.SPAWN_RENEW_RATIO * utils.calcCreepCost(target.body) / C.CREEP_SPAWN_TIME / target.body.length)) {
