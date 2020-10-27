@@ -722,7 +722,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.room.controller && !this.room.controller.my && this.room.controller.safeMode) {
             return C.ERR_NO_BODYPART;
         }
-        if(!this.pos.inRangeTo(target, 3)) {
+        if(!this.pos.inRangeTo(target, C.RANGE_RANGED_HEAL)) {
             return C.ERR_NOT_IN_RANGE;
         }
 
