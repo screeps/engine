@@ -483,7 +483,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             resultPromises.push(core.setUserRoomVisibility(user, roomId));
         }*/
 
-        driver.config.emit('processRoom',roomId, roomInfo);
+        driver.config.emit('processRoom', roomId, roomInfo, roomObjects, roomTerrain, gameTime, bulk, bulkUsers, eventLog);
 
         driver.config.emit('processorLoopStage','saveRoom', roomId);
 
