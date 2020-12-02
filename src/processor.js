@@ -477,6 +477,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             else if(object.type == 'energy' && object.resourceType == 'power') {
                 mapView.pb.push([object.x, object.y]);
             }
+            driver.config.emit('postProcessObject', object, roomObjects, roomTerrain, gameTime, roomInfo, bulk, bulkUsers, eventLog, mapView);
         });
 
         /*for(var user in userVisibility) {
