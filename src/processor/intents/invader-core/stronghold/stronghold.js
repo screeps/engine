@@ -44,7 +44,6 @@ const deployStronghold = function deployStronghold(context) {
         _.forEach(ramparts, rampart => {bulk.remove(rampart._id); delete roomObjects[rampart._id]});
 
         const template = strongholds.templates[core.templateName];
-        const containerAmounts = [0, 500, 4000, 10000, 50000, 360000];
 
         const objectOptions = {};
         objectOptions[C.STRUCTURE_RAMPART] = {
@@ -123,7 +122,7 @@ const deployStronghold = function deployStronghold(context) {
             }
 
             if(i.type == C.STRUCTURE_CONTAINER) {
-                s.store = utils.calcReward(strongholds.containerRewards, containerAmounts[template.rewardLevel], 3);
+                s.store = utils.calcReward(strongholds.containerRewards, strongholds.containerAmounts[template.rewardLevel], 3);
             }
 
             bulk.insert(s);
