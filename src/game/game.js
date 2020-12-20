@@ -8,34 +8,6 @@
         market = require('./market'),
         customPrototypes = require('./custom-prototypes');
 
-    function populateRegister(reg, spatial) {
-        _.extend(reg, {
-            creeps: {},
-            structures: {},
-            ownedStructures: {},
-            spawns: {},
-            sources: {},
-            energy: {},
-            flags: {},
-            constructionSites: {},
-            minerals: {},
-            deposits: {},
-            tombstones: {},
-            nukes: {},
-            powerCreeps: {},
-            ruins: {},
-            customObjects: {}
-        });
-
-        if(spatial) {
-            var keys = Object.keys(reg);
-            reg.spatial = {};
-            keys.forEach((i) => {
-                reg.spatial[i] = new Array(2500);
-            });
-        }
-    }
-
     var findCacheFn = {
         [C.FIND_CREEPS]: (i) => !i.spawning,
         [C.FIND_MY_CREEPS]: (i) => !i.spawning && i.my,
@@ -82,7 +54,8 @@
                     name: i.name,
                     make: customPrototypes(i.name, i.opts.parent, i.opts.properties, i.opts.prototypeExtender,
                         !!i.opts.userOwned),
-                    findConstant: i.opts.findConstant
+                    findConstant: i.opts.findConstant,
+                    lookConstant: i.opts.lookConstant
                 };
             });
         }
@@ -96,6 +69,42 @@
             roomEventLogCache: {},
             wrapFn: sandboxedFunctionWrapper || function(fn) { return fn }
         };
+
+        function populateRegister(reg, spatial) {
+            _.extend(reg, {
+                creeps: {},
+                structures: {},
+                ownedStructures: {},
+                spawns: {},
+                sources: {},
+                energy: {},
+                flags: {},
+                constructionSites: {},
+                minerals: {},
+                deposits: {},
+                tombstones: {},
+                nukes: {},
+                powerCreeps: {},
+                ruins: {},
+                customObjects: {}
+            });
+
+            if(runtimeData.customObjectPrototypes) {
+                runtimeData.customObjectPrototypes.forEach(i => {
+                    if(i.opts.lookConstant) {
+                        reg[i.opts.lookConstant] = {};
+                    }
+                });
+            }
+
+            if(spatial) {
+                var keys = Object.keys(reg);
+                reg.spatial = {};
+                keys.forEach((i) => {
+                    reg.spatial[i] = new Array(2500);
+                });
+            }
+        }
 
         var deprecatedShown = [];
 
@@ -376,6 +385,9 @@
                 addObjectToRegister(register, 'customObjects', register._objects[i], object);
                 if(customObjectsInfo[object.type].findConstant) {
                     addObjectToFindCache(register, customObjectsInfo[object.type].findConstant, register._objects[i], object);
+                }
+                if(customObjectsInfo[object.type].lookConstant) {
+                    addObjectToRegister(register, customObjectsInfo[object.type].lookConstant, register._objects[i], object);
                 }
             }
 

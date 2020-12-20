@@ -513,6 +513,12 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 powerCreep: register.byRoom[id].spatial.powerCreeps
             }
         };
+        runtimeData.customObjectPrototypes.forEach(i => {
+            if(i.opts.lookConstant) {
+                privateStore[id].lookTypeRegisters[i.opts.lookConstant] = register.byRoom[id][i.opts.lookConstant];
+                privateStore[id].lookTypeSpatialRegisters[i.opts.lookConstant] = register.byRoom[id].spatial[i.opts.lookConstant];
+            }
+        });
 
         this.visual = new globals.RoomVisual(id);
     });
@@ -776,6 +782,15 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         _lookSpatialRegister(this.name, C.LOOK_RUINS, x,y, result);
         _lookSpatialRegister(this.name, C.LOOK_POWER_CREEPS, x,y, result);
 
+        if(runtimeData.customObjectPrototypes) {
+            runtimeData.customObjectPrototypes.forEach(i => {
+                if(i.opts.lookConstant) {
+                    console.log(`Look ${i.opts.lookConstant}`);
+                    _lookSpatialRegister(this.name, i.opts.lookConstant, x,y, result);
+                }
+            });
+        }
+
         return result;
     });
 
@@ -816,6 +831,14 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         _lookAreaMixedRegister(this.name, C.LOOK_TOMBSTONES, top, left, bottom, right, true, asArray, result);
         _lookAreaMixedRegister(this.name, C.LOOK_RUINS, top, left, bottom, right, true, asArray, result);
         _lookAreaMixedRegister(this.name, C.LOOK_POWER_CREEPS, top, left, bottom, right, true, asArray, result);
+
+        if(runtimeData.customObjectPrototypes) {
+            runtimeData.customObjectPrototypes.forEach(i => {
+                if(i.opts.lookConstant) {
+                    _lookAreaMixedRegister(this.name, i.opts.lookConstant, top, left, bottom, right, true, asArray, result);
+                }
+            });
+        }
 
         return result;
     });
