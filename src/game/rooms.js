@@ -785,7 +785,6 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(runtimeData.customObjectPrototypes) {
             runtimeData.customObjectPrototypes.forEach(i => {
                 if(i.opts.lookConstant) {
-                    console.log(`Look ${i.opts.lookConstant}`);
                     _lookSpatialRegister(this.name, i.opts.lookConstant, x,y, result);
                 }
             });
