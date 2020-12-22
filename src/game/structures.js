@@ -1229,7 +1229,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.spawning) {
             return C.ERR_BUSY;
         }
-        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning) {
+        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning || _.any(target.body, {type: C.CLAIM})) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
