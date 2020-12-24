@@ -513,12 +513,14 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 powerCreep: register.byRoom[id].spatial.powerCreeps
             }
         };
-        runtimeData.customObjectPrototypes.forEach(i => {
-            if(i.opts.lookConstant) {
-                privateStore[id].lookTypeRegisters[i.opts.lookConstant] = register.byRoom[id][i.opts.lookConstant];
-                privateStore[id].lookTypeSpatialRegisters[i.opts.lookConstant] = register.byRoom[id].spatial[i.opts.lookConstant];
-            }
-        });
+        if(runtimeData.customObjectPrototypes) {
+            runtimeData.customObjectPrototypes.forEach(i => {
+                if(i.opts.lookConstant) {
+                    privateStore[id].lookTypeRegisters[i.opts.lookConstant] = register.byRoom[id][i.opts.lookConstant];
+                    privateStore[id].lookTypeSpatialRegisters[i.opts.lookConstant] = register.byRoom[id].spatial[i.opts.lookConstant];
+                }
+            });
+        }
 
         this.visual = new globals.RoomVisual(id);
     });
