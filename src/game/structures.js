@@ -917,8 +917,13 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
 
-        if(name && (globals.Game.creeps[name] || createdCreepNames.indexOf(name) != -1)) {
-            return C.ERR_NAME_EXISTS;
+        if(name) {
+            if(globals.Game.creeps[name] || createdCreepNames.indexOf(name) != -1) {
+                return C.ERR_NAME_EXISTS;
+            }
+            if(!_.isString(name) || (name.length > 100)) {
+                return C.ERR_INVALID_ARGS;
+            }
         }
 
         return C.OK;
@@ -1056,7 +1061,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     StructureSpawn.prototype.spawnCreep = register.wrapFn(function spawnCreep(body, name, options = {}) {
 
-        if(!name || !_.isObject(options)) {
+        if(!name || !_.isString(name) || (name.length > 100) || !_.isObject(options)) {
             return C.ERR_INVALID_ARGS;
         }
 

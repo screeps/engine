@@ -1001,7 +1001,11 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!_.contains(C.COLORS_ALL, secondaryColor)) {
             return C.ERR_INVALID_ARGS;
         }
-        if(!name) {
+        if(name) {
+            if(!_.isString(name) || (name.length > 100)) {
+                return C.ERR_INVALID_ARGS;
+            }
+        } else {
             var cnt = 1;
             do {
                 name = 'Flag'+cnt;
@@ -1039,6 +1043,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_INVALID_ARGS;
         }
         if(structureType == 'spawn' && typeof name == 'string') {
+            if(name.length > 100) {
+                return C.ERR_INVALID_ARGS;
+            }
             if(createdSpawnNames.indexOf(name) != -1) {
                 return C.ERR_INVALID_ARGS;
             }

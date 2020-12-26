@@ -361,6 +361,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
+        if(!name || !_.isString(name) || (name.length > 100)) {
+            return C.ERR_INVALID_ARGS;
+        }
         if(_.any(runtimeData.userPowerCreeps, {name})) {
             return C.ERR_NAME_EXISTS;
         }
@@ -390,7 +393,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     });
 
     PowerCreep.create = register.wrapFn(function(name, className) {
-
+        if(!name || !_.isString(name) || (name.length > 100)) {
+            return C.ERR_INVALID_ARGS;
+        }
         if(calcFreePowerLevels() <= 0) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
