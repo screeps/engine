@@ -1001,11 +1001,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!_.contains(C.COLORS_ALL, secondaryColor)) {
             return C.ERR_INVALID_ARGS;
         }
-        if(name) {
-            if(!_.isString(name) || (name.length > 100)) {
-                return C.ERR_INVALID_ARGS;
-            }
-        } else {
+        if(!name) {
             var cnt = 1;
             do {
                 name = 'Flag'+cnt;
@@ -1016,7 +1012,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(_.any(register.flags, {name}) || createdFlagNames.indexOf(name) != -1) {
             return C.ERR_NAME_EXISTS;
         }
-        if(name.length > 60) {
+        if(name.length > 100) {
             return C.ERR_INVALID_ARGS;
         }
 
