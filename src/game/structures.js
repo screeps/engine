@@ -1479,6 +1479,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     utils.defineGameObjectProperties(StructureInvaderCore.prototype, data, {
         level: o => o.level,
+        spawning: (o, id) => o.spawning ? new StructureSpawn.Spawning(id) : null,
         ticksToDeploy: o => o.deployTime ? o.deployTime - runtimeData.time : undefined
     });
 
