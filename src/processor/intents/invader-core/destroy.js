@@ -27,7 +27,7 @@ module.exports = function(object, scope) {
     }
 
     const rewardLevel = templates[object.templateName].rewardLevel;
-    const rewards = coreRewards[object.depositType].slice(0, 1+rewardLevel);
+    const rewards = coreRewards[object.depositType].slice(0, 1+rewardLevel).map(r => _.isArray(r) ? _.sample(r) : r);
     const rewardDensities = coreDensities.slice(0, 1+rewardLevel);
 
     const store = utils.calcReward(_.object(rewards, rewardDensities), coreAmounts[rewardLevel]);
