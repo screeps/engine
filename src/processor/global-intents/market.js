@@ -177,7 +177,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                     }
 
                     if (intent.newPrice > order.price) {
-
+                        order._skip = true;
                         var fee = Math.ceil((intent.newPrice - order.price) * order.remainingAmount * C.MARKET_FEE);
 
                         if (user.money < fee) {
@@ -263,7 +263,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                 iUserIntents.intents.deal.forEach(intent => {
                     intent.user = iUserIntents.user;
 
-                    if (!ordersById[intent.orderId]) {
+                    if (!ordersById[intent.orderId] || ordersById[intent.orderId]._skip) {
                         return;
                     }
                     if (intent.amount <= 0) {
