@@ -39,13 +39,15 @@ module.exports = function(x, y, room, amount, resourceType, scope) {
             });
         }
         else {
-            bulk.insert({
+            const obj = {
                 type: 'energy',
                 x, y,
                 room: room,
                 [resourceType]: amount,
                 resourceType
-            })
+            };
+            obj._id = bulk.insert(obj);
+            roomObjects[obj._id] = obj;
         }
     }
 };
