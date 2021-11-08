@@ -8,7 +8,7 @@ function _applyDamage(object, damage) {
 
     let damageReduce = 0, damageEffective = damage;
 
-    if(_.any(object.body, i => !!i.boost)) {
+    if(_.some(object.body, i => !!i.boost)) {
         for(let i=0; i<object.body.length; i++) {
             if(damageEffective <= 0) {
                 break;
@@ -86,7 +86,7 @@ module.exports = function(object, scope) {
 
         if(!object.tutorial) {
             if(!object.ageTime) {
-                object.ageTime = gameTime + (_.any(object.body, {type: C.CLAIM}) ? C.CREEP_CLAIM_LIFE_TIME : C.CREEP_LIFE_TIME);
+                object.ageTime = gameTime + (_.some(object.body, {type: C.CLAIM}) ? C.CREEP_CLAIM_LIFE_TIME : C.CREEP_LIFE_TIME);
                 bulk.update(object, {ageTime: object.ageTime});
             }
 
@@ -111,7 +111,7 @@ module.exports = function(object, scope) {
         require('./_die')(object, undefined, true, scope);
     }
 
-    if(object.userSummoned && _.any(roomObjects, i => i.type == 'creep' && i.user != '2' && i.user != roomController.user)) {
+    if(object.userSummoned && _.some(roomObjects, i => i.type == 'creep' && i.user != '2' && i.user != roomController.user)) {
         require('./_die')(object, undefined, false, scope);
     }
 

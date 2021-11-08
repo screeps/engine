@@ -5,7 +5,7 @@ var _ = require('lodash'),
 
 module.exports = function(object, intent, {roomObjects, bulk, roomController, gameTime, eventLog}) {
 
-    if(!_.contains(C.RESOURCES_ALL, intent.resourceType)) {
+    if(!_.includes(C.RESOURCES_ALL, intent.resourceType)) {
         return;
     }
 
@@ -22,7 +22,7 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ga
     if(!target) {
         return;
     }
-    if(object.user != target.user && _.any(roomObjects, i => i.type == C.STRUCTURE_RAMPART && i.user != object.user && !i.isPublic && i.x == target.x && i.y == target.y)) {
+    if(object.user != target.user && _.some(roomObjects, i => i.type == C.STRUCTURE_RAMPART && i.user != object.user && !i.isPublic && i.x == target.x && i.y == target.y)) {
         return;
     }
     if(Math.abs(target.x - object.x) > 1 || Math.abs(target.y - object.y) > 1) {

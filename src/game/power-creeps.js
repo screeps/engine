@@ -8,7 +8,7 @@ var runtimeData, intents, register, globals;
 
 function calcFreePowerLevels() {
     var level = Math.floor(Math.pow((runtimeData.user.power || 0) / C.POWER_LEVEL_MULTIPLY, 1 / C.POWER_LEVEL_POW));
-    var used = Object.keys(runtimeData.userPowerCreeps).length + _.sum(runtimeData.userPowerCreeps, 'level');
+    var used = Object.keys(runtimeData.userPowerCreeps).length + _.sumBy(runtimeData.userPowerCreeps, 'level');
     return level - used;
 }
 
@@ -364,7 +364,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!name || !_.isString(name) || (name.length > 100)) {
             return C.ERR_INVALID_ARGS;
         }
-        if(_.any(runtimeData.userPowerCreeps, {name})) {
+        if(_.some(runtimeData.userPowerCreeps, {name})) {
             return C.ERR_NAME_EXISTS;
         }
 
@@ -399,7 +399,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(calcFreePowerLevels() <= 0) {
             return C.ERR_NOT_ENOUGH_RESOURCES;
         }
-        if(_.any(runtimeData.userPowerCreeps, {name})) {
+        if(_.some(runtimeData.userPowerCreeps, {name})) {
             return C.ERR_NAME_EXISTS;
         }
         if(Object.values(C.POWER_CLASS).indexOf(className) === -1) {

@@ -12,7 +12,7 @@ module.exports = function(userId, intent, {flags}) {
 
     var name = intent.name.replace(/\|/g,"$VLINE$").replace(/~/g,"$TILDE$");
 
-    if(!_.any(flagItem._parsed, i => i[0] == name)) {
+    if(!_.some(flagItem._parsed, i => i[0] == name)) {
         return;
     }
     flagItem._modified = true;

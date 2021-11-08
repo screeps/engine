@@ -170,17 +170,17 @@ exports.checkConstructionSite = function(objects, structureType, x, y) {
         return true;
     }
 
-    if(_.any(objects, {x, y, type: structureType})) {
+    if(_.some(objects, {x, y, type: structureType})) {
         return false;
     }
-    if(_.any(objects, {x, y, type: 'constructionSite'})) {
+    if(_.some(objects, {x, y, type: 'constructionSite'})) {
         return false;
     }
     if(structureType == 'extractor') {
-        return _.any(objects, {x, y, type: 'mineral'}) && !_.any(objects, {x, y, type: 'extractor'});
+        return _.some(objects, {x, y, type: 'mineral'}) && !_.some(objects, {x, y, type: 'extractor'});
     }
     if(structureType != 'rampart' && structureType != 'road' &&
-        _.any(objects, (i) => i.x == x && i.y == y && i.type != 'rampart' && i.type != 'road' && C.CONSTRUCTION_COST[i.type])) {
+        _.some(objects, (i) => i.x == x && i.y == y && i.type != 'rampart' && i.type != 'road' && C.CONSTRUCTION_COST[i.type])) {
         return false;
     }
     if(x <= 0 || y <= 0 || x >= 49 || y >= 49) {
@@ -266,10 +266,10 @@ exports.encodeTerrain = function(terrain) {
         for(var x=0; x<50; x++) {
             var objects = _.filter(terrain, {x,y}),
                 code = 0;
-            if(_.any(objects, {type: 'wall'})) {
+            if(_.some(objects, {type: 'wall'})) {
                 code = code | C.TERRAIN_MASK_WALL;
             }
-            if(_.any(objects, {type: 'swamp'})) {
+            if(_.some(objects, {type: 'swamp'})) {
                 code = code | C.TERRAIN_MASK_SWAMP;
             }
             result = result + code;
@@ -535,7 +535,7 @@ exports.defineGameObjectProperties = function(obj, dataFn, properties, opts) {
     obj.toJSON = function() {
         var result = {};
         for(var i in this) {
-            if(i[0] == '_' || _.contains(['toJSON','toString'],i)) {
+            if(i[0] == '_' || _.includes(['toJSON','toString'],i)) {
                 continue;
             }
             result[i] = this[i];
@@ -614,10 +614,10 @@ exports.deserializePath = function(path) {
 
 exports.calcResources = function(object) {
     if(object.store) {
-        return _.sum(object.store);
+        return _.sum(_.values(object.store));
     }
 
-    return _.sum(C.RESOURCES_ALL, i => typeof object[i] == 'object' ? object[i].amount : (object[i] || 0));
+    return _.sumBy(_.values(C.RESOURCES_ALL), i => typeof object[i] == 'object' ? object[i].amount : (object[i] || 0));
 };
 
 exports.calcBodyEffectiveness = function(body, bodyPartType, methodName, basePower, withoutOldHits) {
@@ -671,7 +671,7 @@ exports.calcTotalReactionsTime = function(mineral) {
 exports.capacityForResource = function(object, resourceType) {
     return object.storeCapacityResource &&
         object.storeCapacityResource[resourceType] ||
-        Math.max(0, (object.storeCapacity||0) - _.sum(object.storeCapacityResource));
+        Math.max(0, (object.storeCapacity||0) - _.sum(_.values(object.storeCapacityResource)));
 };
 
 exports.calcReward = function(resourceDensities, targetDensity, itemsLimit) {
@@ -694,7 +694,7 @@ exports.calcReward = function(resourceDensities, targetDensity, itemsLimit) {
     }
     result[order.length - 1] = Math.max(0, Math.round((targetDensity - currentDensity) / densities[order.length - 1]));
 
-    return _.object(order.map(i => resources[i]), result);
+    return _.fromPairs(_.zip(order.map(i => resources[i]), result));
 };
 
 exports.getReactionVariants = function getReactionVarients(compound) {

@@ -36,7 +36,7 @@ module.exports = function(object, scope) {
     if(spawns.length > C.CONTROLLER_STRUCTURES.spawn[roomController.level]) {
         spawns.sort(utils.comparatorDistance(roomController));
         spawns = _.take(spawns, C.CONTROLLER_STRUCTURES.spawn[roomController.level]);
-        if(!_.contains(spawns, object)) {
+        if(!_.includes(spawns, object)) {
             return;
         }
     }

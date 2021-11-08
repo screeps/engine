@@ -9,7 +9,7 @@ module.exports = function(roomSpawns, roomExtensions, {roomController, bulk}) {
     if(spawns.length > C.CONTROLLER_STRUCTURES.spawn[roomController.level|0]) {
         spawns.sort(utils.comparatorDistance(roomController));
         spawns = _.take(spawns, C.CONTROLLER_STRUCTURES.spawn[roomController.level|0]);
-        roomSpawns.forEach(i => i._off = !_.contains(spawns, i));
+        roomSpawns.forEach(i => i._off = !_.includes(spawns, i));
     }
     else {
         roomSpawns.forEach(i => i._off = false);
@@ -27,7 +27,7 @@ module.exports = function(roomSpawns, roomExtensions, {roomController, bulk}) {
     if(extensions.length > C.CONTROLLER_STRUCTURES.extension[roomController.level|0]) {
         extensions.sort(utils.comparatorDistance(roomController));
         extensions = _.take(extensions, C.CONTROLLER_STRUCTURES.extension[roomController.level|0]);
-        roomExtensions.forEach(i => i._off = !_.contains(extensions, i));
+        roomExtensions.forEach(i => i._off = !_.includes(extensions, i));
     }
     else {
         roomExtensions.forEach(i => i._off = false);

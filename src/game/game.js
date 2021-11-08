@@ -109,7 +109,7 @@
         var deprecatedShown = [];
 
         register.deprecated = (msg) => {
-            if (!_.contains(deprecatedShown, msg)) {
+            if (!_.includes(deprecatedShown, msg)) {
                 deprecatedShown.push(msg);
                 globals.console.log(msg);
             }

@@ -26,7 +26,7 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ga
         roomController.upgradeBlocked > gameTime) {
         return;
     }
-    if(_.any(target.effects, e => e.effect == C.EFFECT_INVULNERABILITY && e.endTime > gameTime)) {
+    if(_.some(target.effects, e => e.effect == C.EFFECT_INVULNERABILITY && e.endTime > gameTime)) {
         return;
     }
 

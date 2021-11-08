@@ -15,7 +15,7 @@ exports.make = function(runtimeData, intents, register) {
             resourceType = 'all';
         }
         if(!cachedOrders[resourceType]) {
-            if(resourceType != 'all' && !_.contains(C.RESOURCES_ALL, resourceType) && !_.contains(C.INTERSHARD_RESOURCES, resourceType)) {
+            if(resourceType != 'all' && !_.includes(C.RESOURCES_ALL, resourceType) && !_.includes(C.INTERSHARD_RESOURCES, resourceType)) {
                 return {};
             }
             cachedOrders[resourceType] = JSON.parse(JSON.stringify(runtimeData.market.orders[resourceType]) || '{}');
@@ -44,7 +44,7 @@ exports.make = function(runtimeData, intents, register) {
             }
 
             if(!cachedHistory[resourceType]) {
-                if(resourceType != 'all' && !_.contains(C.RESOURCES_ALL, resourceType) && !_.contains(C.INTERSHARD_RESOURCES, resourceType)) {
+                if(resourceType != 'all' && !_.includes(C.RESOURCES_ALL, resourceType) && !_.includes(C.INTERSHARD_RESOURCES, resourceType)) {
                     return {};
                 }
                 cachedHistory[resourceType] = JSON.parse(JSON.stringify(runtimeData.market.history[resourceType] || {}));
@@ -69,7 +69,7 @@ exports.make = function(runtimeData, intents, register) {
             if(_.isObject(type)) {
                 var {type, resourceType, price, totalAmount, roomName} = type;
             }
-            if(!_.contains(C.RESOURCES_ALL, resourceType) && !_.contains(C.INTERSHARD_RESOURCES, resourceType)) {
+            if(!_.includes(C.RESOURCES_ALL, resourceType) && !_.includes(C.INTERSHARD_RESOURCES, resourceType)) {
                 return C.ERR_INVALID_ARGS;
             }
             if(type != C.ORDER_BUY && type != C.ORDER_SELL) {
@@ -83,8 +83,8 @@ exports.make = function(runtimeData, intents, register) {
             if(price * totalAmount * C.MARKET_FEE > this.credits) {
                 return C.ERR_NOT_ENOUGH_RESOURCES;
             }
-            if(!_.contains(C.INTERSHARD_RESOURCES, resourceType) &&
-                (!roomName || !_.any(runtimeData.userObjects, {type: 'terminal', room: roomName}))) {
+            if(!_.includes(C.INTERSHARD_RESOURCES, resourceType) &&
+                (!roomName || !_.some(runtimeData.userObjects, {type: 'terminal', room: roomName}))) {
                 return C.ERR_NOT_OWNER;
             }
             if(_.size(this.orders) + ordersCreatedDuringTick >= C.MARKET_MAX_ORDERS) {
@@ -114,7 +114,7 @@ exports.make = function(runtimeData, intents, register) {
             if(!amount || amount < 0) {
                 return C.ERR_INVALID_ARGS;
             }
-            if(_.contains(C.INTERSHARD_RESOURCES, order.resourceType)) {
+            if(_.includes(C.INTERSHARD_RESOURCES, order.resourceType)) {
                 if(order.type == C.ORDER_BUY && (runtimeData.user.resources[order.resourceType]||0) < amount) {
                     return C.ERR_NOT_ENOUGH_RESOURCES;
                 }

@@ -14,7 +14,7 @@ module.exports = function(object, target, damage, attackType, scope) {
     var attackBackPower = 0;
 
     if(target.type == 'creep') {
-        if(attackType == C.EVENT_ATTACK_TYPE_MELEE && !_.any(roomObjects, {type: 'rampart', x: object.x, y: object.y})) {
+        if(attackType == C.EVENT_ATTACK_TYPE_MELEE && !_.some(roomObjects, {type: 'rampart', x: object.x, y: object.y})) {
             attackBackPower = utils.calcBodyEffectiveness(target.body, C.ATTACK, 'attack', C.ATTACK_POWER);
         }
         target._damageToApply = (target._damageToApply || 0) + damage;

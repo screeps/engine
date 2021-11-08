@@ -7,7 +7,7 @@ module.exports = function(object, intent, scope) {
 
     const {bulk} = scope;
 
-    if(!_.contains(C.RESOURCES_ALL, intent.resourceType)) {
+    if(!_.includes(C.RESOURCES_ALL, intent.resourceType)) {
         return;
     }
     if(object.spawning || !object.store || !(object.store[intent.resourceType] >= intent.amount) ) {

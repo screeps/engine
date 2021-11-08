@@ -25,7 +25,7 @@ module.exports = () => {
             bulkMarketOrders = driver.bulkMarketOrders(),
             bulkMarketIntershardOrders = driver.bulkMarketIntershardOrders(),
             activateRooms = {},
-            usersById = _.indexBy(users, '_id'),
+            usersById = _.keyBy(users, '_id'),
             roomObjectsByType = _.groupBy(roomObjects, 'type');
 
         // creeps

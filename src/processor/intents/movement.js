@@ -20,9 +20,9 @@ function checkObstacleAtXY(x,y,object, roomIsInSafeMode) {
             return;
         }
         if ((i.type == 'creep' || i.type == 'powerCreep') && !objects[i._id] && (!roomIsInSafeMode || roomIsInSafeMode != object.user || roomIsInSafeMode == object.user && object.user == i.user) ||
-            i.type != 'creep' && i.type != 'powerCreep' && _.contains(C.OBSTACLE_OBJECT_TYPES, i.type) ||
+            i.type != 'creep' && i.type != 'powerCreep' && _.includes(C.OBSTACLE_OBJECT_TYPES, i.type) ||
             i.type == 'rampart' && !i.isPublic && i.user != object.user ||
-            i.type == 'constructionSite' && i.user == object.user && _.contains(C.OBSTACLE_OBJECT_TYPES,
+            i.type == 'constructionSite' && i.user == object.user && _.includes(C.OBSTACLE_OBJECT_TYPES,
                 i.structureType)) {
             hasObstacle = true;
             return false;
@@ -39,7 +39,7 @@ function checkObstacleAtXY(x,y,object, roomIsInSafeMode) {
 }
 
 function calcResourcesWeight(creep) {
-    var totalCarry = _.sum(creep.store), weight = 0;
+    var totalCarry = _.sum(_.values(creep.store)), weight = 0;
     for(var i = creep.body.length-1; i >= 0; i--) {
         if(!totalCarry) {
             break;
@@ -123,7 +123,7 @@ exports.check = function(roomIsInSafeMode) {
                 weight = weight || 1;
                 var key = `${object.x},${object.y}`,
                     rate1 = affectedCnt[key] || 0;
-                if(matrix[key] && _.any(matrix[key], {x,y})) {
+                if(matrix[key] && _.some(matrix[key], {x,y})) {
                     rate1 = 100;
                 }
 
@@ -203,7 +203,7 @@ exports.execute = function(object, scope) {
 
     var fatigueRate = 2;
 
-    if(_.any(cellObjects, {type: 'swamp'}) ||
+    if(_.some(cellObjects, {type: 'swamp'}) ||
         utils.checkTerrain(roomTerrain, move.x, move.y, C.TERRAIN_MASK_SWAMP)) {
         fatigueRate = 10;
     }

@@ -203,7 +203,7 @@ exports.makeMap = function(runtimeData, register, globals) {
             if(!/^(W|E)\d+(N|S)\d+$/.test(roomName)) {
                 return false;
             }
-            return _.contains(accessibleRooms, roomName);
+            return _.includes(accessibleRooms, roomName);
         },
 
         getRoomStatus(roomName) {
@@ -225,7 +225,7 @@ exports.makeMap = function(runtimeData, register, globals) {
                 return { status: 'respawn', timestamp: runtimeData.roomStatusData.respawn[roomName] };
             }
 
-            if(_.contains(accessibleRooms, roomName)) {
+            if(_.includes(accessibleRooms, roomName)) {
                 return { status: 'normal', timestamp: null };
             }
 

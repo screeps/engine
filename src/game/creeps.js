@@ -408,7 +408,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.spawning) {
             return C.ERR_BUSY;
         }
-        if(!_.contains(C.RESOURCES_ALL, resourceType)) {
+        if(!_.includes(C.RESOURCES_ALL, resourceType)) {
             return C.ERR_INVALID_ARGS;
         }
         if(!data(this.id).store || !data(this.id).store[resourceType]) {
@@ -435,7 +435,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(amount < 0) {
             return C.ERR_INVALID_ARGS;
         }
-        if(!_.contains(C.RESOURCES_ALL, resourceType)) {
+        if(!_.includes(C.RESOURCES_ALL, resourceType)) {
             return C.ERR_INVALID_ARGS;
         }
         if(!target ||
@@ -500,7 +500,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(amount < 0) {
             return C.ERR_INVALID_ARGS;
         }
-        if(!_.contains(C.RESOURCES_ALL, resourceType)) {
+        if(!_.includes(C.RESOURCES_ALL, resourceType)) {
             return C.ERR_INVALID_ARGS;
         }
 
@@ -522,7 +522,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             }
         }
 
-        if(target.my === false && _.any(target.pos.lookFor('structure'), i => i.structureType == C.STRUCTURE_RAMPART && !i.my && !i.isPublic)) {
+        if(target.my === false && _.some(target.pos.lookFor('structure'), i => i.structureType == C.STRUCTURE_RAMPART && !i.my && !i.isPublic)) {
             return C.ERR_NOT_OWNER;
         }
         if(this.room.controller && !this.room.controller.my && this.room.controller.safeMode) {
@@ -785,7 +785,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         const objectsInTile = [], creepsInTile = [], myCreepsInTile = [];
         const userId = data(this.id).user;
         _.forEach(objects, function(obj){
-            if(obj.x == target.pos.x && obj.y == target.pos.y && _.contains(C.OBSTACLE_OBJECT_TYPES, obj.type)) {
+            if(obj.x == target.pos.x && obj.y == target.pos.y && _.includes(C.OBSTACLE_OBJECT_TYPES, obj.type)) {
                 if(obj.type == 'creep') {
                     creepsInTile.push(obj);
                     if(obj.user == userId) {
@@ -796,12 +796,12 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 }
             }
         });
-        if(_.contains(C.OBSTACLE_OBJECT_TYPES, target.structureType)) {
-            if(_.any(objectsInTile)) {
+        if(_.includes(C.OBSTACLE_OBJECT_TYPES, target.structureType)) {
+            if(_.some(objectsInTile)) {
                 return C.ERR_INVALID_TARGET;
             }
             const blockingCreeps = (this.room.controller && this.room.controller.my && this.room.controller.safeMode) ? myCreepsInTile : creepsInTile;
-            if(_.any(blockingCreeps)) {
+            if(_.some(blockingCreeps)) {
                 return C.ERR_INVALID_TARGET;
             }
         }
@@ -908,7 +908,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.room.controller && !this.room.controller.my && this.room.controller.safeMode) {
             return C.ERR_NO_BODYPART;
         }
-        if(_.any(target.effects, e => e.effect == C.EFFECT_INVULNERABILITY && e.ticksRemaining > 0)) {
+        if(_.some(target.effects, e => e.effect == C.EFFECT_INVULNERABILITY && e.ticksRemaining > 0)) {
             return C.ERR_INVALID_TARGET;
         }
 

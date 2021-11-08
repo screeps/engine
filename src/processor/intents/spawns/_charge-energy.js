@@ -6,7 +6,7 @@ var _ = require('lodash'),
 function oldEnergyHandling(spawn, cost, {roomObjects, bulk}){
     var spawns = _.filter(roomObjects, i => i.type == 'spawn' && i.user == spawn.user && !i.off);
     var extensions = _.filter(roomObjects, i => i.type == 'extension' && i.user == spawn.user && !i.off);
-    var availableEnergy = _.sum(extensions, 'store.energy') + _.sum(spawns, 'store.energy');
+    var availableEnergy = _.sumBy(extensions, 'store.energy') + _.sumBy(spawns, 'store.energy');
 
     if(availableEnergy < cost) {
         return false;
@@ -48,7 +48,7 @@ function newEnergyHandling(spawn, cost, energyStructures, {roomObjects, bulk}){
 
     energyStructures = _.uniq(energyStructures);
 
-    let availableEnergy = _.sum(energyStructures, id => roomObjects[id].store.energy);
+    let availableEnergy = _.sumBy(energyStructures, id => roomObjects[id].store.energy);
     if(availableEnergy < cost) {
         return false;
     }

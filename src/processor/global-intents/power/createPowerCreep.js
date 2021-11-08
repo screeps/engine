@@ -9,7 +9,7 @@ module.exports = function(intent, user, {userPowerCreeps, bulkUsersPowerCreeps})
     var thisUserPowerCreeps = _.filter(userPowerCreeps, i => i.user == user._id);
 
     var powerLevel = Math.floor(Math.pow((user.power || 0) / C.POWER_LEVEL_MULTIPLY, 1 / C.POWER_LEVEL_POW));
-    var used = thisUserPowerCreeps.length + _.sum(thisUserPowerCreeps, 'level') + (user._usedPowerLevels||0);
+    var used = thisUserPowerCreeps.length + _.sumBy(thisUserPowerCreeps, 'level') + (user._usedPowerLevels||0);
     if(used >= powerLevel) {
         return;
     }
@@ -20,7 +20,7 @@ module.exports = function(intent, user, {userPowerCreeps, bulkUsersPowerCreeps})
 
     var name = intent.name.substring(0,50);
 
-    if(_.any(thisUserPowerCreeps, {name})) {
+    if(_.some(thisUserPowerCreeps, {name})) {
         return;
     }
 

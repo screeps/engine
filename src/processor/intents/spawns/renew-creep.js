@@ -42,7 +42,7 @@ module.exports = function(object, intent, scope) {
     target.actionLog.healed = {x: object.x, y: object.y};
     bulk.inc(target, 'ageTime', effect);
 
-    if(_.any(target.body, i => !!i.boost)) {
+    if(_.some(target.body, i => !!i.boost)) {
         target.body.forEach(i => {
             i.boost = null;
         });

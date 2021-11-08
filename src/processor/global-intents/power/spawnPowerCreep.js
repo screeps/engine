@@ -17,7 +17,7 @@ module.exports = function(intent, user, {roomObjectsByType, userPowerCreeps, bul
         return;
     }
 
-    if(_.any(roomObjectsByType.powerCreep, {room: powerSpawn.room, x: powerSpawn.x, y: powerSpawn.y})) {
+    if(_.some(roomObjectsByType.powerCreep, {room: powerSpawn.room, x: powerSpawn.x, y: powerSpawn.y})) {
         return;
     }
 

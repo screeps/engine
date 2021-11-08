@@ -10,7 +10,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
 
     var terminals = roomObjectsByType.terminal;
 
-    var terminalsByRoom = _.indexBy(terminals, 'room');
+    var terminalsByRoom = _.keyBy(terminals, 'room');
 
     function executeTransfer(fromTerminal, toTerminal, resourceType, amount, transferFeeTerminal, additionalFields) {
 
@@ -96,7 +96,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
 
 
 
-    var ordersById = _.indexBy(orders, '_id'),
+    var ordersById = _.keyBy(orders, '_id'),
         terminalDeals = [], directDeals = [];
 
     const nowTimestamp = new Date().getTime();
@@ -112,11 +112,11 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                     if (!intent.price || !intent.totalAmount) {
                         return;
                     }
-                    if (!_.contains(C.RESOURCES_ALL, intent.resourceType) &&
-                        !_.contains(C.INTERSHARD_RESOURCES, intent.resourceType)) {
+                    if (!_.includes(C.RESOURCES_ALL, intent.resourceType) &&
+                        !_.includes(C.INTERSHARD_RESOURCES, intent.resourceType)) {
                         return;
                     }
-                    if (!_.contains(C.INTERSHARD_RESOURCES, intent.resourceType) &&
+                    if (!_.includes(C.INTERSHARD_RESOURCES, intent.resourceType) &&
                         (!terminalsByRoom[intent.roomName] || terminalsByRoom[intent.roomName].user != iUserIntents.user)) {
                         return;
                     }
@@ -142,7 +142,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                     }, intent);
 
                     let bulk = bulkMarketIntershardOrders;
-                    if (!_.contains(C.INTERSHARD_RESOURCES, intent.resourceType)) {
+                    if (!_.includes(C.INTERSHARD_RESOURCES, intent.resourceType)) {
                         bulk = bulkMarketOrders;
                         order.created = gameTime;
                     }
@@ -203,7 +203,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                         });
                     }
 
-                    const bulk = _.contains(C.INTERSHARD_RESOURCES,
+                    const bulk = _.includes(C.INTERSHARD_RESOURCES,
                         order.resourceType) ? bulkMarketIntershardOrders : bulkMarketOrders;
                     bulk.inc(order, 'price', intent.newPrice - order.price);
                 });
@@ -242,7 +242,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                         }
                     });
 
-                    const bulk = _.contains(C.INTERSHARD_RESOURCES,
+                    const bulk = _.includes(C.INTERSHARD_RESOURCES,
                         order.resourceType) ? bulkMarketIntershardOrders : bulkMarketOrders;
                     bulk.inc(order, 'remainingAmount', intent.addAmount);
                     bulk.inc(order, 'totalAmount', intent.addAmount);
@@ -269,7 +269,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                     if (intent.amount <= 0) {
                         return;
                     }
-                    if (_.contains(C.INTERSHARD_RESOURCES, ordersById[intent.orderId].resourceType)) {
+                    if (_.includes(C.INTERSHARD_RESOURCES, ordersById[intent.orderId].resourceType)) {
                         directDeals.push(intent);
                         return;
                     }
@@ -475,7 +475,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                 amount
             }
         });
-        const bulk = _.contains(C.INTERSHARD_RESOURCES, order.resourceType) ? bulkMarketIntershardOrders : bulkMarketOrders;
+        const bulk = _.includes(C.INTERSHARD_RESOURCES, order.resourceType) ? bulkMarketIntershardOrders : bulkMarketOrders;
         bulk.inc(order, 'amount', -amount);
         bulk.inc(order, 'remainingAmount', -amount);
         bulkUsersResources.insert({
@@ -493,7 +493,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
 
     if(orders) {
         orders.forEach(order => {
-            const bulk = _.contains(C.INTERSHARD_RESOURCES,
+            const bulk = _.includes(C.INTERSHARD_RESOURCES,
                 order.resourceType) ? bulkMarketIntershardOrders : bulkMarketOrders;
 
             if (order._cancelled) {
@@ -538,7 +538,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
 
             if (order.type == C.ORDER_SELL) {
 
-                var availableResourceAmount = _.contains(C.INTERSHARD_RESOURCES, order.resourceType) ?
+                var availableResourceAmount = _.includes(C.INTERSHARD_RESOURCES, order.resourceType) ?
                     ((usersById[order.user].resources||{})[order.resourceType] || 0) :
                     terminal && terminal.user == order.user ? terminal.store[order.resourceType] || 0 : 0;
 
@@ -566,7 +566,7 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
             if (order.type == C.ORDER_BUY) {
 
                 var user = usersById[order.user], userMoney = user.money || 0;
-                var isOwner = _.contains(C.INTERSHARD_RESOURCES,
+                var isOwner = _.includes(C.INTERSHARD_RESOURCES,
                     order.resourceType) || (!!terminal && terminal.user == order.user);
 
                 var newAmount = Math.min(Math.floor(userMoney / order.price), order.remainingAmount);

@@ -47,14 +47,14 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
         return;
     }
 
-    if(_.contains(C.OBSTACLE_OBJECT_TYPES, target.structureType)) {
-        if(_.any(objectsInTile, i => _.contains(C.OBSTACLE_OBJECT_TYPES, i.type))) {
+    if(_.includes(C.OBSTACLE_OBJECT_TYPES, target.structureType)) {
+        if(_.some(objectsInTile, i => _.includes(C.OBSTACLE_OBJECT_TYPES, i.type))) {
             return;
         }
 
         const mySafeMode = roomController && roomController.user == object.user && roomController.safeMode > gameTime;
         const blockingCreeps = mySafeMode ? myCreepsInTile : creepsInTile;
-        if(_.any(blockingCreeps)) {
+        if(_.some(blockingCreeps)) {
             return;
         }
     }
@@ -171,11 +171,11 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
         if (target.structureType == 'road') {
             var hits = C.ROAD_HITS;
 
-            if(_.any(roomObjects, {x: target.x, y: target.y, type: 'swamp'}) ||
+            if(_.some(roomObjects, {x: target.x, y: target.y, type: 'swamp'}) ||
                 utils.checkTerrain(roomTerrain, target.x, target.y, C.TERRAIN_MASK_SWAMP)) {
                 hits *= C.CONSTRUCTION_COST_ROAD_SWAMP_RATIO;
             }
-            if(_.any(roomObjects, {x: target.x, y: target.y, type: 'wall'}) ||
+            if(_.some(roomObjects, {x: target.x, y: target.y, type: 'wall'}) ||
                 utils.checkTerrain(roomTerrain, target.x, target.y, C.TERRAIN_MASK_WALL)) {
                 hits *= C.CONSTRUCTION_COST_ROAD_WALL_RATIO;
             }

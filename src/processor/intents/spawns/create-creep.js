@@ -27,7 +27,7 @@ module.exports = function(spawn, intent, scope) {
         directions = _.uniq(_.map(directions, e => +e));
         if(directions.length > 0) {
             // bail if any numbers are out of bounds or non-integers
-            if(!_.all(directions, direction => direction >= 1 && direction <= 8 && direction === (direction | 0))) {
+            if(!_.every(directions, direction => direction >= 1 && direction <= 8 && direction === (direction | 0))) {
                 return;
             }
         }
@@ -65,7 +65,7 @@ module.exports = function(spawn, intent, scope) {
     var body = [], storeCapacity = 0;
 
     intent.body.forEach((i) => {
-        if(_.contains(C.BODYPARTS_ALL, i)) {
+        if(_.includes(C.BODYPARTS_ALL, i)) {
             body.push({
                 type: i,
                 hits: 100

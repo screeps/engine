@@ -41,7 +41,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                         }
                         if(this._sum === undefined) {
                             Object.defineProperty(this, '_sum', {
-                                value: _.sum(object.store)
+                                value: _.sum(_.values(object.store))
                             });
                         }
                         return this._sum;
@@ -70,7 +70,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
                     if(this._sum === undefined) {
                         Object.defineProperty(this, '_sum', {
-                            value: _.sum(object.store)
+                            value: _.sum(_.values(object.store))
                         });
                     }
 

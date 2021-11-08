@@ -9,11 +9,11 @@ module.exports = function(object, {roomObjects, roomTerrain, bulk, gameTime}) {
 
     if(!object.nextDecayTime || gameTime >= object.nextDecayTime-1) {
         var decayAmount = C.ROAD_DECAY_AMOUNT;
-        if(_.any(roomObjects, (i) => i.x == object.x && i.y == object.y && i.type == 'swamp') ||
+        if(_.some(roomObjects, (i) => i.x == object.x && i.y == object.y && i.type == 'swamp') ||
             utils.checkTerrain(roomTerrain, object.x, object.y, C.TERRAIN_MASK_SWAMP)) {
             decayAmount *= C.CONSTRUCTION_COST_ROAD_SWAMP_RATIO;
         }
-        if(_.any(roomObjects, (i) => i.x == object.x && i.y == object.y && i.type == 'wall') ||
+        if(_.some(roomObjects, (i) => i.x == object.x && i.y == object.y && i.type == 'wall') ||
             utils.checkTerrain(roomTerrain, object.x, object.y, C.TERRAIN_MASK_WALL)) {
             decayAmount *= C.CONSTRUCTION_COST_ROAD_WALL_RATIO;
         }

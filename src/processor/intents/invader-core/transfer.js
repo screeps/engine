@@ -13,7 +13,7 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ev
         return;
     }
 
-    if(!_.contains(['tower','creep'], target.type)) {
+    if(!_.includes(['tower','creep'], target.type)) {
         return;
     }
     const targetTotal = target.type == 'creep' ? utils.calcResources(target) : target.store.energy;

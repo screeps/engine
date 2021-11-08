@@ -17,6 +17,6 @@ module.exports = function(creep, context) {
         return;
     }
 
-    const target = _.min(targets, 'hits');
+    const target = _.minBy(targets, 'hits');
     intents.set(creep._id, 'rangedAttack', {id: target._id});
 };
