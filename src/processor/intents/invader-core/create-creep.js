@@ -16,7 +16,7 @@ module.exports = function(object, intent, scope) {
     const body = [];
     for(let i = 0; i < intent.body.length; i++) {
         const type = intent.body[i];
-        if(!_.contains(C.BODYPARTS_ALL, type)) {
+        if(!_.includes(C.BODYPARTS_ALL, type)) {
             continue;
         }
         if(intent.boosts && (intent.boosts.length >= i) && C.BOOSTS[type] && C.BOOSTS[type][intent.boosts[i]]){

@@ -75,13 +75,13 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     Flag.prototype.setColor = register.wrapFn(function(color, secondaryColor) {
 
-        if(!_.contains(C.COLORS_ALL, color)) {
+        if(!_.includes(C.COLORS_ALL, color)) {
             return C.ERR_INVALID_ARGS;
         }
 
         secondaryColor = secondaryColor || color;
 
-        if(!_.contains(C.COLORS_ALL, secondaryColor)) {
+        if(!_.includes(C.COLORS_ALL, secondaryColor)) {
             return C.ERR_INVALID_ARGS;
         }
 

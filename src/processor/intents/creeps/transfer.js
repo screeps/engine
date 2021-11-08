@@ -6,7 +6,7 @@ var _ = require('lodash'),
 module.exports = function(object, intent, {roomObjects, bulk, eventLog}) {
 
     const resourceType = intent.resourceType;
-    if(!_.contains(C.RESOURCES_ALL, resourceType)) {
+    if(!_.includes(C.RESOURCES_ALL, resourceType)) {
         return;
     }
     if(!object || object.spawning || !object.store || !(object.store[resourceType] >= intent.amount) || intent.amount < 0) {

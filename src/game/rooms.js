@@ -61,9 +61,9 @@ function makePathfindingGrid(id, opts, endNodesKey) {
     register.objectsByRoomKeys[id].forEach((key) => {
         var object = register.objectsByRoom[id][key];
 
-        if (_.contains(obstacleTypes, object.type) ||
+        if (_.includes(obstacleTypes, object.type) ||
         !opts.ignoreDestructibleStructures && object.type == 'rampart' && !object.isPublic && object.user != runtimeData.user._id ||
-        !opts.ignoreDestructibleStructures && object.type == 'constructionSite' && object.user == runtimeData.user._id && _.contains(C.OBSTACLE_OBJECT_TYPES, object.structureType)) {
+        !opts.ignoreDestructibleStructures && object.type == 'constructionSite' && object.user == runtimeData.user._id && _.includes(C.OBSTACLE_OBJECT_TYPES, object.structureType)) {
 
             rows[object.y][object.x] = 0;
         }
@@ -174,10 +174,10 @@ function makePathfindingGrid2(id, opts) {
         register.objectsByRoomKeys[id].forEach((key) => {
             var object = register.objectsByRoom[id][key];
 
-            if (_.contains(obstacleTypes, object.type) ||
+            if (_.includes(obstacleTypes, object.type) ||
             !opts.ignoreCreeps && register.rooms[id].controller && register.rooms[id].controller.safeMode && register.rooms[id].controller.my && (object.type == 'creep' || object.type == 'powerCreep') && object.user == runtimeData.user._id ||
             !opts.ignoreDestructibleStructures && object.type == 'rampart' && !object.isPublic && object.user != runtimeData.user._id ||
-            !opts.ignoreDestructibleStructures && object.type == 'constructionSite' && object.user == runtimeData.user._id && _.contains(C.OBSTACLE_OBJECT_TYPES, object.structureType)) {
+            !opts.ignoreDestructibleStructures && object.type == 'constructionSite' && object.user == runtimeData.user._id && _.includes(C.OBSTACLE_OBJECT_TYPES, object.structureType)) {
 
                 costs.set(object.x, object.y, 0xFF);
             }
@@ -463,7 +463,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                     });
 
                     var key = _.findKey(this.cache, (objects) => {
-                        return positionsArray.length == objects.length && _.every(positionsArray, (j) => _.any(objects, (object) => {
+                        return positionsArray.length == objects.length && _.every(positionsArray, (j) => _.some(objects, (object) => {
                             if(!_.isObject(j) || !j.isEqualTo) {
                                 throw new Error('Invalid position '+j+', check your `opts` property');
                             }
@@ -540,7 +540,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     Room.prototype.toJSON = register.wrapFn(function() {
         var result = {};
         for(var i in this) {
-            if(i[0] == '_' || _.contains(['toJSON','toString','controller','storage','terminal'],i)) {
+            if(i[0] == '_' || _.includes(['toJSON','toString','controller','storage','terminal'],i)) {
                 continue;
             }
             result[i] = this[i];
@@ -995,10 +995,10 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!secondaryColor) {
             secondaryColor = color;
         }
-        if(!_.contains(C.COLORS_ALL, color)) {
+        if(!_.includes(C.COLORS_ALL, color)) {
             return C.ERR_INVALID_ARGS;
         }
-        if(!_.contains(C.COLORS_ALL, secondaryColor)) {
+        if(!_.includes(C.COLORS_ALL, secondaryColor)) {
             return C.ERR_INVALID_ARGS;
         }
         if(!name) {
@@ -1007,9 +1007,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 name = 'Flag'+cnt;
                 cnt++;
             }
-            while(_.any(register.flags, {name}) || createdFlagNames.indexOf(name) != -1);
+            while(_.some(register.flags, {name}) || createdFlagNames.indexOf(name) != -1);
         }
-        if(_.any(register.flags, {name}) || createdFlagNames.indexOf(name) != -1) {
+        if(_.some(register.flags, {name}) || createdFlagNames.indexOf(name) != -1) {
             return C.ERR_NAME_EXISTS;
         }
         if(name.length > 100) {
@@ -1045,7 +1045,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             if(createdSpawnNames.indexOf(name) != -1) {
                 return C.ERR_INVALID_ARGS;
             }
-            if(_.any(register.spawns, {name}) || _.any(register.constructionSites, {structureType: 'spawn', name})) {
+            if(_.some(register.spawns, {name}) || _.some(register.constructionSites, {structureType: 'spawn', name})) {
                 return C.ERR_INVALID_ARGS;
             }
         }
@@ -1081,8 +1081,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                     name = "Spawn" + cnt;
                     cnt++;
                 }
-                while (_.any(register.spawns, {name}) ||
-                _.any(register.constructionSites, {structureType: 'spawn', name}) ||
+                while (_.some(register.spawns, {name}) ||
+                _.some(register.constructionSites, {structureType: 'spawn', name}) ||
                 createdSpawnNames.indexOf(name) != -1);
             }
             createdSpawnNames.push(name);

@@ -10,8 +10,8 @@ module.exports = function(spawn, creep, scope) {
 
     var newX, newY, isOccupied, hostileOccupied;
     var checkObstacleFn = (i) => (i.x == newX && i.y == newY) && (
-        _.contains(C.OBSTACLE_OBJECT_TYPES, i.type) ||                                          // just unwalkable
-        (i.type == 'constructionSite' && _.contains(C.OBSTACLE_OBJECT_TYPES, i.structureType))  // unwalkable site
+        _.includes(C.OBSTACLE_OBJECT_TYPES, i.type) ||                                          // just unwalkable
+        (i.type == 'constructionSite' && _.includes(C.OBSTACLE_OBJECT_TYPES, i.structureType))  // unwalkable site
     );
 
     var directions = [1,2,3,4,5,6,7,8];
@@ -25,9 +25,9 @@ module.exports = function(spawn, creep, scope) {
 
         newX = spawn.x + dx;
         newY = spawn.y + dy;
-        isOccupied = _.any(roomObjects, checkObstacleFn) ||
+        isOccupied = _.some(roomObjects, checkObstacleFn) ||
             movement.isTileBusy(newX, newY) ||
-            (utils.checkTerrain(roomTerrain, newX, newY, C.TERRAIN_MASK_WALL) && !_.any(roomObjects, {type: 'road', x: newX, y: newY}));
+            (utils.checkTerrain(roomTerrain, newX, newY, C.TERRAIN_MASK_WALL) && !_.some(roomObjects, {type: 'road', x: newX, y: newY}));
 
         if (!isOccupied) {
             break;
@@ -57,7 +57,7 @@ module.exports = function(spawn, creep, scope) {
 
             newX = spawn.x + dx;
             newY = spawn.y + dy;
-            isOccupied = _.any(roomObjects, checkObstacleFn) ||
+            isOccupied = _.some(roomObjects, checkObstacleFn) ||
                 utils.checkTerrain(roomTerrain, newX, newY, C.TERRAIN_MASK_WALL) ||
                 movement.isTileBusy(newX, newY);
 

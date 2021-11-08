@@ -7,15 +7,15 @@ module.exports = function(userId, intent, {flags}) {
 
     var name = intent.name.replace(/\|/g,"$VLINE$").replace(/~/g,"$TILDE$");
 
-    if(_.any(flags, i => {
-        return i.user == userId && _.any(i._parsed, j => j[0] == name);
+    if(_.some(flags, i => {
+        return i.user == userId && _.some(i._parsed, j => j[0] == name);
     })) {
         return;
     }
-    if(!intent.color || !_.contains(C.COLORS_ALL, intent.color)) {
+    if(!intent.color || !_.includes(C.COLORS_ALL, intent.color)) {
         return;
     }
-    if(!intent.secondaryColor || !_.contains(C.COLORS_ALL, intent.secondaryColor)) {
+    if(!intent.secondaryColor || !_.includes(C.COLORS_ALL, intent.secondaryColor)) {
         return;
     }
 

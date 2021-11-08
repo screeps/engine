@@ -15,7 +15,7 @@ module.exports = function(userId, intent, {roomObjects, roomTerrain, bulk}) {
         x = Math.floor(Math.random() * 48) + 1;
         y = Math.floor(Math.random() * 48) + 1;
     }
-    while(_.any(roomObjects, (i) => _.contains(C.OBSTACLE_OBJECT_TYPES, i.type) && i.x == x && i.y == y) ||
+    while(_.some(roomObjects, (i) => _.includes(C.OBSTACLE_OBJECT_TYPES, i.type) && i.x == x && i.y == y) ||
             utils.checkTerrain(roomTerrain, x, y, C.TERRAIN_MASK_WALL));
 
     bulk.insert({

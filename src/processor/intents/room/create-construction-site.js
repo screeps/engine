@@ -35,11 +35,11 @@ module.exports = function(userId, intent, {roomObjects, roomTerrain, bulk, roomC
     var progressTotal = C.CONSTRUCTION_COST[intent.structureType];
 
     if(intent.structureType == 'road') {
-        if(_.any(roomObjects, {x: intent.x, y: intent.y, type: 'swamp'}) ||
+        if(_.some(roomObjects, {x: intent.x, y: intent.y, type: 'swamp'}) ||
             utils.checkTerrain(roomTerrain, intent.x, intent.y, C.TERRAIN_MASK_SWAMP)) {
             progressTotal *= C.CONSTRUCTION_COST_ROAD_SWAMP_RATIO;
         }
-        if(_.any(roomObjects, {x: intent.x, y: intent.y, type: 'wall'}) ||
+        if(_.some(roomObjects, {x: intent.x, y: intent.y, type: 'wall'}) ||
             utils.checkTerrain(roomTerrain, intent.x, intent.y, C.TERRAIN_MASK_WALL)) {
             progressTotal *= C.CONSTRUCTION_COST_ROAD_WALL_RATIO;
         }

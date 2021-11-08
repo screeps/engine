@@ -220,7 +220,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             this.ticksToDowngrade < C.CONTROLLER_DOWNGRADE[this.level]/2 - C.CONTROLLER_DOWNGRADE_SAFEMODE_THRESHOLD) {
             return C.ERR_TIRED;
         }
-        if(_.any(register.structures, i => i.structureType == 'controller' && i.my && i.safeMode)) {
+        if(_.some(register.structures, i => i.structureType == 'controller' && i.my && i.safeMode)) {
             return C.ERR_BUSY;
         }
 
@@ -301,7 +301,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     StructureLab.prototype = Object.create(OwnedStructure.prototype);
     StructureLab.prototype.constructor = StructureLab;
 
-    const labMineralAmountGetter = o => _.sum(o.store) - (o.store.energy||0);
+    const labMineralAmountGetter = o => _.sum(_.values(o.store)) - (o.store.energy||0);
     const labMineralTypeGetter = o => _(o.store).keys().filter(k => k != C.RESOURCE_ENERGY && o.store[k]).first();
 
     utils.defineGameObjectProperties(StructureLab.prototype, data, {
@@ -497,7 +497,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if (!target.my) {
             return C.ERR_NOT_OWNER;
         }
-        if(this.my === false && _.any(this.pos.lookFor('structure'), i => i.structureType == C.STRUCTURE_RAMPART)) {
+        if(this.my === false && _.some(this.pos.lookFor('structure'), i => i.structureType == C.STRUCTURE_RAMPART)) {
             return C.ERR_NOT_OWNER;
         }
 
@@ -721,7 +721,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!/^(W|E)\d+(N|S)\d+$/.test(targetRoomName)) {
             return C.ERR_INVALID_ARGS;
         }
-        if(!_.contains(C.RESOURCES_ALL, resourceType)) {
+        if(!_.includes(C.RESOURCES_ALL, resourceType)) {
             return C.ERR_INVALID_ARGS;
         }
         if(!data(this.id).store || !data(this.id).store[resourceType] || data(this.id).store[resourceType] < amount) {
@@ -905,7 +905,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_INVALID_ARGS;
         }
         for(var i=0; i<body.length; i++) {
-            if(!_.contains(C.BODYPARTS_ALL, body[i]))
+            if(!_.includes(C.BODYPARTS_ALL, body[i]))
                 return C.ERR_INVALID_ARGS;
         }
 
@@ -944,7 +944,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
         if(!name) {
             name = require('./names').getUniqueName((i) => {
-                return _.any(runtimeData.roomObjects, {type: 'creep', user: data(this.id).user, name: i}) ||
+                return _.some(runtimeData.roomObjects, {type: 'creep', user: data(this.id).user, name: i}) ||
                 createdCreepNames.indexOf(i) != -1;
             });
         }
@@ -1051,7 +1051,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     });
 
     function calcEnergyAvailable(roomObjects, energyStructures){
-        return _.sum(energyStructures, id => {
+        return _.sumBy(energyStructures, id => {
             if (roomObjects[id] && !roomObjects[id].off && (roomObjects[id].type === 'spawn' || roomObjects[id].type === 'extension') && roomObjects[id].store) {
                 return roomObjects[id].store.energy;
             } else {
@@ -1084,7 +1084,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             // convert directions to numbers, eliminate duplicates
             directions = _.uniq(_.map(directions, d => +d));
             // bail if any numbers are out of bounds or non-integers
-            if(directions.length ==0 || !_.all(directions, direction => direction >= 1 && direction <= 8 && direction === (direction | 0))) {
+            if(directions.length ==0 || !_.every(directions, direction => direction >= 1 && direction <= 8 && direction === (direction | 0))) {
                 return C.ERR_INVALID_ARGS;
             }
         }
@@ -1106,7 +1106,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
 
         for(let i=0; i<body.length; i++) {
-            if(!_.contains(C.BODYPARTS_ALL, body[i]))
+            if(!_.includes(C.BODYPARTS_ALL, body[i]))
                 return C.ERR_INVALID_ARGS;
         }
 
@@ -1239,7 +1239,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.spawning) {
             return C.ERR_BUSY;
         }
-        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning || _.any(target.body, {type: C.CLAIM})) {
+        if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning || _.some(target.body, {type: C.CLAIM})) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
@@ -1258,7 +1258,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(target.ticksToLive + Math.floor(C.SPAWN_RENEW_RATIO * C.CREEP_LIFE_TIME / C.CREEP_SPAWN_TIME / target.body.length) > C.CREEP_LIFE_TIME) {
             return C.ERR_FULL;
         }
-        if(_.any(target.body, i => !!i.boost)) {
+        if(_.some(target.body, i => !!i.boost)) {
             register.deprecated('Using `StructureSpawn.renewCreep` on a boosted creep is deprecated and will throw an error soon. Please remove boosts using `StructureLab.unboostCreep` before renewing.');
         }
 
@@ -1317,7 +1317,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             // convert directions to numbers, eliminate duplicates
             directions = _.uniq(_.map(directions, e => +e));
             // bail if any numbers are out of bounds or non-integers
-            if(!_.any(directions, (direction)=>direction < 1 || direction > 8 || direction !== (direction | 0))) {
+            if(!_.some(directions, (direction)=>direction < 1 || direction > 8 || direction !== (direction | 0))) {
                 intents.set(this.spawn.id, 'setSpawnDirections', {directions});
                 return C.OK;
             }

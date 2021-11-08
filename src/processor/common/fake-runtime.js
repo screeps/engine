@@ -121,9 +121,9 @@ const defaultCostMatrix = function defaultCostMatrix(roomId, opts, creep, roomOb
 
     _.forEach(roomObjects, function(object) {
         if(
-            _.contains(obstacleTypes, object.type) ||
+            _.includes(obstacleTypes, object.type) ||
             (!opts.ignoreDestructibleStructures && object.type == 'rampart' && !object.isPublic && object.user != creep.user) ||
-            (!opts.ignoreDestructibleStructures && object.type == 'constructionSite' && object.user == creep.user && _.contains(C.OBSTACLE_OBJECT_TYPES, object.structureType))
+            (!opts.ignoreDestructibleStructures && object.type == 'constructionSite' && object.user == creep.user && _.includes(C.OBSTACLE_OBJECT_TYPES, object.structureType))
         ) {
             costs.set(object.x, object.y, Infinity);
         }

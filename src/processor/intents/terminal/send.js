@@ -9,7 +9,7 @@ module.exports = function(object, intent, {bulk, gameTime}) {
         return;
     }
 
-    if(!_.contains(C.RESOURCES_ALL, intent.resourceType)) {
+    if(!_.includes(C.RESOURCES_ALL, intent.resourceType)) {
         return;
     }
     if(!intent.amount || !object.store || !(object.store[intent.resourceType] >= intent.amount)) {

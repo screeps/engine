@@ -15,7 +15,7 @@ module.exports = function(intent, user, {userPowerCreeps, bulkObjects, bulkUsers
 
     var name = intent.name.substring(0,50);
 
-    if(_.any(thisUserPowerCreeps, {name})) {
+    if(_.some(thisUserPowerCreeps, {name})) {
         return;
     }
 

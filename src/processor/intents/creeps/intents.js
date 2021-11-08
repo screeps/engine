@@ -19,7 +19,7 @@ var creepActions = ['drop','transfer','withdraw','pickup','heal','rangedHeal','d
 var modules = require('bulk-require')(__dirname, ['*.js']);
 
 function checkPriorities(intents, name) {
-    return intents[name] && (!priorities[name] || !_.any(priorities[name], i => !!intents[i]));
+    return intents[name] && (!priorities[name] || !_.some(priorities[name], i => !!intents[i]));
 }
 
 module.exports = function(object, objectIntents, scope) {

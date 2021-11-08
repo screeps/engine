@@ -7,8 +7,8 @@ module.exports = function(object, objectIntents, roomObjects, roomTerrain, bulk,
     }
 
     if(objectIntents.setColor) {
-        if(_.contains(['white','grey','red','purple','blue','cyan','green','yellow','orange','brown'], objectIntents.setColor.color) &&
-           _.contains(['white','grey','red','purple','blue','cyan','green','yellow','orange','brown'], objectIntents.setColor.secondaryColor)) {
+        if(_.includes(['white','grey','red','purple','blue','cyan','green','yellow','orange','brown'], objectIntents.setColor.color) &&
+           _.includes(['white','grey','red','purple','blue','cyan','green','yellow','orange','brown'], objectIntents.setColor.secondaryColor)) {
             bulk.update(object, {color: objectIntents.setColor.color, secondaryColor: objectIntents.setColor.secondaryColor});
         }
     }

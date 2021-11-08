@@ -45,7 +45,7 @@ exports.distribute = function(positions, agents) {
     const result = {}, weights = _.map(positions, p => { return {pos: p, weight: 100}});
     while(_.some(agents)) {
         const creep = agents.shift();
-        const place = _.max(weights, 'weight');
+        const place = _.maxBy(_.values(weights), 'weight');
         _.pull(weights, place);
         result[50*place.pos.x+place.pos.y] = creep;
         _.forEach(weights, w => {

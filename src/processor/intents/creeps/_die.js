@@ -37,7 +37,7 @@ module.exports = function(object, dropRate, violentDeath, {roomObjects, bulk, st
         let container = _.find(roomObjects, { type: 'container', x: object.x, y: object.y });
 
         if(dropRate > 0 && !object.userSummoned && !object.strongholdId) {
-            var lifeTime = _.any(object.body, {type: C.CLAIM}) ? C.CREEP_CLAIM_LIFE_TIME : C.CREEP_LIFE_TIME;
+            var lifeTime = _.some(object.body, {type: C.CLAIM}) ? C.CREEP_CLAIM_LIFE_TIME : C.CREEP_LIFE_TIME;
             var lifeRate = dropRate * object._ticksToLive / lifeTime;
             var bodyResources = {energy: 0};
 
