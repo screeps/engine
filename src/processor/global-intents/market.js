@@ -176,8 +176,11 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
                         return;
                     }
 
-                    if (intent.newPrice > order.price) {
+                    if(intent.newPrice != order.price) {
                         order._skip = true;
+                    }
+
+                    if (intent.newPrice > order.price) {
                         var fee = Math.ceil((intent.newPrice - order.price) * order.remainingAmount * C.MARKET_FEE);
 
                         if (user.money < fee) {
