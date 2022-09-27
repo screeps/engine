@@ -11,7 +11,7 @@ module.exports = function(creep, context) {
 
     const { intents, hostiles } = context;
 
-    const targets = _.filter(hostiles, c => utils.dist(creep, c) <= 3);
+    const targets = hostiles.filter(c => utils.dist(creep, c) <= 3);
 
     if(!_.some(targets)){
         return;

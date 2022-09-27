@@ -309,19 +309,19 @@ function _findClosestByPath2(fromPos, objects, opts) {
         objects = register.rooms[fromPos.roomName].find(objects, {filter: opts.filter});
     }
     else if(opts.filter) {
-        objects = _.filter(objects, opts.filter);
+        objects = objects.filter(opts.filter);
     }
 
     if(!objects.length) {
         return null;
     }
 
-    var objectOnSquare = _.find(objects, obj => fromPos.isEqualTo(obj));
+    var objectOnSquare = objects.find( obj => fromPos.isEqualTo(obj));
     if(objectOnSquare) {
         return objectOnSquare;
     }
 
-    var goals = _.map(objects, i => {
+    var goals = objects.map(i => {
         if(i.pos) {
             i = i.pos;
         }
@@ -364,11 +364,11 @@ function _findClosestByPath2(fromPos, objects, opts) {
         lastPos = ret.path[ret.path.length-1];
     }
 
-    objects.forEach(obj => {
+    for (const obj of objects) {
         if(lastPos.isNearTo(obj)) {
             result = obj;
         }
-    });
+    }
 
     return result;
 }
@@ -646,10 +646,10 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
 
         if(opts.filter) {
-            result = _.filter(result, opts.filter);
+            result = result.filter(opts.filter);
         }
         else {
-            result = _.clone(result);
+            result = [...result];
         }
 
         return result;
@@ -874,7 +874,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             path,
             cacheKeySuffix = '';
 
-        opts = _.clone(opts || {});
+        opts = opts ? {...opts} : {};
 
         if(opts.ignoreCreeps) {
             cacheKeySuffix += '_ignoreCreeps'
@@ -1399,7 +1399,7 @@ exports.makePos = function(_register) {
             room = register.rooms[this.roomName];
 
         if(_.isObject(secondArg)) {
-            opts = _.clone(secondArg);
+            opts = {...secondArg};
         }
         opts = opts || {};
 
@@ -1428,7 +1428,7 @@ exports.makePos = function(_register) {
 
     RoomPosition.prototype.findClosestByPath = register.wrapFn(function(type, opts) {
 
-        opts = _.clone(opts || {});
+        opts = opts ? {...opts} : {};
 
         var room = register.rooms[this.roomName];
 
@@ -1522,7 +1522,7 @@ exports.makePos = function(_register) {
             throw new Error(`Could not access room ${this.roomName}`);
         }
 
-        opts = _.clone(opts || {});
+        opts = opts ? {...opts} : {};
 
         var objects = [],
             result = [];
@@ -1531,14 +1531,14 @@ exports.makePos = function(_register) {
             objects = room.find(type, opts);
         }
         if(_.isArray(type)) {
-            objects = opts.filter ? _.filter(type, opts.filter) : type;
+            objects = opts.filter ? type.filter(opts.filter) : type;
         }
 
-        objects.forEach((i) => {
+        for (const i of objects) {
             if(this.inRangeTo(i, range)) {
                 result.push(i);
             }
-        });
+        }
 
         return result;
     });
@@ -1550,7 +1550,7 @@ exports.makePos = function(_register) {
             throw new Error(`Could not access room ${this.roomName}`);
         }
 
-        opts = _.clone(opts || {});
+        opts = opts ? {...opts} : {};
 
         var objects = [],
         result = [];
@@ -1559,7 +1559,7 @@ exports.makePos = function(_register) {
             objects = room.find(type, opts);
         }
         if(_.isArray(type)) {
-            objects = opts.filter ? _.filter(type, opts.filter) : type;
+            objects = opts.filter ? type.filter(opts.filter) : type;
         }
 
         var closest = null, minRange = Infinity;

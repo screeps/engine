@@ -68,7 +68,7 @@ const behaviors = {
             return;
         }
 
-        const repairRamparts = _.filter(ramparts, r => r.hitsTarget && r.hits < r.hitsTarget);
+        const repairRamparts = ramparts.filter(r => r.hitsTarget && r.hits < r.hitsTarget);
         if(!_.some(repairRamparts)) {
             return;
         }
@@ -86,7 +86,7 @@ const behaviors = {
         const safeMatrixCallback = defence.createSafeMatrixCallback(context);
 
         fakeRuntime.walkTo(creep, target, { range: 3, costCallback: safeMatrixCallback }, context);
-        const targetInRange = _.first(_.filter(repairRamparts, r => utils.dist(creep, r) <= 3));
+        const targetInRange = repairRamparts.find(r => utils.dist(creep, r) <= 3);
         if(targetInRange) {
             intents.set(creep._id, 'repair', {id: targetInRange._id, x: targetInRange.x, y: targetInRange.y});
         }

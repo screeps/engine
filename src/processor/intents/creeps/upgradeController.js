@@ -26,9 +26,9 @@ module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, stats, 
 
     target._upgraded = target._upgraded || 0;
 
-    var buildPower = _.filter(object.body, (i) => (i.hits > 0 || i._oldHits > 0) && i.type == C.WORK).length * C.UPGRADE_CONTROLLER_POWER || 0,
+    var buildPower = object.body.filter((i) => (i.hits > 0 || i._oldHits > 0) && i.type == C.WORK).length * C.UPGRADE_CONTROLLER_POWER || 0,
         buildEffect = Math.min(buildPower, object.store.energy),
-        boostedParts = _.map(object.body, i => {
+        boostedParts = object.body.map(i => {
             if(i.type == C.WORK && i.boost && C.BOOSTS[C.WORK][i.boost].upgradeController > 0) {
                 return C.BOOSTS[C.WORK][i.boost].upgradeController-1;
             }

@@ -32,7 +32,7 @@ module.exports = function(object, scope) {
     if(!roomController || roomController.level < 1 || roomController.user != object.user) {
         return;
     }
-    var spawns = _.filter(roomObjects, {type: 'spawn'});
+    let spawns = roomObjects.filter((object) => object.type === 'spawn');
     if(spawns.length > C.CONTROLLER_STRUCTURES.spawn[roomController.level]) {
         spawns.sort(utils.comparatorDistance(roomController));
         spawns = _.take(spawns, C.CONTROLLER_STRUCTURES.spawn[roomController.level]);

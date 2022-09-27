@@ -31,7 +31,7 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ga
     }
 
     if(target.reservation) {
-        var effect = Math.floor(_.filter(object.body, (i) => i.hits > 0 && i.type == C.CLAIM).length * C.CONTROLLER_RESERVE);
+        var effect = Math.floor(object.body.filter((i) => i.hits > 0 && i.type == C.CLAIM).length * C.CONTROLLER_RESERVE);
         if(!effect) {
             return;
         }
@@ -39,7 +39,7 @@ module.exports = function(object, intent, {roomObjects, bulk, roomController, ga
         bulk.update(target, {reservation: {endTime}});
     }
     if(target.user) {
-        var effect = Math.floor(_.filter(object.body, (i) => i.hits > 0 && i.type == C.CLAIM).length * C.CONTROLLER_CLAIM_DOWNGRADE);
+        var effect = Math.floor(object.body.filter((i) => i.hits > 0 && i.type == C.CLAIM).length * C.CONTROLLER_CLAIM_DOWNGRADE);
         if(!effect) {
             return;
         }

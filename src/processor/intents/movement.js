@@ -117,7 +117,7 @@ exports.check = function(roomIsInSafeMode) {
                 var moves = object.type == 'powerCreep' ? 0 :
                         utils.calcBodyEffectiveness(object.body, C.MOVE, 'fatigue', 1),
                     weight = object.type == 'powerCreep' ? 0 :
-                        _.filter(object.body, (i) => i.type != C.MOVE && i.type != C.CARRY).length;
+                        object.body.filter( (i) => i.type != C.MOVE && i.type != C.CARRY).length;
                 weight += object.type == 'powerCreep' ? 0 :
                     calcResourcesWeight(object);
                 weight = weight || 1;
@@ -199,7 +199,7 @@ exports.execute = function(object, scope) {
         return;
     }
 
-    var cellObjects = _.filter(roomObjects, (i) => i.x == move.x && i.y == move.y);
+    var cellObjects = roomObjects ? roomObjects.filter( (i) => i.x == move.x && i.y == move.y) : [];
 
     var fatigueRate = 2;
 

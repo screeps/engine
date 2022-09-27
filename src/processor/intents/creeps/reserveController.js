@@ -23,7 +23,7 @@ module.exports = function(object, intent, {roomObjects, bulk, gameTime, eventLog
         return;
     }
 
-    var effect =  _.filter(object.body, (i) => i.hits > 0 && i.type == C.CLAIM).length * C.CONTROLLER_RESERVE;
+    var effect = object.body.filter((i) => i.hits > 0 && i.type == C.CLAIM).length * C.CONTROLLER_RESERVE;
     if(!effect) {
         return;
     }

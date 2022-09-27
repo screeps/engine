@@ -8,9 +8,9 @@ const _ = require('lodash'),
 module.exports = function(creep, context) {
     const {scope, intents, invaders} = context;
 
-    let healTargets = _.filter(invaders, c => utils.dist(c, creep) <= 3);
-    if(_.some(healTargets)) {
-        const healTarget = _.first(healTargets.sort((a, b) => (b.hitsMax - b.hits) - (a.hitsMax - a.hits)));
+    let healTargets = invaders.filter(c => utils.dist(c, creep) <= 3);
+    if(healTargets.length > 0) {
+        const healTarget = healTargets.sort((a, b) => (b.hitsMax - b.hits) - (a.hitsMax - a.hits))[0];
         if(utils.dist(creep, healTarget) <= 1) {
             intents.set(creep._id, 'heal', {id: healTarget._id, x: healTarget.x, y: healTarget.y});
         } else {
@@ -22,7 +22,7 @@ module.exports = function(creep, context) {
         if(!flee(creep, 4, context)) {
             const fleeTarget = fakeRuntime.findClosestByPath(
                 creep,
-                _.filter(invaders, c => (c != creep) && fakeRuntime.hasActiveBodyparts(c, C.HEAL)),
+                invaders.filter(c => (c != creep) && fakeRuntime.hasActiveBodyparts(c, C.HEAL)),
                 null,
                 scope);
 
@@ -37,12 +37,12 @@ module.exports = function(creep, context) {
         return;
     }
 
-    let target = fakeRuntime.findClosestByPath(creep, _.filter(invaders, c => c.hits < c.hitsMax), null, scope);
+    let target = fakeRuntime.findClosestByPath(creep, invaders.filter(c => c.hits < c.hitsMax), null, scope);
     if(!target) {
         if(flee(creep, 4, context)) {
             return;
         }
-        target = fakeRuntime.findClosestByPath(creep, _.filter(invaders, c => (c != creep) && !fakeRuntime.hasActiveBodyparts(c, C.HEAL)), null, scope);
+        target = fakeRuntime.findClosestByPath(creep, invaders.filter(c => (c != creep) && !fakeRuntime.hasActiveBodyparts(c, C.HEAL)), null, scope);
     }
 
     if(!target) {

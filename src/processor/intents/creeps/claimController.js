@@ -25,7 +25,7 @@ module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, users})
     if(target.level > 0) {
         return;
     }
-    if ((_.filter(object.body, (i) => i.hits > 0 && i.type == C.CLAIM).length) === 0) {
+    if (!object.body.some((i) => i.hits > 0 && i.type == C.CLAIM).length) {
         return;
     }
     if(target.reservation && target.reservation.user != object.user) {

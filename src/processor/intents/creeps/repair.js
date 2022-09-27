@@ -20,12 +20,12 @@ module.exports = function(object, intent, {roomObjects, bulk, stats, eventLog}) 
         return;
     }
 
-    var repairPower = _.filter(object.body, (i) => (i.hits > 0 || i._oldHits > 0) && i.type == C.WORK).length * C.REPAIR_POWER || 0,
+    var repairPower = object.body.filter((i) => (i.hits > 0 || i._oldHits > 0) && i.type == C.WORK).length * C.REPAIR_POWER || 0,
         repairEnergyRemaining = object.store.energy / C.REPAIR_COST,
         repairHitsMax = target.hitsMax - target.hits,
         repairEffect = Math.min(repairPower, repairEnergyRemaining, repairHitsMax),
         repairCost = Math.min(object.store.energy, Math.ceil(repairEffect * C.REPAIR_COST)),
-        boostedParts = _.map(object.body, i => {
+        boostedParts = object.body.map(i => {
             if(i.type == C.WORK && i.boost && C.BOOSTS[C.WORK][i.boost].repair > 0) {
                 return (C.BOOSTS[C.WORK][i.boost].repair-1) * C.REPAIR_POWER;
             }

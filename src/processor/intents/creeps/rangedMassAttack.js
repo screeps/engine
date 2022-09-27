@@ -23,7 +23,7 @@ module.exports = function(object, intent, scope) {
         return;
     }
 
-    var targets = _.filter(roomObjects, (i) => {
+    var targets = roomObjects.filter((i) => {
         return (!_.isUndefined(i.user) || i.type == 'powerBank') && i.user != object.user &&
             i.x >= object.x - 3 && i.x <= object.x + 3 &&
             i.y >= object.y - 3 && i.y <= object.y + 3;

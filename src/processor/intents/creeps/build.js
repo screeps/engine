@@ -64,10 +64,10 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
         return;
     }
 
-    var buildPower = _.filter(object.body, (i) => (i.hits > 0 || i._oldHits > 0) && i.type == C.WORK).length * C.BUILD_POWER || 0,
+    var buildPower = object.body.filter((i) => (i.hits > 0 || i._oldHits > 0) && i.type == C.WORK).length * C.BUILD_POWER || 0,
         buildRemaining = target.progressTotal - target.progress,
         buildEffect = Math.min(buildPower, buildRemaining, object.store.energy),
-        boostedParts = _.map(object.body, i => {
+        boostedParts = object.body.map(i => {
             if(i.type == C.WORK && i.boost && C.BOOSTS[C.WORK][i.boost].build > 0) {
                 return (C.BOOSTS[C.WORK][i.boost].build-1) * C.BUILD_POWER;
             }
