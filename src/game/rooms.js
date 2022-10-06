@@ -305,6 +305,8 @@ function _findClosestByPath2(fromPos, objects, opts) {
 
     opts = opts || {};
 
+  const range = opts.range || 0;
+
     if(_.isNumber(objects)) {
         objects = register.rooms[fromPos.roomName].find(objects, {filter: opts.filter});
     }
@@ -325,7 +327,7 @@ function _findClosestByPath2(fromPos, objects, opts) {
         if(i.pos) {
             i = i.pos;
         }
-        return {range: 1, pos: i};
+        return {range, pos: i};
     });
 
     if(opts.avoid) {
@@ -365,7 +367,7 @@ function _findClosestByPath2(fromPos, objects, opts) {
     }
 
     objects.forEach(obj => {
-        if(lastPos.isNearTo(obj)) {
+        if(lastPos.inRangeTo(obj, range)) {
             result = obj;
         }
     });
