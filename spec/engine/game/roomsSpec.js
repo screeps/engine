@@ -6,18 +6,25 @@ const _ =require('lodash'),
 
 describe('rooms', () => {
     describe('RoomPosition', () => {
-        let globals = {};
+        let globals;
 
         beforeEach(()=>{
+            globals = {}
             const runtimeData = {
                 staticTerrainData: require('../../helpers/mocks/rooms').terrain
             };
             const register = {
-                wrapFn: function(fn) { return fn }
+                wrapFn: function(fn) { return fn },
+                rooms: { E2S7: {} },
+                _useNewPathFinder: true,
             };
 
             rooms.make(runtimeData, {}, register, globals);
             rooms.makePos(register);
+        
+            for (var i in runtimeData.rooms) {
+                register.rooms[i] = new globals.Room(i);
+            }
         });
 
         it('Exists',()=>{
@@ -53,6 +60,98 @@ describe('rooms', () => {
             expect(pos.x).toBe(11);
             expect(pos.y).toBe(15);
             expect(pos.roomName).toBe('E2S7');
+        });
+
+        describe("findClosestByPath", () => {
+            it("Finds target according to PathFinder", () => {
+                const newPos = (x) => new globals.RoomPosition(x, 0, "E2S7");
+
+                const pos = newPos(0);
+                const closeTarget = newPos(5);
+                const farTarget = newPos(10);
+
+                globals.PathFinder = {
+                    search: () => ({
+                        // Only last position of a path is considered in search
+                        path: [closeTarget],
+                    })
+                }
+
+                const result = pos.findClosestByPath([
+                    closeTarget,
+                    farTarget,
+                ]);
+
+                expect(result).toEqual(closeTarget);
+            });
+
+            it("Finds target with range option", () => {
+                const range = 2;
+                const targetX = 5;
+                const newPos = (x) => new globals.RoomPosition(x, 0, "E2S7");
+
+                const pos = newPos(0);
+                const target = newPos(targetX);
+                const pathEnd = newPos(targetX - range);
+
+                globals.PathFinder = {
+                    search: () => ({
+                        // Only last position of a path is considered in search
+                        path: [pathEnd],
+                    })
+                }
+                const searchSpy = spyOn(globals.PathFinder, 'search').and.callThrough()
+
+                const result = pos.findClosestByPath([target], { range });
+
+                expect(result).toEqual(target);
+                expect(searchSpy.calls.count()).toBe(1)
+                expect(searchSpy.calls.argsFor(0)[0]).toEqual(pos)
+                expect(searchSpy.calls.argsFor(0)[1].length).toBe(1)
+                expect(searchSpy.calls.argsFor(0)[1]).toContain({ range, pos: target })
+            })
+
+            it("Fails to find target out of range", () => {
+                const range = 2;
+                const targetX = 5;
+                const newPos = (x) => new globals.RoomPosition(x, 0, "E2S7");
+
+                const pos = newPos(0);
+                const target = newPos(targetX);
+                const pathEnd = newPos(targetX - range - 1);
+
+                globals.PathFinder = {
+                    search: () => ({
+                        // Only last position of a path is considered in search
+                        path: [pathEnd],
+                    })
+                }
+
+                const result = pos.findClosestByPath([target], { range });
+
+                expect(result).toEqual(null);
+            })
+
+            it("Picks first target in range of the path even if it's further away", () => {
+                const range = 2;
+                const newPos = (x) => new globals.RoomPosition(x, 0, "E2S7");
+
+                const pos = newPos(0);
+                const targetOut = newPos(3)
+                const targetFar = newPos(2);
+                const targetNear = newPos(1);
+
+                globals.PathFinder = {
+                    search: () => ({
+                        // Only last position of a path is considered in search
+                        path: [],
+                    })
+                }
+
+                const result = pos.findClosestByPath([targetOut, targetFar, targetNear], { range });
+
+                expect(result).toEqual(targetFar);
+            })
         });
     });
 });
