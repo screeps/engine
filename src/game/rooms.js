@@ -305,7 +305,7 @@ function _findClosestByPath2(fromPos, objects, opts) {
 
     opts = opts || {};
 
-  const range = opts.range || 0;
+    const range = opts.range || 0;
 
     if(_.isNumber(objects)) {
         objects = register.rooms[fromPos.roomName].find(objects, {filter: opts.filter});
