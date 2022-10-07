@@ -63,12 +63,12 @@ describe('rooms', () => {
         });
 
         describe("findClosestByPath", () => {
-            it("Finds target according to PathFinder", () => {
-                const newPos = (x) => new globals.RoomPosition(x, 0, "E2S7");
+            const newPos = ({x}) => new globals.RoomPosition(x, 0, "E2S7");
 
-                const pos = newPos(0);
-                const closeTarget = newPos(5);
-                const farTarget = newPos(10);
+            it("Finds target according to PathFinder", () => {
+                const pos = newPos({ x: 0 });
+                const closeTarget = newPos({ x: 5 });
+                const farTarget = newPos({ x: 10 });
 
                 globals.PathFinder = {
                     search: () => ({
@@ -88,11 +88,10 @@ describe('rooms', () => {
             it("Finds target with range option", () => {
                 const range = 2;
                 const targetX = 5;
-                const newPos = (x) => new globals.RoomPosition(x, 0, "E2S7");
 
-                const pos = newPos(0);
-                const target = newPos(targetX);
-                const pathEnd = newPos(targetX - range);
+                const pos = newPos({ x: 0 });
+                const target = newPos({ x: targetX });
+                const pathEnd = newPos({ x: targetX - range });
 
                 globals.PathFinder = {
                     search: () => ({
@@ -114,11 +113,10 @@ describe('rooms', () => {
             it("Fails to find target out of range", () => {
                 const range = 2;
                 const targetX = 5;
-                const newPos = (x) => new globals.RoomPosition(x, 0, "E2S7");
 
-                const pos = newPos(0);
-                const target = newPos(targetX);
-                const pathEnd = newPos(targetX - range - 1);
+                const pos = newPos({ x: 0 });
+                const target = newPos({ x: targetX });
+                const pathEnd = newPos({ x: targetX - range - 1 });
 
                 globals.PathFinder = {
                     search: () => ({
@@ -134,12 +132,11 @@ describe('rooms', () => {
 
             it("Picks first target in range of the path even if it's further away", () => {
                 const range = 2;
-                const newPos = (x) => new globals.RoomPosition(x, 0, "E2S7");
 
-                const pos = newPos(0);
-                const targetOut = newPos(3)
-                const targetFar = newPos(2);
-                const targetNear = newPos(1);
+                const pos = newPos({ x: 0 });
+                const targetOut = newPos({ x: 3 });
+                const targetFar = newPos({ x: 2 });
+                const targetNear = newPos({ x: 1 });
 
                 globals.PathFinder = {
                     search: () => ({
