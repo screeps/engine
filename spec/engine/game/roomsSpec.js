@@ -65,17 +65,24 @@ describe('rooms', () => {
         describe("findClosestByPath", () => {
             const newPos = ({x}) => new globals.RoomPosition(x, 0, "E2S7");
 
+            /** 
+             * In context of `RoomPosition.findClosestByPath` `path` only has to include the last position. 
+             */
+            const mockPathFinderSearch = (path) => {
+                globals.PathFinder = {
+                    search: () => ({
+                        // Only the last position of a path is considered in search
+                        path,
+                    })
+                }
+            }
+
             it("Finds target according to PathFinder", () => {
                 const pos = newPos({ x: 0 });
                 const closeTarget = newPos({ x: 5 });
                 const farTarget = newPos({ x: 10 });
 
-                globals.PathFinder = {
-                    search: () => ({
-                        // Only last position of a path is considered in search
-                        path: [closeTarget],
-                    })
-                }
+                mockPathFinderSearch([closeTarget])
 
                 const result = pos.findClosestByPath([
                     closeTarget,
@@ -93,12 +100,7 @@ describe('rooms', () => {
                 const target = newPos({ x: targetX });
                 const pathEnd = newPos({ x: targetX - range });
 
-                globals.PathFinder = {
-                    search: () => ({
-                        // Only last position of a path is considered in search
-                        path: [pathEnd],
-                    })
-                }
+                mockPathFinderSearch([pathEnd])
                 const searchSpy = spyOn(globals.PathFinder, 'search').and.callThrough()
 
                 const result = pos.findClosestByPath([target], { range });
@@ -118,12 +120,7 @@ describe('rooms', () => {
                 const target = newPos({ x: targetX });
                 const pathEnd = newPos({ x: targetX - range - 1 });
 
-                globals.PathFinder = {
-                    search: () => ({
-                        // Only last position of a path is considered in search
-                        path: [pathEnd],
-                    })
-                }
+                mockPathFinderSearch([pathEnd])
 
                 const result = pos.findClosestByPath([target], { range });
 
@@ -138,12 +135,7 @@ describe('rooms', () => {
                 const targetFar = newPos({ x: 2 });
                 const targetNear = newPos({ x: 1 });
 
-                globals.PathFinder = {
-                    search: () => ({
-                        // Only last position of a path is considered in search
-                        path: [],
-                    })
-                }
+                mockPathFinderSearch([])
 
                 const result = pos.findClosestByPath([targetOut, targetFar, targetNear], { range });
 
