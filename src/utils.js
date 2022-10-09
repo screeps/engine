@@ -127,60 +127,57 @@ exports.calcCreepCost = function(body) {
 };
 
 exports.checkConstructionSite = function(objects, structureType, x, y) {
+    
+    const isTerrainMask = _.isString(objects) || objects instanceof Uint8Array
+    const isTerrainArray = objects && _.isArray(objects[0]) && _.isString(objects[0][0])
 
-    var borderTiles;
-    if(structureType != 'road' && structureType != 'container' && (x == 1 || x == 48 || y == 1 || y == 48)) {
-        if(x == 1) borderTiles = [[0,y-1],[0,y],[0,y+1]];
-        if(x == 48) borderTiles = [[49,y-1],[49,y],[49,y+1]];
-        if(y == 1) borderTiles = [[x-1,0],[x,0],[x+1,0]];
-        if(y == 48) borderTiles = [[x-1,49],[x,49],[x+1,49]];
-    }
+    if(isTerrainMask || isTerrainArray) {
+        const isWall = (x, y) => isTerrainMask
+            ? exports.checkTerrain(objects, x, y, C.TERRAIN_MASK_WALL)
+            : objects[x][y] & C.TERRAIN_MASK_WALL;
 
-    if(_.isString(objects) || objects instanceof Uint8Array) {
-        if(borderTiles) {
-            for(var i in borderTiles) {
-                if(!exports.checkTerrain(objects, borderTiles[i][0], borderTiles[i][1], C.TERRAIN_MASK_WALL)) {
-                    return false;
-                }
+        const canBeBuiltNearExit = ['road', 'container'].includes(structureType)
+        const isNearBorder = x == 1 || x == 48 || y == 1 || y == 48
+
+        if(!canBeBuiltNearExit && isNearBorder) {
+            const borderTiles = [];
+            if(x == 1) borderTiles.push([0, y-1], [0, y], [0, y+1]);
+            if(x == 48) borderTiles.push([49, y-1], [49, y], [49, y+1]);
+            if(y == 1) borderTiles.push([x-1, 0], [x, 0], [x+1, 0]);
+            if(y == 48) borderTiles.push([x-1, 49], [x, 49], [x+1, 49]);
+
+            for(const [borderX, borderY] of borderTiles) {
+                const isExit = !isWall(borderX, borderY)
+                if(isExit) return false;
             }
         }
-        if(structureType == 'extractor') {
-            return true;
-        }
-        if(structureType != 'road' && exports.checkTerrain(objects, x, y, C.TERRAIN_MASK_WALL)) {
+
+        const canBeBuiltOnWalls = ['road', 'extractor'].includes(structureType)
+        
+        if(!canBeBuiltOnWalls && isWall(x, y)) {
             return false;
         }
         return true;
     }
 
-    if(objects && _.isArray(objects[0]) && _.isString(objects[0][0])) {
-        if(borderTiles) {
-            for(var i in borderTiles) {
-                if(!(objects[borderTiles[i][1]][borderTiles[i][0]] & C.TERRAIN_MASK_WALL)) {
-                    return false;
-                }
-            }
-        }
-        if(structureType == 'extractor') {
-            return true;
-        }
-        if(structureType != 'road' && objects[y][x] & C.TERRAIN_MASK_WALL) {
-            return false;
-        }
-        return true;
-    }
+    const objectsAtTarget = _.filter(objects, (obj) => obj.x == x && obj.y == y)
+    const objectTypeExistsAtTarget = (type) => _.any(objectsAtTarget, {type})
 
-    if(_.any(objects, {x, y, type: structureType})) {
+    if(objectTypeExistsAtTarget(structureType)) {
         return false;
     }
-    if(_.any(objects, {x, y, type: 'constructionSite'})) {
+    if(objectTypeExistsAtTarget('constructionSite')) {
         return false;
     }
     if(structureType == 'extractor') {
-        return _.any(objects, {x, y, type: 'mineral'}) && !_.any(objects, {x, y, type: 'extractor'});
+        return objectTypeExistsAtTarget('mineral');
     }
-    if(structureType != 'rampart' && structureType != 'road' &&
-        _.any(objects, (i) => i.x == x && i.y == y && i.type != 'rampart' && i.type != 'road' && C.CONSTRUCTION_COST[i.type])) {
+
+    const isStackable = (type) => ['rampart', 'road'].includes(type)
+    const isBuildable = (type) => C.CONSTRUCTION_COST[type] > 0
+    const nonStackableBuildingExistsAtTarget = _.any(objectsAtTarget, object => !isStackable(object.type) && isBuildable(object.type))
+    
+    if(!isStackable(structureType) && nonStackableBuildingExistsAtTarget) {
         return false;
     }
     if(x <= 0 || y <= 0 || x >= 49 || y >= 49) {
