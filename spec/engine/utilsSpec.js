@@ -454,4 +454,33 @@ describe('Utils', () => {
             });
         });
     });
+
+    describe('checkConstructionSite', () => {
+        it('Only allows constructing roads or containers near room corners', () => {
+            const cases = [
+                { structureType: 'road', isAllowed: true },
+                { structureType: 'container', isAllowed: true },
+                { structureType: 'extension', isAllowed: false },
+                { structureType: 'spawn', isAllowed: false }
+            ]
+
+            const terrain = [
+                'WWWW',
+                '....',
+                'W...',
+                'W...'
+            ]
+
+            const objects = terrain.map(
+                (line) => line.split('').map(
+                    (char) => String(char === 'W' ? C.TERRAIN_MASK_WALL : C.TERRAIN_MASK_PLAIN))
+            )
+            const x = 1, y = 1;
+
+            for(const {structureType, isAllowed} of cases) {
+                const passedCheck = utils.checkConstructionSite(objects, structureType, x, y)
+                expect(passedCheck).withContext(structureType).toEqual(isAllowed)
+            }
+        })
+    })
 });
