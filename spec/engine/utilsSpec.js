@@ -462,14 +462,14 @@ describe('Utils', () => {
                 { structureType: 'container', isAllowed: true },
                 { structureType: 'extension', isAllowed: false },
                 { structureType: 'spawn', isAllowed: false }
-            ]
+            ];
 
             const terrain = [
                 'WWWW',
                 '....',
                 'W...',
                 'W...'
-            ]
+            ];
 
             const objects = terrain.map(
                 (line) => line.split('').map(
@@ -478,9 +478,54 @@ describe('Utils', () => {
             const x = 1, y = 1;
 
             for(const {structureType, isAllowed} of cases) {
-                const passedCheck = utils.checkConstructionSite(objects, structureType, x, y)
-                expect(passedCheck).withContext(structureType).toEqual(isAllowed)
+                const passedCheck = utils.checkConstructionSite(objects, structureType, x, y);
+
+                expect(passedCheck).withContext(structureType).toEqual(isAllowed);
             }
-        })
-    })
+        });
+
+        it('Allows to construct roads and ramparts onto existing structures', () => {
+            const objects = [
+                {x: 10, y: 10, type: 'spawn'},
+
+                {x: 20, y: 20, type: 'spawn'},
+                {x: 20, y: 20, type: 'road'},
+                
+                {x: 30, y: 30, type: 'spawn'},
+                {x: 30, y: 30, type: 'rampart'},
+                
+                {x: 40, y: 40, type: 'road'},
+                {x: 40, y: 40, type: 'rampart'},
+            ];
+
+            expect(utils.checkConstructionSite(objects, 'road', 10, 10)).toBe(true);
+            expect(utils.checkConstructionSite(objects, 'rampart', 10, 10)).toBe(true);
+
+            expect(utils.checkConstructionSite(objects, 'rampart', 20, 20)).toBe(true);
+
+            expect(utils.checkConstructionSite(objects, 'road', 30, 30)).toBe(true);
+
+            expect(utils.checkConstructionSite(objects, 'spawn', 40, 40)).toBe(true);
+        });
+
+        it('Disallows constructing same structures on one tile', () => {
+            const objects = [
+                {x: 10, y: 10, type: 'spawn'},
+                {x: 20, y: 20, type: 'rampart'},
+                {x: 30, y: 30, type: 'road'},
+            ];
+
+            expect(utils.checkConstructionSite(objects, 'spawn', 10, 10)).toBe(false);
+            expect(utils.checkConstructionSite(objects, 'rampart', 20, 20)).toBe(false);
+            expect(utils.checkConstructionSite(objects, 'road', 30, 30)).toBe(false);
+        });
+
+        it('Disallows constructing multiple construction sites on the same tile', () => {
+            const objects = [
+                {x: 10, y: 10, type: 'constructionSite'},
+            ];
+
+            expect(utils.checkConstructionSite(objects, 'constructionSite', 10, 10)).toBe(false);
+        });
+    });
 });
