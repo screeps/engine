@@ -1,0 +1,27 @@
+name: Build npm package
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v3
+      # Setup .npmrc file to use GitHub Packages
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '10.x'
+          registry-url: 'https://npm.pkg.github.com'
+          # Defaults to the user or organization that owns the workflow file
+          scope: '@screeps'
+      # package-lock.json usually contains checksum of the package at npmjs
+      # which doesn't match checksum of the package at GitHub Packages,
+      # so we have to remove package-lock.json
+      - run: rm package-lock.json
+      - run: npm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
