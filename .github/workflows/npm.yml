@@ -15,9 +15,20 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           # Defaults to the user or organization that owns the workflow file
           scope: '@screeps'
-      - run: npm ci
+      - name: Install
+        run: npm ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: npm publish
+      - name: Publish (github)
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '10.x'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@screeps'
+      - name: Publish (npmjs)
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
