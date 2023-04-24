@@ -15,11 +15,7 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           # Defaults to the user or organization that owns the workflow file
           scope: '@screeps'
-      # package-lock.json usually contains checksum of the package at npmjs
-      # which doesn't match checksum of the package at GitHub Packages,
-      # so we have to remove package-lock.json
-      - run: rm package-lock.json
-      - run: npm install
+      - run: npm ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm publish
