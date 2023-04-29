@@ -42,5 +42,8 @@
       "transform-es2015-destructuring",
       "transform-strict-mode"
     ]
+  },
+  "browser": {
+    "@screeps/core": "@screeps/simcore"
   }
 }
