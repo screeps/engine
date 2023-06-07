@@ -243,6 +243,8 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                         continue;
                     }
 
+                    driver.config.emit('preProcessObjectIntents',object, userId, objectIntents, roomObjects, roomTerrain, gameTime, roomInfo, bulk, bulkUsers);
+
                     if (!object || object._skip || object.user && object.user != userId) continue;
 
                     if (object.type == 'creep')
