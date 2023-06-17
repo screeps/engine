@@ -68,7 +68,7 @@ const behaviors = {
             return;
         }
 
-        const repairRamparts = ramparts.filter(r => r.hitsTarget && r.hits < r.hitsTarget);
+        const repairRamparts = _.filter(ramparts, r => r.hitsTarget && r.hits < r.hitsTarget);
         if(!_.some(repairRamparts)) {
             return;
         }

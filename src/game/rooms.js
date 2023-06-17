@@ -309,19 +309,19 @@ function _findClosestByPath2(fromPos, objects, opts) {
         objects = register.rooms[fromPos.roomName].find(objects, {filter: opts.filter});
     }
     else if(opts.filter) {
-        objects = objects.filter(opts.filter);
+        objects = _.filter(objects, opts.filter);
     }
 
     if(!objects.length) {
         return null;
     }
 
-    var objectOnSquare = objects.find( obj => fromPos.isEqualTo(obj));
+    var objectOnSquare = _.find(objects, obj => fromPos.isEqualTo(obj));
     if(objectOnSquare) {
         return objectOnSquare;
     }
 
-    var goals = objects.map(i => {
+    var goals = _.map(objects, i => {
         if(i.pos) {
             i = i.pos;
         }
@@ -646,7 +646,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         }
 
         if(opts.filter) {
-            result = result.filter(opts.filter);
+            result = _.filter(result, opts.filter);
         }
         else {
             result = [...result];
@@ -1531,7 +1531,7 @@ exports.makePos = function(_register) {
             objects = room.find(type, opts);
         }
         if(_.isArray(type)) {
-            objects = opts.filter ? type.filter(opts.filter) : type;
+            objects = opts.filter ? _.filter(type, opts.filter) : type;
         }
 
         for (const i of objects) {
@@ -1559,7 +1559,7 @@ exports.makePos = function(_register) {
             objects = room.find(type, opts);
         }
         if(_.isArray(type)) {
-            objects = opts.filter ? type.filter(opts.filter) : type;
+            objects = opts.filter ? _.filter(type, opts.filter) : type;
         }
 
         var closest = null, minRange = Infinity;

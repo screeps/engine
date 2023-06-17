@@ -22,7 +22,7 @@ module.exports = function(creep, context) {
         if(!flee(creep, 4, context)) {
             const fleeTarget = fakeRuntime.findClosestByPath(
                 creep,
-                invaders.filter(c => (c != creep) && fakeRuntime.hasActiveBodyparts(c, C.HEAL)),
+                _.filter(invaders, c => (c != creep) && fakeRuntime.hasActiveBodyparts(c, C.HEAL)),
                 null,
                 scope);
 
@@ -37,12 +37,12 @@ module.exports = function(creep, context) {
         return;
     }
 
-    let target = fakeRuntime.findClosestByPath(creep, invaders.filter(c => c.hits < c.hitsMax), null, scope);
+    let target = fakeRuntime.findClosestByPath(creep, _.filter(invaders, c => c.hits < c.hitsMax), null, scope);
     if(!target) {
         if(flee(creep, 4, context)) {
             return;
         }
-        target = fakeRuntime.findClosestByPath(creep, invaders.filter(c => (c != creep) && !fakeRuntime.hasActiveBodyparts(c, C.HEAL)), null, scope);
+        target = fakeRuntime.findClosestByPath(creep, _.filter(invaders, c => (c != creep) && !fakeRuntime.hasActiveBodyparts(c, C.HEAL)), null, scope);
     }
 
     if(!target) {
