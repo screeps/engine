@@ -29,6 +29,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     Flag.prototype.constructor = Flag;
 
     Object.defineProperty(Flag.prototype, 'memory', {
+        configurable: true,
         get: function() {
             if(_.isUndefined(globals.Memory.flags) || globals.Memory.flags === 'undefined') {
                 globals.Memory.flags = {};

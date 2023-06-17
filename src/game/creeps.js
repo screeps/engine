@@ -93,6 +93,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     });
 
     Object.defineProperty(Creep.prototype, 'memory', {
+        configurable: true,
         get: function() {
             if(this.id && !this.my) {
                 return undefined;

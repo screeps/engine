@@ -549,6 +549,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     });
 
     Object.defineProperty(Room.prototype, 'memory', {
+        configurable: true,
         get: function() {
             if(_.isUndefined(globals.Memory.rooms) || globals.Memory.rooms === 'undefined') {
                 globals.Memory.rooms = {};
