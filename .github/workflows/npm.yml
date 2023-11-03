@@ -2,6 +2,7 @@ name: Build npm package
 on: push
 jobs:
   build:
+    if: contains(github.event.head_commit.message, '🔖')
     runs-on: ubuntu-latest
     permissions:
       contents: read
