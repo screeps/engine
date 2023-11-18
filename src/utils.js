@@ -15,7 +15,7 @@ catch(e) {}
 exports.getDriver = function getDriver() {
     driver = typeof process != 'undefined' && process.env.DRIVER_MODULE ?
         require(process.env.DRIVER_MODULE) :
-        require('./core/index');
+        require('@screeps/core');
     loadDriver();
     return driver;
 };

@@ -1,6 +1,6 @@
 {
   "name": "@screeps/engine",
-  "version": "4.2.16",
+  "version": "4.2.17-rc1",
   "bin": {
     "screeps-engine-main": "dist/main.js",
     "screeps-engine-runner": "dist/runner.js",
@@ -8,10 +8,11 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "test": "cross-env DRIVER_MODULE=@screeps/driver jasmine"
+    "test": "cross-env DRIVER_MODULE=@screeps/driver jasmine",
+    "prepublish": "gulp"
   },
   "dependencies": {
-    "@screeps/pathfinding": "^0.4.16",
+    "@screeps/pathfinding": "^0.4.17",
     "bulk-require": "^0.2.1",
     "cross-env": "^5.2.0",
     "lodash": "3.10.1",
@@ -41,5 +42,8 @@
       "transform-es2015-destructuring",
       "transform-strict-mode"
     ]
+  },
+  "browser": {
+    "@screeps/core": "@screeps/simcore"
   }
 }
