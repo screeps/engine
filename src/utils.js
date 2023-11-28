@@ -112,15 +112,14 @@ exports.getOffsetsByDirection = function(direction) {
 };
 
 exports.calcCreepCost = function(body) {
-    var result = 0;
+    let result = 0;
 
     body.forEach((i) => {
-        if(_.isObject(i)) {
-            result += C.BODYPART_COST[i.type];
+        const partType = _.isObject(i) ? i.type : i;
+        if(!C.BODYPART_COST[partType]) {
+            throw new Error(`Invalid body part ${partType}`);
         }
-        else {
-            result += C.BODYPART_COST[i];
-        }
+        result += C.BODYPART_COST[partType];
     });
 
     return result;
