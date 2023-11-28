@@ -7,8 +7,7 @@
         map = require('./map'),
         market = require('./market'),
         customPrototypes = require('./custom-prototypes'),
-        system = { Function: { bind: Function.bind } };
-    system.Function.bind.call = Function.prototype.call;
+        bindFunction = Function.call.bind(Function.bind);
 
     var findCacheFn = {
         [C.FIND_CREEPS]: (i) => !i.spawning,
@@ -507,7 +506,7 @@
                 !_.isObject(runCodeCache[userId].globals.require.cache.main) || !_.isFunction(
                     runCodeCache[userId].globals.require.cache.main.loop)) {
 
-                runCodeCache[userId].globals.require = system.Function.bind.call(requireFn, runCodeCache[userId]);
+                runCodeCache[userId].globals.require = bindFunction(requireFn, runCodeCache[userId]);
                 runCodeCache[userId].globals.require.cache = {lodash: runCodeCache[userId].globals._};
                 runCodeCache[userId].globals.require.timestamp = runCodeCache[userId].runtimeData.userCodeTimestamp;
             }
