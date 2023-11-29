@@ -403,22 +403,23 @@ exports.comparatorDistance = function(target) {
 };
 
 exports.storeIntents = function(userId, userIntents, userRuntimeData, customIntentTypes) {
+    const system = driver ? driver.system : exports.getDriver().system;
     var intents = {};
 
     for(var i in userIntents) {
 
         if(i == 'notify') {
-            intents.notify = driver.system.sanitizeUserIntents({notify: userIntents.notify}).notify;
+            intents.notify = system.sanitizeUserIntents({notify: userIntents.notify}).notify;
             continue;
         }
 
         if(i == 'room') {
-            driver.system.sanitizeUserRoomIntents(userIntents.room, intents, customIntentTypes);
+            system.sanitizeUserRoomIntents(userIntents.room, intents, customIntentTypes);
             continue;
         }
 
         if(i == 'global') {
-            intents.global = driver.system.sanitizeUserIntents(userIntents.global, customIntentTypes);
+            intents.global = system.sanitizeUserIntents(userIntents.global, customIntentTypes);
             continue;
         }
 
@@ -428,7 +429,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData, customInte
         }
 
         intents[object.room] = intents[object.room] || {};
-        intents[object.room][i] = driver.system.sanitizeUserIntents(userIntents[i], customIntentTypes);
+        intents[object.room][i] = system.sanitizeUserIntents(userIntents[i], customIntentTypes);
     }
 
     return intents;
