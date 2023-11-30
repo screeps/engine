@@ -150,10 +150,7 @@
                 getHeapStatistics: getHeapStatistics ? function() {
                     return getHeapStatistics();
                 } : undefined,
-                halt: cpuHalt ? function() {
-                    cpuHalt.applySync();
-                    throw new Error("No one should ever see this message.");
-                } : undefined,
+                halt: cpuHalt,
             },
             map: {},
             gcl: {
