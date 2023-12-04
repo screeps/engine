@@ -38,9 +38,11 @@
         let index = objectRaw.x * 50 + objectRaw.y;
         let spatial = register.byRoom[objectRaw.room].spatial[type];
         if (spatial[index] === undefined) {
-            spatial[index] = [ objectInstance ];
-        } else {
+            spatial[index] = objectInstance;
+        } else if (Array.isArray(spatial[index])) {
             spatial[index].push(objectInstance);
+        } else {
+            spatial[index] = [ spatial[index], objectInstance ];
         }
     }
 
