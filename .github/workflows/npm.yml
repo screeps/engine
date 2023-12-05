@@ -8,28 +8,43 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v3
+      - name: ⤵️ Checkout
+        uses: actions/checkout@v3
       # Setup .npmrc file to use GitHub Packages
-      - uses: actions/setup-node@v3
+      - name: 🔨 Setup node (github registry)
+        uses: actions/setup-node@v3
         with:
           node-version: '10.x'
           registry-url: 'https://npm.pkg.github.com'
           # Defaults to the user or organization that owns the workflow file
           scope: '@screeps'
-      - name: Install
+      - name: 👷 Install
         run: npm ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Publish (github)
+      - name: 📦️ Publish package (github registry)
+        if: github.ref_name == 'master'
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/setup-node@v3
+      - name: 📦️ Publish tagged package (github registry)
+        if: github.ref_name != 'master'
+        run: npm publish --tag ${{ github.ref_name }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 🔨 Setup node (npmjs)
+        uses: actions/setup-node@v3
         with:
           node-version: '10.x'
           registry-url: 'https://registry.npmjs.org'
           scope: '@screeps'
-      - name: Publish (npmjs)
+      - name: 📦️ Publish package (npmjs)
+        if: github.ref_name == 'master'
         run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
+      - name: 📦️ Publish tagged package (npmjs)
+        if: github.ref_name != 'master'
+        run: npm publish --tag ${{ github.ref_name }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
