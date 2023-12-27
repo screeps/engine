@@ -7,7 +7,8 @@
         map = require('./map'),
         market = require('./market'),
         customPrototypes = require('./custom-prototypes'),
-        bindFunction = Function.call.bind(Function.bind);
+        bindFunction = Function.call.bind(Function.bind),
+        objectCreate = Object.create;
 
     var findCacheFn = {
         [C.FIND_CREEPS]: (i) => !i.spawning,
@@ -436,7 +437,7 @@
 
     (function() {
 
-        var runCodeCache = {};
+        var runCodeCache = objectCreate(null);
 
         exports.init = function (
             _globals, _codeModules, _runtimeData,
@@ -449,7 +450,7 @@
 
             var userId = _runtimeData.user._id;
 
-            runCodeCache[userId] = runCodeCache[userId] || {};
+            runCodeCache[userId] = runCodeCache[userId] || objectCreate(null);
             runCodeCache[userId].globals = _globals;
             runCodeCache[userId].codeModules = _codeModules;
             runCodeCache[userId].runtimeData = _runtimeData;
