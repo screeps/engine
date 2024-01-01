@@ -8,7 +8,9 @@
         market = require('./market'),
         customPrototypes = require('./custom-prototypes'),
         bindFunction = Function.call.bind(Function.bind),
-        objectCreate = Object.create;
+        objectCreate = Object.create,
+        jsonStringify = JSON.stringify,
+        jsonParse = JSON.parse;
 
     var findCacheFn = {
         [C.FIND_CREEPS]: (i) => !i.spawning,
@@ -165,7 +167,7 @@
                 progressTotal: Math.pow(gplLevel+1, 2) * 1000 - gplBaseProgress
             },
             market: {},
-            resources: JSON.parse(JSON.stringify(runtimeData.user.resources||{})),
+            resources: jsonParse(jsonStringify(runtimeData.user.resources||{})),
             getObjectById(id) {
                 return register._objects[id] || null;
             },
@@ -430,7 +432,7 @@
 
         game.market = register.market = market.make(runtimeData, intents, register);
 
-        _.extend(globals, JSON.parse(JSON.stringify(C)));
+        _.extend(globals, jsonParse(jsonStringify(C)));
 
         return game;
     };
