@@ -201,17 +201,17 @@ exports.execute = function(object, scope) {
 
     var cellObjects = _.filter(roomObjects, (i) => i.x == move.x && i.y == move.y);
 
-    var fatigueRate = 2;
+    var fatigueRate = C.MOVE_FATIGUE_PLAINS;
 
     if(_.any(cellObjects, {type: 'swamp'}) ||
         utils.checkTerrain(roomTerrain, move.x, move.y, C.TERRAIN_MASK_SWAMP)) {
-        fatigueRate = 10;
+        fatigueRate = C.MOVE_FATIGUE_SWAMP;
     }
 
     var road = _.find(cellObjects, {type: 'road'});
 
     if(road) {
-        fatigueRate = 1;
+        fatigueRate = C.MOVE_FATIGUE_ROAD;
         if(object.type == 'powerCreep') {
             road.nextDecayTime -= C.ROAD_WEAROUT_POWER_CREEP;
         }
