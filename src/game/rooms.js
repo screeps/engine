@@ -364,11 +364,11 @@ function _findClosestByPath2(fromPos, objects, opts) {
         lastPos = ret.path[ret.path.length-1];
     }
 
-    objects.forEach(obj => {
+    for (const obj of objects) {
         if(lastPos.isNearTo(obj)) {
             result = obj;
         }
-    });
+    }
 
     return result;
 }
@@ -649,7 +649,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             result = _.filter(result, opts.filter);
         }
         else {
-            result = _.clone(result);
+            result = [...result];
         }
 
         return result;
@@ -874,7 +874,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             path,
             cacheKeySuffix = '';
 
-        opts = _.clone(opts || {});
+        opts = opts ? {...opts} : {};
 
         if(opts.ignoreCreeps) {
             cacheKeySuffix += '_ignoreCreeps'
@@ -1399,7 +1399,7 @@ exports.makePos = function(_register) {
             room = register.rooms[this.roomName];
 
         if(_.isObject(secondArg)) {
-            opts = _.clone(secondArg);
+            opts = {...secondArg};
         }
         opts = opts || {};
 
@@ -1428,7 +1428,7 @@ exports.makePos = function(_register) {
 
     RoomPosition.prototype.findClosestByPath = register.wrapFn(function(type, opts) {
 
-        opts = _.clone(opts || {});
+        opts = opts ? {...opts} : {};
 
         var room = register.rooms[this.roomName];
 
@@ -1522,7 +1522,7 @@ exports.makePos = function(_register) {
             throw new Error(`Could not access room ${this.roomName}`);
         }
 
-        opts = _.clone(opts || {});
+        opts = opts ? {...opts} : {};
 
         var objects = [],
             result = [];
@@ -1534,11 +1534,11 @@ exports.makePos = function(_register) {
             objects = opts.filter ? _.filter(type, opts.filter) : type;
         }
 
-        objects.forEach((i) => {
+        for (const i of objects) {
             if(this.inRangeTo(i, range)) {
                 result.push(i);
             }
-        });
+        }
 
         return result;
     });
@@ -1550,7 +1550,7 @@ exports.makePos = function(_register) {
             throw new Error(`Could not access room ${this.roomName}`);
         }
 
-        opts = _.clone(opts || {});
+        opts = opts ? {...opts} : {};
 
         var objects = [],
         result = [];
