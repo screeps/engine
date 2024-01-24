@@ -16,9 +16,9 @@ exports.make = function(runtimeData, intents, register) {
         }
         if(!cachedOrders[resourceType]) {
             if(resourceType != 'all' && !_.contains(C.RESOURCES_ALL, resourceType) && !_.contains(C.INTERSHARD_RESOURCES, resourceType)) {
-                return {};
+                return [];
             }
-            cachedOrders[resourceType] = JSON.parse(JSON.stringify(runtimeData.market.orders[resourceType]) || '{}');
+            cachedOrders[resourceType] = JSON.parse(JSON.stringify(runtimeData.market.orders[resourceType]) || '[]');
             for(var i in cachedOrders[resourceType]) {
                 cachedOrders[resourceType][i].price /= 1000;
             }
@@ -45,9 +45,9 @@ exports.make = function(runtimeData, intents, register) {
 
             if(!cachedHistory[resourceType]) {
                 if(resourceType != 'all' && !_.contains(C.RESOURCES_ALL, resourceType) && !_.contains(C.INTERSHARD_RESOURCES, resourceType)) {
-                    return {};
+                    return [];
                 }
-                cachedHistory[resourceType] = JSON.parse(JSON.stringify(runtimeData.market.history[resourceType] || {}));
+                cachedHistory[resourceType] = JSON.parse(JSON.stringify(runtimeData.market.history[resourceType] || []));
             }
             return cachedHistory[resourceType];
         }),
