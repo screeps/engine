@@ -25,8 +25,8 @@ module.exports = function(object, intent, scope) {
 
     var targets = _.filter(roomObjects, (i) => {
         return (!_.isUndefined(i.user) || i.type == 'powerBank') && i.user != object.user &&
-            i.x >= object.x - 3 && i.x <= object.x + 3 &&
-            i.y >= object.y - 3 && i.y <= object.y + 3;
+            i.x >= object.x - C.RANGE_RANGED_MASS_ATTACK && i.x <= object.x + C.RANGE_RANGED_MASS_ATTACK &&
+            i.y >= object.y - C.RANGE_RANGED_MASS_ATTACK && i.y <= object.y + C.RANGE_RANGED_MASS_ATTACK;
     });
 
     var distanceRate = {0: 1, 1: 1, 2: 0.4, 3: 0.1};
