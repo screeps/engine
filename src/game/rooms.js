@@ -1656,6 +1656,9 @@ exports.makePos = function(_register) {
                 ticksRemaining: i.endTime - runtimeData.time
             })).filter(i => i.ticksRemaining > 0).value();
         }
+        else {
+            this.effects = []
+        }
     });
 
     Object.defineProperty(globals, 'RoomObject', {enumerable: true, value: RoomObject});
