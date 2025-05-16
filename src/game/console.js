@@ -7,22 +7,38 @@ exports.makeConsole = function(id, sandboxedFunctionWrapper) {
     messages[id] = [];
     commandResults[id] = [];
     visual[id] = {};
+
+    const rawLog = (args, escape_message = true) => {
+        if(typeof self != 'undefined' && self.navigator.userAgent) {
+            self['console']['log'].apply(console, args);
+        }
+
+        let m = _.map(args, (i) => {
+                    if(i && i.toString) return i.toString();
+                    if(typeof i === 'undefined') return 'undefined';
+                    return JSON.stringify(i);
+                }).join(' ');
+
+        if (escape__message) {
+            m = _.escape(m);
+        }
+
+	messages[id].push(m);
+    };
+
     return Object.create(null, {
+        unescapedLog: {
+            writable: true,
+            configurable: true,
+            value: sandboxedFunctionWrapper(function() {
+                rawLog(arguments, false);
+            })
+        },
         log: {
             writable: true,
             configurable: true,
             value: sandboxedFunctionWrapper(function() {
-
-                if(typeof self != 'undefined' && self.navigator.userAgent) {
-                    self['console']['log'].apply(console, arguments);
-                }
-
-                messages[id].push(
-                _.map(arguments, (i) => {
-                    if(i && i.toString) return i.toString();
-                    if(typeof i === 'undefined') return 'undefined';
-                    return JSON.stringify(i);
-                }).join(' '));
+                rawLog(arguments, true);
             })
         },
         commandResult: {
