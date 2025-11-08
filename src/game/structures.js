@@ -1101,6 +1101,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             }
         }
 
+        const notifyWhenAttacked = options.notifyWhenAttacked === undefined ? true : !!options.notifyWhenAttacked;
+
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
@@ -1224,7 +1226,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             }
         });
 
-        intents.set(this.id, 'createCreep', {name, body, energyStructures, directions});
+        intents.set(this.id, 'createCreep', {name, body, energyStructures, directions, notifyWhenAttacked});
 
         return C.OK;
     });

@@ -33,6 +33,8 @@ module.exports = function(spawn, intent, scope) {
         }
     }
 
+    const notifyWhenAttacked = intent.notifyWhenAttacked === undefined ? true : !!intent.notifyWhenAttacked;
+
     intent.body = intent.body.slice(0, C.MAX_CREEP_SIZE);
 
     var cost = utils.calcCreepCost(intent.body);
@@ -90,7 +92,7 @@ module.exports = function(spawn, intent, scope) {
         hitsMax: body.length * 100,
         spawning: true,
         fatigue: 0,
-        notifyWhenAttacked: true
+        notifyWhenAttacked,
     };
 
     if(spawn.tutorial) {
