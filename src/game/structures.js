@@ -86,6 +86,18 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
+    Structure.prototype.notifiesWhenAttacked = register.wrapFn(function() {
+
+        if(!this.room) {
+            return C.ERR_INVALID_TARGET;
+        }
+        if(this.my === false || (this.room.controller && this.room.controller.owner && !this.room.controller.my)) {
+            return C.ERR_NOT_OWNER;
+        }
+
+        return !!data(this.id).notifyWhenAttacked;
+    });
+
     Structure.prototype.notifyWhenAttacked = register.wrapFn(function(enabled) {
         if(!this.room) {
             return C.ERR_INVALID_TARGET;
@@ -1215,6 +1227,15 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         intents.set(this.id, 'createCreep', {name, body, energyStructures, directions});
 
         return C.OK;
+    });
+
+    StructureSpawn.prototype.notifiesWhenAttacked = register.wrapFn(function() {
+
+        if(!this.my) {
+            return C.ERR_NOT_OWNER;
+        }
+
+        return !!data(this.id).notifyWhenAttacked;
     });
 
     StructureSpawn.prototype.notifyWhenAttacked = register.wrapFn(function(enabled) {

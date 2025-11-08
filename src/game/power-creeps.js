@@ -372,6 +372,18 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
+    PowerCreep.prototype.notifiesWhenAttacked = register.wrapFn(function() {
+
+        if(!this.room) {
+            return C.ERR_BUSY;
+        }
+        if(!this.my) {
+            return C.ERR_NOT_OWNER;
+        }
+
+        return !!data(this.id).notifyWhenAttacked;
+    });
+
     PowerCreep.prototype.notifyWhenAttacked = register.wrapFn(function(enabled) {
 
         if(!this.room) {

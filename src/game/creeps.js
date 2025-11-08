@@ -993,6 +993,18 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
+    Creep.prototype.notifiesWhenAttacked = register.wrapFn(function() {
+
+        if(!this.my) {
+            return C.ERR_NOT_OWNER;
+        }
+        if(this.spawning) {
+            return C.ERR_BUSY;
+        }
+
+        return !!data(this.id).notifyWhenAttacked;
+    });
+
     Creep.prototype.notifyWhenAttacked = register.wrapFn(function(enabled) {
 
         if(!this.my) {
