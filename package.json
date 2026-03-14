@@ -15,7 +15,7 @@
     "@screeps/pathfinding": "^0.4.17",
     "bulk-require": "^0.2.1",
     "cross-env": "^5.2.0",
-    "lodash": "3.10.1",
+    "lodash": "4.17.13",
     "q": "^1.0.1"
   },
   "devDependencies": {
