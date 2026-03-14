@@ -18,7 +18,7 @@ module.exports = function(object, intent, scope) {
     if(!target || target.type != 'creep' || target.user != object.user || target.spawning) {
         return;
     }
-    if(Math.abs(target.x - object.x) > 1 || Math.abs(target.y - object.y) > 1) {
+    if(Math.abs(target.x - object.x) > C.RANGE_RENEW_CREEP || Math.abs(target.y - object.y) > C.RANGE_RENEW_CREEP) {
         return;
     }
     if(_.filter(target.body, (i) => i.type == C.CLAIM).length > 0) {

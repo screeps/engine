@@ -18,7 +18,7 @@ module.exports = function(object, intent, scope) {
     if(!target || target == object) {
         return;
     }
-    if(Math.abs(target.x - object.x) > 3 || Math.abs(target.y - object.y) > 3) {
+    if(Math.abs(target.x - object.x) > C.RANGE_RANGED_ATTACK || Math.abs(target.y - object.y) > C.RANGE_RANGED_ATTACK) {
         return;
     }
     if(target.type == 'creep' && target.spawning) {

@@ -16,7 +16,7 @@ module.exports = function(object, intent, {roomObjects, bulk, stats, eventLog}) 
     if(!target || !target.hitsMax || !C.CONSTRUCTION_COST[target.type] || target.hits >= target.hitsMax) {
         return;
     }
-    if(Math.abs(target.x - object.x) > 3 || Math.abs(target.y - object.y) > 3) {
+    if(Math.abs(target.x - object.x) > C.RANGE_REPAIR || Math.abs(target.y - object.y) > C.RANGE_REPAIR) {
         return;
     }
 

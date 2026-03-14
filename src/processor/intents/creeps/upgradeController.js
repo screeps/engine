@@ -14,7 +14,7 @@ module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, stats, 
     if(!target || target.type != 'controller') {
         return;
     }
-    if(Math.abs(target.x - object.x) > 3 || Math.abs(target.y - object.y) > 3) {
+    if(Math.abs(target.x - object.x) > C.RANGE_UPGRADE_CONTROLLER || Math.abs(target.y - object.y) > C.RANGE_UPGRADE_CONTROLLER) {
         return;
     }
     if(target.level == 0 || target.user != object.user) {

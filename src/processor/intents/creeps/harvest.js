@@ -3,6 +3,12 @@ var _ = require('lodash'),
     driver = utils.getDriver(),
     C = driver.constants;
 
+const RANGES = {
+    'source': C.RANGE_HARVEST_SOURCE,
+    'mineral': C.RANGE_HARVEST_MINERAL,
+    'deposit': C.RANGE_HARVEST_DEPOSIT,
+};
+
 module.exports = function(object, intent, scope) {
 
     const {roomObjects, roomTerrain, bulk, roomController, stats, eventLog, gameTime} = scope;
@@ -18,7 +24,8 @@ module.exports = function(object, intent, scope) {
     if(!target) {
         return;
     }
-    if(Math.abs(target.x - object.x) > 1 || Math.abs(target.y - object.y) > 1) {
+
+    if(Math.abs(target.x - object.x) > RANGES[target.type] || Math.abs(target.y - object.y) > RANGES[target.type]) {
         return;
     }
 

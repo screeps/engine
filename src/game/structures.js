@@ -334,7 +334,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             register.assertTargetObject(lab2);
             return C.ERR_INVALID_TARGET;
         }
-        if(this.pos.getRangeTo(lab1) > 2 || this.pos.getRangeTo(lab2) > 2) {
+        if(this.pos.getRangeTo(lab1) > C.RANGE_RUN_REACTION || this.pos.getRangeTo(lab2) > C.RANGE_RUN_REACTION) {
             return C.ERR_NOT_IN_RANGE;
         }
         var reactionAmount = C.LAB_REACTION_AMOUNT;
@@ -420,7 +420,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             register.assertTargetObject(target);
             return C.ERR_INVALID_TARGET;
         }
-        if(!this.pos.isNearTo(target)) {
+        if(!this.pos.inRangeTo(target, C.RANGE_BOOST_CREEP)) {
             return C.ERR_NOT_IN_RANGE;
         }
         if(data(this.id).store.energy < C.LAB_BOOST_ENERGY) {
@@ -457,7 +457,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!_.some(target.body, p => !!p.boost)) {
             return C.ERR_NOT_FOUND;
         }
-        if(!this.pos.isNearTo(target)) {
+        if(!this.pos.inRange(target, C.RANGE_UNBOOST_CREEP)) {
             return C.ERR_NOT_IN_RANGE;
         }
 
@@ -1249,7 +1249,10 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(runtimeData.roomObjects[this.id].off) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
-        if(!target.pos.isNearTo(this.pos)) {
+        if(!target.my) {
+            return C.ERR_NOT_OWNER;
+        }
+        if(!target.pos.inRangeTo(this.pos, C.RANGE_RENEW_CREEP)) {
             return C.ERR_NOT_IN_RANGE;
         }
         if(this.room.energyAvailable < Math.ceil(C.SPAWN_RENEW_RATIO * utils.calcCreepCost(target.body) / C.CREEP_SPAWN_TIME / target.body.length)) {
@@ -1281,7 +1284,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!target.my) {
             return C.ERR_NOT_OWNER;
         }
-        if(!target.pos.isNearTo(this.pos)) {
+        if(!target.pos.inRangeTo(this.pos, C.RANGE_RECYCLE_CREEP)) {
             return C.ERR_NOT_IN_RANGE;
         }
 

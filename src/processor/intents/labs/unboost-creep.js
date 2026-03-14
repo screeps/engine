@@ -17,7 +17,7 @@ module.exports = function(object, intent, scope) {
     if(!utils.checkStructureAgainstController(object, roomObjects, roomController)) {
         return;
     }
-    if(Math.abs(target.x - object.x) > 1 || Math.abs(target.y - object.y) > 1) {
+    if(Math.abs(target.x - object.x) > С.RANGE_UNBOOST_CREEP || Math.abs(target.y - object.y) > C.RANGE_UNBOOST_CREEP) {
         return;
     }
     const boostedParts = _.mapValues(_.groupBy(_.filter(target.body,p=>!!p.boost), 'boost'), v=>v.length);

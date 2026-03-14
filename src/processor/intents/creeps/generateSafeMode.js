@@ -13,7 +13,7 @@ module.exports = function(object, intent, {roomObjects, bulk}) {
     if(!target || target.type != 'controller') {
         return;
     }
-    if(Math.abs(target.x - object.x) > 1 || Math.abs(target.y - object.y) > 1) {
+    if(Math.abs(target.x - object.x) > C.RANGE_GENERATE_SAFEMODE || Math.abs(target.y - object.y) > C.RANGE_GENERATE_SAFEMODE) {
         return;
     }
     if(!object.store || !(object.store[C.RESOURCE_GHODIUM] >= C.SAFE_MODE_COST)) {

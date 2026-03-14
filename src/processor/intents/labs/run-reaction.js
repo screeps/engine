@@ -23,7 +23,7 @@ module.exports = function(object, intent, {roomObjects, bulk, gameTime}) {
     if(!lab1MineralType || lab1.store[lab1MineralType] < reactionAmount) {
         return;
     }
-    if(Math.abs(lab1.x - object.x) > 2 || Math.abs(lab1.y - object.y) > 2) {
+    if(Math.abs(lab1.x - object.x) > C.RANGE_RUN_REACTION || Math.abs(lab1.y - object.y) > C.RANGE_RUN_REACTION) {
         return;
     }
 
@@ -35,7 +35,7 @@ module.exports = function(object, intent, {roomObjects, bulk, gameTime}) {
     if(!lab2MineralType || lab2.store[lab2MineralType] < reactionAmount) {
         return;
     }
-    if(Math.abs(lab2.x - object.x) > 2 || Math.abs(lab2.y - object.y) > 2) {
+    if(Math.abs(lab2.x - object.x) > C.RANGE_RUN_REACTION || Math.abs(lab2.y - object.y) > C.RANGE_RUN_REACTION) {
         return;
     }
 

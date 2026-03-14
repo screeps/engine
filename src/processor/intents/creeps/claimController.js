@@ -16,7 +16,7 @@ module.exports = function(object, intent, {roomObjects, bulk, bulkUsers, users})
     if(!target || target.type != 'controller') {
         return;
     }
-    if(Math.abs(target.x - object.x) > 1 || Math.abs(target.y - object.y) > 1) {
+    if(Math.abs(target.x - object.x) > C.RANGE_CLAIM_CONTROLLER || Math.abs(target.y - object.y) > C.RANGE_CLAIM_CONTROLLER) {
         return;
     }
     if(target.bindUser && object.user != target.bindUser) {
