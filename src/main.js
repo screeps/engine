@@ -114,7 +114,11 @@ function loop() {
 
             driver.config.emit('mainLoopStage','finish');
 
-            setTimeout(loop, Math.max(driver.config.mainLoopMinDuration - usedTime, 0));
+            var delay = driver.config.getNextTickDelay
+                ? driver.config.getNextTickDelay(usedTime)
+                : Math.max(driver.config.mainLoopMinDuration - usedTime, 0);
+            console.log(`Tick done in ${Math.round(usedTime)} ms, next tick in ${Math.round(delay)} ms`);
+            setTimeout(loop, delay);
         })
         .catch((error) => {
             console.error(`'Error while main loop (final):`, _.isObject(error) && error.stack ? error.stack : error);
