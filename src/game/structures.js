@@ -887,7 +887,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 throw new Error('Could not set spawn memory');
             }
             globals.Memory.spawns[data(this.id).name] = value;
-        }
+        },
+        configurable: true
     });
 
     StructureSpawn.prototype.toString = register.wrapFn(function() {

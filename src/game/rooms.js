@@ -567,7 +567,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 throw new Error('Could not set room memory');
             }
             globals.Memory.rooms[this.name] = value;
-        }
+        },
+        configurable: true
     });
 
     Room.prototype.getEventLog = register.wrapFn(function(raw) {

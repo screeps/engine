@@ -489,13 +489,16 @@
                         runCodeCache[userId].memory._parsed = null;
                     }
 
+                    this.Memory = runCodeCache[userId].memory._parsed;
+
+                    return runCodeCache[userId].memory._parsed;
+                },
+                set(memory) {
                     Object.defineProperty(runCodeCache[userId].globals, 'Memory', {
                         configurable: true,
                         enumerable: true,
-                        value: runCodeCache[userId].memory._parsed
+                        value: memory
                     });
-
-                    return runCodeCache[userId].memory._parsed;
                 }
             });
 
