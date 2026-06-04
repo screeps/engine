@@ -248,6 +248,9 @@ function _findPath2(id, fromPos, toPos, opts) {
                 if(resultMatrix instanceof globals.PathFinder.CostMatrix) {
                     costMatrix = resultMatrix;
                 }
+                else if(resultMatrix === false) {
+                    return false;
+                }
             }
             return costMatrix;
         },
