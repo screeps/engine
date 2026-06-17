@@ -46,14 +46,14 @@ function makePathfindingGrid(id, opts, endNodesKey) {
     for(var y=0; y<50; y++) {
         rows[y] = new Array(50);
         for(var x=0; x<50; x++) {
-            rows[y][x] = x == 0 || y == 0 || x == 49 || y == 49 ? 11 : 2;
+            rows[y][x] = x == 0 || y == 0 || x == 49 || y == 49 ? 11 : C.MOVE_FATIGUE_PLAINS;
             //var terrainCode = register.terrainByRoom.spatial[id][y][x];
             var terrainCode = runtimeData.staticTerrainData[id][y*50+x];
             if(terrainCode & C.TERRAIN_MASK_WALL) {
                 rows[y][x] = 0;
             }
-            if ((terrainCode & C.TERRAIN_MASK_SWAMP) && rows[y][x] == 2) {
-                rows[y][x] = 10;
+            if ((terrainCode & C.TERRAIN_MASK_SWAMP) && rows[y][x] == C.MOVE_FATIGUE_PLAINS) {
+                rows[y][x] = C.MOVE_FATIGUE_SWAMP;
             }
         }
     }
@@ -183,11 +183,11 @@ function makePathfindingGrid2(id, opts) {
             }
 
             if (object.type == 'swamp' && costs.get(object.x, object.y) == 0) {
-                costs.set(object.x, object.y, opts.ignoreRoads ? 5 : 10);
+                costs.set(object.x, object.y, opts.ignoreRoads ? ~~(C.MOVE_FATIGUE_SWAMP / C.MOVE_FATIGUE_PLAINS) : C.MOVE_FATIGUE_SWAMP);
             }
 
             if (!opts.ignoreRoads && object.type == 'road' && costs.get(object.x, object.y) < 0xFF) {
-                costs.set(object.x, object.y, 1);
+                costs.set(object.x, object.y, C.MOVE_FATIGUE_ROAD);
             }
         });
     }
@@ -255,8 +255,8 @@ function _findPath2(id, fromPos, toPos, opts) {
         maxRooms: opts.maxRooms
     };
     if(!opts.ignoreRoads) {
-        searchOpts.plainCost = 2;
-        searchOpts.swampCost = 10;
+        searchOpts.plainCost = C.MOVE_FATIGUE_PLAINS;
+        searchOpts.swampCost = C.MOVE_FATIGUE_SWAMP;
     }
     if(opts.plainCost) {
         searchOpts.plainCost = opts.plainCost;
@@ -352,8 +352,8 @@ function _findClosestByPath2(fromPos, objects, opts) {
         maxRooms: 1
     };
     if(!opts.ignoreRoads) {
-        searchOpts.plainCost = 2;
-        searchOpts.swampCost = 10;
+        searchOpts.plainCost = C.MOVE_FATIGUE_PLAINS;
+        searchOpts.swampCost = C.MOVE_FATIGUE_SWAMP;
     }
     var ret = globals.PathFinder.search(fromPos, goals, searchOpts);
 

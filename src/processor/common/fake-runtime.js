@@ -129,7 +129,7 @@ const defaultCostMatrix = function defaultCostMatrix(roomId, opts, creep, roomOb
         }
 
         if (object.type == 'swamp' && costs.get(object.x, object.y) == 0) {
-            costs.set(object.x, object.y, opts.ignoreRoads ? 5 : 10);
+            costs.set(object.x, object.y, opts.ignoreRoads ? ~~(C.MOVE_FATIGUE_SWAMP / C.MOVE_FATIGUE_PLAINS) : C.MOVE_FATIGUE_SWAMP);
         }
 
         if (!opts.ignoreRoads && object.type == 'road' && costs.get(object.x, object.y) < Infinity) {
@@ -160,8 +160,8 @@ const findPath = function findPath(source, target, opts, scope) {
     searchOpts.maxRooms = 1;
     searchOpts.roomCallback = roomCallback;
     if(!searchOpts.ignoreRoads) {
-        searchOpts.plainCost = 2;
-        searchOpts.swampCost = 10;
+        searchOpts.plainCost = C.MOVE_FATIGUE_PLAINS;
+        searchOpts.swampCost = C.MOVE_FATIGUE_SWAMP;
     }
 
     const fromPos = new RoomPosition(source.x, source.y, source.room);
