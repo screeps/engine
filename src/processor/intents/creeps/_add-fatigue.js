@@ -21,7 +21,11 @@ module.exports = function(object, dFatigue, {roomObjects, bulk}) {
         }
     }
 
-    while(!!object._pulled && !!roomObjects[object._pulled]) {
+    while(!!object._pulled) {
+        if(!roomObjects[object._pulled]) {
+            // Puller died this tick; pull-aware fatigue has no live destination, drop it.
+            return;
+        }
         object = roomObjects[object._pulled];
     }
 
