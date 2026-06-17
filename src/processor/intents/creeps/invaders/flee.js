@@ -7,8 +7,8 @@ const _ = require('lodash'),
 module.exports = function(creep, range, context) {
     const {scope, intents, hostiles} = context;
 
-    const nearCreeps = _.filter(hostiles, c => utils.dist(creep, c) < range);
-    if(_.some(nearCreeps)) {
+    const nearCreeps = hostiles.filter(c => utils.dist(creep, c) < range);
+    if(nearCreeps.length > 0) {
         const direction = fakeRuntime.flee(creep, nearCreeps, range, {}, scope);
         if(direction) {
             intents.set(creep._id, 'move', { direction });

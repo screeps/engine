@@ -80,15 +80,15 @@ module.exports = function(creep, context) {
     }
 
     if(!target) {
-        const unreachableSpawns = _.filter(roomObjects, o =>
+        const unreachableSpawn = roomObjects ? roomObjects.find(o =>
             o.type == 'spawn' && !checkPath(creep, new fakeRuntime.RoomPosition(o.x, o.y, o.room), scope)
-        );
-        if(!unreachableSpawns.length && roomController && roomController.user) {
+        ) : null;
+        if(!unreachableSpawn && roomController && roomController.user) {
             intents.set(creep._id, 'suicide', {});
             return;
         }
 
-        target = unreachableSpawns[0];
+        target = unreachableSpawn;
         if(target) {
             const direction = fakeRuntime.moveTo(creep, target, {ignoreDestructibleStructures: true, maxRooms: 1, ignoreRoads: true}, scope);
             if(direction) {
@@ -105,15 +105,15 @@ module.exports = function(creep, context) {
         }
 
         const pos = fakeRuntime.RoomPosition.sUnpackLocal(creep['memory_move']['path'][0], creep.room);
-        const structures = _.filter(roomObjects, o => !!C.CONTROLLER_STRUCTURES[o.type] && o.type != 'spawn' && o.x == pos.x && o.y == pos.y);
-        if(structures.length > 0) {
+        const structure = roomObjects.find(o => !!C.CONTROLLER_STRUCTURES[o.type] && o.type != 'spawn' && o.x == pos.x && o.y == pos.y);
+        if(structure) {
             if(fakeRuntime.hasActiveBodyparts(creep, C.RANGED_ATTACK)) {
-                intents.set(creep._id, 'rangedAttack', { id: structures[0]._id })
+                intents.set(creep._id, 'rangedAttack', { id: structure._id })
             }
             if(fakeRuntime.hasActiveBodyparts(creep, C.WORK)) {
-                intents.set(creep._id, 'dismantle', { id: structures[0]._id });
+                intents.set(creep._id, 'dismantle', { id: structure._id });
             } else {
-                intents.set(creep._id, 'attack', { id: structures[0]._id, x: structures[0].x, y: structures[0].y });
+                intents.set(creep._id, 'attack', { id: structure._id, x: structure.x, y: structure.y });
             }
         }
     }

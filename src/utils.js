@@ -1,5 +1,31 @@
 var _ = require('lodash');
 
+// shim lodash to use native array methods, built into the VM, when available.
+// this only works if the module imports _ instead of the method directly.
+const oldFilter = _.filter;
+_.filter = (data, predicate) => {
+    if (data && typeof predicate === 'function') {
+        return data.filter(predicate);
+    }
+    return oldFilter(data, predicate);
+}
+
+const oldFind = _.find;
+_.find = (data, predicate) => {
+    if (data && typeof predicate === 'function') {
+        return data.find(predicate);
+    }
+    return oldFind(data, predicate);
+}
+
+const oldMap = _.map;
+_.map = (data, predicate) => {
+    if (data && typeof predicate === 'function') {
+        return data.map(predicate);
+    }
+    return oldMap(data, predicate);
+}
+
 var driver, C, offsetsByDirection = [, [0,-1], [1,-1], [1,0], [1,1], [0,1], [-1,1], [-1,0], [-1,-1]];
 
 function loadDriver() {

@@ -154,8 +154,8 @@ const refillTowers = function refillTowers(context) {
         return false;
     }
 
-    const underchargedTowers = _.filter(towers, t => (t.store.energy <= 2*C.TOWER_ENERGY_COST) && _.some(ramparts, {x: t.x, y: t.y}));
-    if(_.some(underchargedTowers)) {
+    const underchargedTowers = towers.filter(t => (t.store.energy <= 2*C.TOWER_ENERGY_COST) && _.some(ramparts, {x: t.x, y: t.y}));
+    if(underchargedTowers.length > 0) {
         const towerToCharge = _.min(underchargedTowers, 'store.energy');
         if(towerToCharge) {
             intents.set(core._id, 'transfer', {id: towerToCharge._id, amount: towerToCharge.storeCapacityResource.energy - towerToCharge.store.energy, resourceType: C.RESOURCE_ENERGY});
@@ -169,8 +169,8 @@ const refillTowers = function refillTowers(context) {
 const refillCreeps = function refillCreeps(context) {
     const {core, intents, defenders} = context;
 
-    const underchargedCreeps = _.filter(defenders, c => (c.storeCapacity > 0) && (2*c.store.energy <= c.storeCapacity));
-    if(_.some(underchargedCreeps)) {
+    const underchargedCreeps = defenders.filter(c => (c.storeCapacity > 0) && (2*c.store.energy <= c.storeCapacity));
+    if(underchargedCreeps.length > 0) {
         const creep = _.min(underchargedCreeps, 'store.energy');
         if(creep) {
             intents.set(core._id, 'transfer', {id: creep._id, amount: creep.storeCapacity - creep.store.energy, resourceType: C.RESOURCE_ENERGY});
@@ -187,8 +187,8 @@ const towersMaintenance = function towersMaintenance(context) {
         return;
     }
 
-    const protectedCreeps = _.filter(damagedDefenders, d => _.some(ramparts, {x: d.x, y: d.y}));
-    if(_.some(protectedCreeps)) {
+    const protectedCreeps = damagedDefenders.filter(d => _.some(ramparts, {x: d.x, y: d.y}));
+    if(protectedCreeps.length > 0) {
         const creep = _.first(protectedCreeps);
         const tower = _.first(towers);
         intents.set(tower._id, 'heal', {id: creep._id});
@@ -196,8 +196,8 @@ const towersMaintenance = function towersMaintenance(context) {
         return;
     }
 
-    const protectedRoads = _.filter(damagedRoads, r => _.some(ramparts, {x: r.x, y: r.y}));
-    if(_.some(protectedRoads)) {
+    const protectedRoads = damagedRoads.filter(r => _.some(ramparts, {x: r.x, y: r.y}));
+    if(protectedRoads.length > 0) {
         const road = _.first(damagedRoads);
         const tower = _.first(towers);
         intents.set(tower._id, 'repair', {id: road._id});
@@ -220,12 +220,12 @@ const focusClosest = function focusClosest(context) {
         intents.set(t._id, 'attack', {id: target._id});
     }
 
-    const meleesNear = _.filter(defenders, d => (range(d, target) == 1) && _.some(d.body, {type: C.ATTACK}));
+    const meleesNear = defenders.filter(d => (range(d, target) == 1) && _.some(d.body, {type: C.ATTACK}));
     for(let melee of meleesNear) {
         intents.set(melee._id, 'attack', {id: target._id, x: target.x, y: target.y});
     }
 
-    const rangersInRange = _.filter(defenders, d => (range(d, target) <= 3) && _.some(d.body, {type: C.RANGED_ATTACK}));
+    const rangersInRange = defenders.filter(d => (range(d, target) <= 3) && _.some(d.body, {type: C.RANGED_ATTACK}));
     for(let r of rangersInRange) {
         if(range(r,target) == 1) {
             intents.set(r._id, 'rangedMassAttack', {});
@@ -244,7 +244,7 @@ const focusMax = function focusMax(context) {
         return false;
     }
 
-    const activeTowers = _.filter(towers, t => t.store.energy >= C.TOWER_ENERGY_COST);
+    const activeTowers = towers.filter(t => t.store.energy >= C.TOWER_ENERGY_COST);
     const target = _.max(hostiles, creep => {
         let damage = _.sum(activeTowers, tower => {
             let r = utils.dist(creep, tower);
@@ -277,12 +277,12 @@ const focusMax = function focusMax(context) {
         return damage;
     });
 
-    const meleesNear = _.filter(defenders, d => (range(d, target) == 1) && _.some(d.body, {type: C.ATTACK}));
+    const meleesNear = defenders.filter(d => (range(d, target) == 1) && _.some(d.body, {type: C.ATTACK}));
     for(let melee of meleesNear) {
         intents.set(melee._id, 'attack', {id: target._id, x: target.x, y: target.y});
     }
 
-    const rangersInRange = _.filter(defenders, d => (range(d, target) <= 3) && _.some(d.body, {type: C.RANGED_ATTACK}));
+    const rangersInRange = defenders.filter(d => (range(d, target) <= 3) && _.some(d.body, {type: C.RANGED_ATTACK}));
     for(let r of rangersInRange) {
         if(range(r,target) == 1) {
             intents.set(r._id, 'rangedMassAttack', {});

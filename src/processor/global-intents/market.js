@@ -68,9 +68,11 @@ module.exports = function({orders, userIntents, usersById, gameTime, roomObjects
         return true;
     }
 
-    _.filter(terminals, i => !!i.send).forEach(terminal => {
-
-        var intent = terminal.send;
+    terminals.forEach(terminal => {
+        const intent = terminal.send;
+        if (!intent) {
+            return;
+        }
 
         bulkObjects.update(terminal, {send: null});
 
