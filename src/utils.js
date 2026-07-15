@@ -423,7 +423,7 @@ exports.storeIntents = function(userId, userIntents, userRuntimeData, customInte
             continue;
         }
 
-        const object = userRuntimeData.userObjects[i] || userRuntimeData.roomObjects[i];
+        const object = userRuntimeData.roomObjects[i];
         if(!object) {
             continue;
         }

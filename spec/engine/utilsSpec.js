@@ -121,7 +121,7 @@ describe('Utils', () => {
         let runtimeData;
         beforeEach(() => {
             runtimeData = {
-                userObjects: {
+                roomObjects: {
                     '5dbaca29ca637207bc2d472b': {
                         _id: "5dbaca29ca637207bc2d472b",
                         name: "Test",
@@ -147,9 +147,7 @@ describe('Utils', () => {
                         storeCapacity: 100,
                         spawnCooldownTime: 0,
                         powers: {}
-                    }
-                },
-                roomObjects: {
+                    },
                     '5c3f86c72071261a0c27cd9e': {
                         _id: "5c3f86c72071261a0c27cd9e",
                         type: "observer",
