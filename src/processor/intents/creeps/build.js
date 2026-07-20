@@ -11,7 +11,7 @@ module.exports = function(object, intent, {roomObjects, roomTerrain, bulk, roomC
     if(object.type != 'creep') {
         return;
     }
-    if(object.spawning || !object.store || object.store.energy <= 0) {
+    if(object.spawning || !object.store || !(object.store.energy > 0)) {
         return;
     }
 
