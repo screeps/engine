@@ -32,7 +32,10 @@ function loop() {
         .then((users) => {
             stage = 'addUsersToQueue';
             driver.config.emit('mainLoopStage',stage, users);
-            return usersQueue.addMulti(users.map(user => user._id.toString()));
+            return usersQueue.addMulti(
+                users.map(user => user._id.toString()),
+                users.map(user => user.lastUsedDirtyTime)
+            );
         })
         .then(() => {
             stage = 'waitForUsers';
