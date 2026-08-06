@@ -1,18 +1,15 @@
 var _ = require('lodash'),
     utils = require('../../../utils'),
-    driver = utils.getDriver(),
-    C = driver.constants,
     movement = require('../movement');
 
 module.exports = function(spawn, creep, scope) {
 
-    const {roomObjects, roomTerrain, bulk} = scope;
+    const {roomObjects, roomTerrain, bulk, roomController, gameTime} = scope;
+
+    const roomIsInSafeMode = roomController && roomController.safeMode > gameTime ? roomController.user : false;
+    const mySafeMode = roomIsInSafeMode && roomIsInSafeMode == spawn.user;
 
     var newX, newY, isOccupied, hostileOccupied;
-    var checkObstacleFn = (i) => (i.x == newX && i.y == newY) && (
-        _.contains(C.OBSTACLE_OBJECT_TYPES, i.type) ||                                          // just unwalkable
-        (i.type == 'constructionSite' && _.contains(C.OBSTACLE_OBJECT_TYPES, i.structureType))  // unwalkable site
-    );
 
     var directions = [1,2,3,4,5,6,7,8];
     if(spawn.spawning && spawn.spawning.directions) {
@@ -25,16 +22,15 @@ module.exports = function(spawn, creep, scope) {
 
         newX = spawn.x + dx;
         newY = spawn.y + dy;
-        isOccupied = _.any(roomObjects, checkObstacleFn) ||
-            movement.isTileBusy(newX, newY) ||
-            (utils.checkTerrain(roomTerrain, newX, newY, C.TERRAIN_MASK_WALL) && !_.any(roomObjects, {type: 'road', x: newX, y: newY}));
+        isOccupied = utils.checkObstacleAtXY(newX, newY, spawn, roomIsInSafeMode, roomObjects, roomTerrain) ||
+            movement.isTileBusy(newX, newY);
 
         if (!isOccupied) {
             break;
         }
 
-        // remember the first direction where we found a hostile creep
-        if(!hostileOccupied) {
+        // remember the first direction where we found a hostile creep (not under safemode)
+        if(!mySafeMode && !hostileOccupied) {
             hostileOccupied = _.find(roomObjects, i => i.x == newX && i.y == newY && i.type == 'creep' && i.user != spawn.user);
         }
     }
@@ -57,8 +53,7 @@ module.exports = function(spawn, creep, scope) {
 
             newX = spawn.x + dx;
             newY = spawn.y + dy;
-            isOccupied = _.any(roomObjects, checkObstacleFn) ||
-                utils.checkTerrain(roomTerrain, newX, newY, C.TERRAIN_MASK_WALL) ||
+            isOccupied = utils.checkObstacleAtXY(newX, newY, spawn, roomIsInSafeMode, roomObjects, roomTerrain) ||
                 movement.isTileBusy(newX, newY);
 
             if (!isOccupied) {

@@ -13,31 +13,6 @@ function canMove(object) {
         (!!object._pulled || !object._oldFatigue && _.some(object.body, i => i.hits > 0 && i.type == C.MOVE));
 }
 
-function checkObstacleAtXY(x,y,object, roomIsInSafeMode) {
-    var hasObstacle = false, hasRoad = false;
-    _.forEach(roomObjects, (i) => {
-        if (i.x != x || i.y != y) {
-            return;
-        }
-        if ((i.type == 'creep' || i.type == 'powerCreep') && !objects[i._id] && (!roomIsInSafeMode || roomIsInSafeMode != object.user || roomIsInSafeMode == object.user && object.user == i.user) ||
-            i.type != 'creep' && i.type != 'powerCreep' && _.contains(C.OBSTACLE_OBJECT_TYPES, i.type) ||
-            i.type == 'rampart' && !i.isPublic && i.user != object.user ||
-            i.type == 'constructionSite' && i.user == object.user && _.contains(C.OBSTACLE_OBJECT_TYPES,
-                i.structureType)) {
-            hasObstacle = true;
-            return false;
-        }
-        if(i.type == 'road') {
-            hasRoad = true;
-        }
-    });
-    if(hasObstacle) {
-        return true;
-    }
-    return utils.checkTerrain(roomTerrain, x, y, C.TERRAIN_MASK_WALL) && !hasRoad;
-
-}
-
 function calcResourcesWeight(creep) {
     var totalCarry = _.sum(creep.store), weight = 0;
     for(var i = creep.body.length-1; i >= 0; i--) {
@@ -180,7 +155,7 @@ exports.check = function(roomIsInSafeMode) {
             }
         }
 
-        if(!canMove(object) || !!checkObstacleAtXY(x,y, object, roomIsInSafeMode)) {
+        if(!canMove(object) || !!utils.checkObstacleAtXY(x, y, object, roomIsInSafeMode, roomObjects, roomTerrain, objects)) {
             removeFromMatrix(i);
         }
     }
