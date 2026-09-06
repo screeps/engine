@@ -31,7 +31,7 @@ module.exports = function(object, intent, scope) {
     }
 
     var cost = Math.ceil(C.SPAWN_RENEW_RATIO * utils.calcCreepCost(target.body) / C.CREEP_SPAWN_TIME / target.body.length);
-    var result = require('./_charge-energy')(object, cost, undefined, scope);
+    var result = require('./_charge-energy')(object, cost, intent.energyStructures, scope);
 
     if(!result) {
         return;

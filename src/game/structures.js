@@ -1234,8 +1234,10 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         return C.OK;
     });
 
-    StructureSpawn.prototype.renewCreep = register.wrapFn(function(target) {
-
+    StructureSpawn.prototype.renewCreep = register.wrapFn(function(target, options = {}) {
+        if (!_.isObject(options)) {
+            return C.ERR_INVALID_ARGS;
+        }
         if(this.spawning) {
             return C.ERR_BUSY;
         }
@@ -1252,7 +1254,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!target.pos.isNearTo(this.pos)) {
             return C.ERR_NOT_IN_RANGE;
         }
-        if(this.room.energyAvailable < Math.ceil(C.SPAWN_RENEW_RATIO * utils.calcCreepCost(target.body) / C.CREEP_SPAWN_TIME / target.body.length)) {
+        let energyStructures = options.energyStructures && _.uniq(_.map(options.energyStructures, 'id'));
+        let energyAvailable = energyStructures ? calcEnergyAvailable(runtimeData.roomObjects, energyStructures) : this.room.energyAvailable;
+        if(energyAvailable < Math.ceil(C.SPAWN_RENEW_RATIO * utils.calcCreepCost(target.body) / C.CREEP_SPAWN_TIME / target.body.length)) {
             return C.ERR_NOT_ENOUGH_ENERGY;
         }
         if(target.ticksToLive + Math.floor(C.SPAWN_RENEW_RATIO * C.CREEP_LIFE_TIME / C.CREEP_SPAWN_TIME / target.body.length) > C.CREEP_LIFE_TIME) {
@@ -1262,7 +1266,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             register.deprecated('Using `StructureSpawn.renewCreep` on a boosted creep is deprecated and will throw an error soon. Please remove boosts using `StructureLab.unboostCreep` before renewing.');
         }
 
-        intents.set(this.id, 'renewCreep', {id: target.id});
+        intents.set(this.id, 'renewCreep', {id: target.id, energyStructures});
         return C.OK;
     });
 
