@@ -6,7 +6,11 @@ const _ =require('lodash'),
     roomsEnv = require('../../../helpers/mocks/rooms'),
     creepsEnv = require('../../../helpers/mocks/creeps'),
     powerCreepsEnv = require('../../../helpers/mocks/powerCreeps'),
+    users = require('../../../helpers/mocks/users'),
     intents = require('../../../helpers/mocks/intents');
+
+const OWNER = users.defaultId;
+const HOSTILE = 'hostile-user-id';
 
 describe('movement', ()=>{
     let scope;
@@ -180,6 +184,78 @@ describe('movement', ()=>{
 
             expect(scout1.x).toBe(24); expect(scout1.y).toBe(25);
             expect(scout2.x).toBe(24); expect(scout2.y).toBe(24);
+        });
+    });
+
+    describe('Safe mode', ()=>{
+        let owner, invader;
+
+        beforeEach(()=>{
+            owner = creepsEnv.createCreep('scout', {x: 24, y: 25, user: OWNER});
+            invader = creepsEnv.createCreep('scout', {x: 24, y: 24, user: HOSTILE});
+            movement.init(scope.roomObjects, roomsEnv.terrain.E2S7);
+        });
+
+        it('allows the owner to move onto a stationary hostile', ()=>{
+            owner.move(1);
+            movement.check(OWNER);
+            intents.ticks();
+
+            expect(owner.x).toBe(24); expect(owner.y).toBe(24);
+            expect(invader.x).toBe(24); expect(invader.y).toBe(24);
+        });
+
+        it('allows the owner to move onto a hostile whose own move was rejected', ()=>{
+            // Invader tries to step onto another owner creep and fails; that
+            // rejection must not cascade-cancel the owner entering the invader tile.
+            const owner2 = creepsEnv.createCreep('scout', {x: 25, y: 24, user: OWNER});
+            movement.init(scope.roomObjects, roomsEnv.terrain.E2S7);
+
+            owner.move(1);
+            invader.move(3);
+            movement.check(OWNER);
+            intents.ticks();
+
+            expect(owner.x).toBe(24); expect(owner.y).toBe(24);
+            expect(invader.x).toBe(24); expect(invader.y).toBe(24);
+            expect(owner2.x).toBe(25); expect(owner2.y).toBe(24);
+        });
+
+        it('still prevents hostiles from moving onto the owner', ()=>{
+            invader.move(5);
+            movement.check(OWNER);
+            intents.ticks();
+
+            expect(owner.x).toBe(24); expect(owner.y).toBe(25);
+            expect(invader.x).toBe(24); expect(invader.y).toBe(24);
+        });
+
+        it('still blocks the owner without safe mode', ()=>{
+            owner.move(1);
+            movement.check(false);
+            intents.ticks();
+
+            expect(owner.x).toBe(24); expect(owner.y).toBe(25);
+            expect(invader.x).toBe(24); expect(invader.y).toBe(24);
+        });
+
+        it('still cascades when a friendly creep fails to move', ()=>{
+            intents.reset();
+            const lead = creepsEnv.createCreep('scout', {x: 24, y: 24, user: OWNER});
+            const mid = creepsEnv.createCreep('scout', {x: 24, y: 25, user: OWNER});
+            const trail = creepsEnv.createCreep('scout', {x: 24, y: 26, user: OWNER});
+            movement.init(scope.roomObjects, roomsEnv.terrain.E2S7);
+
+            // lead walks into a wall; followers must stay put
+            lead.move(4);
+            mid.move(1);
+            trail.move(1);
+            movement.check(OWNER);
+            intents.ticks();
+
+            expect(lead.x).toBe(24); expect(lead.y).toBe(24);
+            expect(mid.x).toBe(24); expect(mid.y).toBe(25);
+            expect(trail.x).toBe(24); expect(trail.y).toBe(26);
         });
     });
 
