@@ -13,7 +13,7 @@ module.exports = function(object, intent, {roomObjects, roomController, bulk, ga
         return;
     }
 
-    if(target.type == 'powerSpawn' && !utils.checkStructureAgainstController(target, roomObjects, roomController)) {
+    if(target.type == 'powerSpawn' && target.off) {
         return;
     }
 

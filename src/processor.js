@@ -218,10 +218,6 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             });
         }
 
-        if(roomSpawns.length || roomExtensions.length) {
-            require('./processor/intents/_calc_spawns')(roomSpawns, roomExtensions, scope);
-        }
-
         movement.init(roomObjects, roomTerrain);
 
         if (intents) {
@@ -339,6 +335,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
         var resultPromises = [];
         var userVisibility = {};
 
+        let ownedObjects = {};
         _.forEach(roomObjects, (object) => {
 
             if(!object || object._skip) {
@@ -439,6 +436,10 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
                 }
             }
 
+            if (object.type in C.CONTROLLER_STRUCTURES) {
+                (ownedObjects[object.type] = ownedObjects[object.type] || []).push(object)
+            }
+
             if (object.user) {
                 //userVisibility[object.user] = true;
 
@@ -481,6 +482,11 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
             }
             driver.config.emit('postProcessObject', object, roomObjects, roomTerrain, gameTime, roomInfo, bulk, bulkUsers, eventLog, mapView);
         });
+
+
+        if(scope.roomController) {
+            require('./processor/intents/_check_active_structures')(ownedObjects, scope);
+        }
 
         /*for(var user in userVisibility) {
             resultPromises.push(core.setUserRoomVisibility(user, roomId));

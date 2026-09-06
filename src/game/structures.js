@@ -115,7 +115,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.room || !this.room.controller) {
             return false;
         }
-        return utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id));
+        return !data(this.id).off
     });
 
     Object.defineProperty(globals, 'Structure', {enumerable: true, value: Structure});
@@ -321,7 +321,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.cooldown > 0) {
             return C.ERR_TIRED;
         }
-        if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
+        if(data(this.id).off) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
         if(!lab1 || !lab1.id || !register.structures[lab1.id] ||
@@ -364,7 +364,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.cooldown > 0) {
             return C.ERR_TIRED;
         }
-        if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
+        if(data(this.id).off) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
         if(!lab1 || !lab1.id || !register.structures[lab1.id] ||
@@ -413,7 +413,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
-        if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
+        if(data(this.id).off) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
         if(!target || !target.id || !register.creeps[target.id] || !(target instanceof globals.Creep) || target.spawning) {
@@ -448,7 +448,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my || !target.my) {
             return C.ERR_NOT_OWNER;
         }
-        if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
+        if(data(this.id).off) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
         if(this.cooldown > 0) {
@@ -507,7 +507,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.room.controller) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
-        if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
+        if(data(this.id).off) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
 
@@ -552,7 +552,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!_.isString(roomName) || !/^(W|E)\d+(S|N)\d+$/.test(roomName)) {
             return C.ERR_INVALID_ARGS;
         }
-        if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
+        if(data(this.id).off) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
 
@@ -614,7 +614,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
-        if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
+        if(data(this.id).off) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
         var amount = 1;
@@ -715,7 +715,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!this.my) {
             return C.ERR_NOT_OWNER;
         }
-        if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
+        if(data(this.id).off) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
         if(!/^(W|E)\d+(N|S)\d+$/.test(targetRoomName)) {
@@ -775,7 +775,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!data(this.id).store || (data(this.id).store.energy < C.TOWER_ENERGY_COST)) {
             return C.ERR_NOT_ENOUGH_ENERGY;
         }
-        if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
+        if(data(this.id).off) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
 
@@ -795,7 +795,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!data(this.id).store || (data(this.id).store.energy < C.TOWER_ENERGY_COST)) {
             return C.ERR_NOT_ENOUGH_ENERGY;
         }
-        if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
+        if(data(this.id).off) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
 
@@ -815,7 +815,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(!data(this.id).store || (data(this.id).store.energy < C.TOWER_ENERGY_COST)) {
             return C.ERR_NOT_ENOUGH_ENERGY;
         }
-        if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
+        if(data(this.id).off) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
 
@@ -1370,7 +1370,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         if(this.cooldown > 0) {
             return C.ERR_TIRED;
         }
-        if(!utils.checkStructureAgainstController(data(this.id), register.objectsByRoom[data(this.id).room], data(this.room.controller.id))) {
+        if(data(this.id).off) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
         var [tx,ty] = utils.roomNameToXY(pos.roomName);
@@ -1449,7 +1449,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_INVALID_TARGET;
         }
 
-        if(!utils.checkStructureAgainstController(rawFactory, register.objectsByRoom[rawFactory.room], data(this.room.controller.id))) {
+        if(rawFactory.off) {
             return C.ERR_RCL_NOT_ENOUGH;
         }
 
