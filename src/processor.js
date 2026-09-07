@@ -6,9 +6,10 @@ var q = require('q'),
     driver = utils.getDriver(),
     C = driver.constants,
     config = require('./config'),
-    fakeRuntime = require('./processor/common/fake-runtime');
+    fakeRuntime = require('./processor/common/fake-runtime'),
+    history = require('./history');
 
-var roomsQueue, usersQueue, lastRoomsStatsSaveTime = 0, currentHistoryPromise = q.when();
+var roomsQueue, usersQueue, lastRoomsStatsSaveTime = 0;
 
 const KEEPER_ID = "3";
 const INVADER_ID = "2";
@@ -18,23 +19,7 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
     return q.when().then(() => {
 
         if (gameTime > 0) {
-            var historyPayload = {};
-            _.forEach(roomObjects, (object) => {
-                if (!object || object.type === 'flag') {
-                    return;
-                }
-                if (object.type === 'creep' || object.type === 'powerCreep') {
-                    var clone = JSON.parse(JSON.stringify(object));
-                    clone._id = '' + object._id;
-                    if (clone.actionLog && clone.actionLog.say && !clone.actionLog.say.isPublic) {
-                        delete clone.actionLog.say;
-                    }
-                    historyPayload[clone._id] = clone;
-                } else {
-                    historyPayload[object._id] = object;
-                }
-            });
-            void saveRoomHistory(roomId, historyPayload, gameTime - 1);
+            history.saveRoomHistory(roomId, history.buildHistoryPayload(roomObjects), gameTime - 1);
         }
 
         var bulk = driver.bulkObjectsWrite(),
@@ -522,24 +507,6 @@ function processRoom(roomId, {intents, roomObjects, users, roomTerrain, gameTime
         return q.all(resultPromises);
     });
 }
-
-function saveRoomHistory(roomId, objects, gameTime) {
-
-    var data = JSON.stringify(objects);
-
-    return currentHistoryPromise.then(() => {
-        var promise = q.when();
-
-        if (!(gameTime % driver.config.historyChunkSize)) {
-            var baseTime = Math.floor((gameTime - 1) / driver.config.historyChunkSize) * driver.config.historyChunkSize;
-            promise = driver.history.upload(roomId, baseTime);
-        }
-
-        currentHistoryPromise = promise.then(() => driver.history.saveTick(roomId, gameTime, data));
-        return currentHistoryPromise;
-    });
-}
-
 
 driver.connect('processor')
     .then(() => driver.queue.create('rooms', 'read'))
