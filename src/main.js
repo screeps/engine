@@ -3,7 +3,8 @@ var q = require('q'),
     _ = require('lodash'),
     utils = require('./utils'),
     driver = utils.getDriver(),
-    config = require('./config');
+    config = require('./config')
+    history = require('./history');
 
 var lastAccessibleRoomsUpdate = 0;
 var roomsQueue, usersQueue;
@@ -11,7 +12,9 @@ var roomsQueue, usersQueue;
 function loop() {
 
     var resetInterval, startLoopTime = process.hrtime ? process.hrtime() : Date.now(),
-        stage = 'start';
+        stage = 'start',
+        processedRooms,
+        tickGameTime;
 
     driver.config.emit('mainLoopStage',stage);
 
@@ -45,6 +48,7 @@ function loop() {
             return driver.getAllRoomsNames();
         })
         .then((rooms) => {
+            processedRooms = rooms;
             stage = 'addRoomsToQueue';
             driver.config.emit('mainLoopStage',stage, rooms);
             return roomsQueue.addMulti(rooms);
@@ -53,6 +57,13 @@ function loop() {
             stage = 'waitForRooms';
             driver.config.emit('mainLoopStage',stage);
             return roomsQueue.whenAllDone();
+        })
+        .then(() => driver.getGameTime())
+        .then((gameTime) => {
+            tickGameTime = gameTime;
+            stage = 'flushHistory';
+            driver.config.emit('mainLoopStage',stage);
+            return history.uploadPendingChunks(gameTime, processedRooms);
         })
         .then(() => {
             stage = 'commit1';
@@ -68,6 +79,11 @@ function loop() {
             stage = 'commit2';
             driver.config.emit('mainLoopStage',stage);
             return driver.commitDbBulk();
+        })
+        .then(() => {
+            stage = 'saveDeactivatedRoomHistory';
+            driver.config.emit('mainLoopStage',stage);
+            return history.saveDeactivatedRoomsHistory(processedRooms, tickGameTime);
         })
         .then(() => {
             stage = 'incrementGameTime';
