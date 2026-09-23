@@ -1,4 +1,6 @@
-const _ = require('lodash'),
+const {describe, it, beforeEach} = require('node:test'),
+    assert = require('node:assert/strict'),
+    _ = require('lodash'),
     utils =  require('../../src/utils'),
     driver = utils.getDriver(),
     C = driver.constants;
@@ -9,11 +11,11 @@ describe('Utils', () => {
 
     describe('calcTerminalEnergyCost', () => {
         it('Should cost something to send resources',()=>{
-            expect(utils.calcTerminalEnergyCost(1, 1)).toBeGreaterThan(0);
+            assert.ok(utils.calcTerminalEnergyCost(1, 1) > 0);
         });
 
         it('Should not cost something to not send resources',()=>{
-            expect(utils.calcTerminalEnergyCost(10, 0)).toBe(0);
+            assert.strictEqual(utils.calcTerminalEnergyCost(10, 0), 0);
         });
     });
 
@@ -26,7 +28,7 @@ describe('Utils', () => {
             };
 
             C.RESOURCES_ALL.forEach(r => {
-                expect(utils.capacityForResource(spawner, r)).toBe( r == C.RESOURCE_ENERGY ? 300 : 0);
+                assert.strictEqual(utils.capacityForResource(spawner, r), r == C.RESOURCE_ENERGY ? 300 : 0);
             });
         });
 
@@ -38,7 +40,7 @@ describe('Utils', () => {
             };
 
             C.RESOURCES_ALL.forEach(r => {
-                expect(utils.capacityForResource(container, r)).toBe(2000);
+                assert.strictEqual(utils.capacityForResource(container, r), 2000);
             });
         });
 
@@ -51,14 +53,14 @@ describe('Utils', () => {
 
             C.RESOURCES_ALL.forEach(r => {
                 if(r == 'energy') {
-                    expect(utils.capacityForResource(nuker, r)).toBe(300000);
+                    assert.strictEqual(utils.capacityForResource(nuker, r), 300000);
                     return;
                 }
                 if(r == 'G') {
-                    expect(utils.capacityForResource(nuker, r)).toBe(5000);
+                    assert.strictEqual(utils.capacityForResource(nuker, r), 5000);
                     return;
                 }
-                expect(utils.capacityForResource(nuker, r)).toBe( 0);
+                assert.strictEqual(utils.capacityForResource(nuker, r), 0);
             });
         });
 
@@ -72,10 +74,10 @@ describe('Utils', () => {
 
             C.RESOURCES_ALL.forEach(r => {
                 if(r == 'energy') {
-                    expect(utils.capacityForResource(lab, r)).toBe(2000);
+                    assert.strictEqual(utils.capacityForResource(lab, r), 2000);
                     return;
                 }
-                expect(utils.capacityForResource(lab, r)).toBe( 3000);
+                assert.strictEqual(utils.capacityForResource(lab, r), 3000);
             });
         });
 
@@ -89,10 +91,10 @@ describe('Utils', () => {
 
             C.RESOURCES_ALL.forEach(r => {
                 if(r == 'energy') {
-                    expect(utils.capacityForResource(lab, r)).toBe(2000);
+                    assert.strictEqual(utils.capacityForResource(lab, r), 2000);
                     return;
                 }
-                expect(utils.capacityForResource(lab, r)).toBe( 3000);
+                assert.strictEqual(utils.capacityForResource(lab, r), 3000);
             });
         });
 
@@ -105,14 +107,14 @@ describe('Utils', () => {
 
             C.RESOURCES_ALL.forEach(r => {
                 if(r == 'energy') {
-                    expect(utils.capacityForResource(lab, r)).toBe(2000);
+                    assert.strictEqual(utils.capacityForResource(lab, r), 2000);
                     return;
                 }
                 if(r == 'UO') {
-                    expect(utils.capacityForResource(lab, r)).toBe(3000);
+                    assert.strictEqual(utils.capacityForResource(lab, r), 3000);
                     return;
                 }
-                expect(utils.capacityForResource(lab, r)).toBe( 0);
+                assert.strictEqual(utils.capacityForResource(lab, r), 0);
             });
         });
     });
@@ -210,12 +212,12 @@ describe('Utils', () => {
 
                 const result = utils.storeIntents('2', input, runtimeData);
 
-                expect(result).toBeDefined();
-                expect(result.notify).toBeDefined();
-                expect(_.isArray(result.notify)).toBeTruthy();
-                expect(result.notify.length).toEqual(1);
-                expect(result.notify[0].message).toEqual("test");
-                expect(result.notify[0].groupInterval).toEqual(10);
+                assert.notStrictEqual(result, undefined);
+                assert.notStrictEqual(result.notify, undefined);
+                assert.ok(_.isArray(result.notify));
+                assert.deepStrictEqual(result.notify.length, 1);
+                assert.deepStrictEqual(result.notify[0].message, "test");
+                assert.deepStrictEqual(result.notify[0].groupInterval, 10);
             });
         });
 
@@ -225,14 +227,14 @@ describe('Utils', () => {
 
                 const result = utils.storeIntents('2', input, runtimeData);
 
-                expect(result).toBeDefined();
+                assert.notStrictEqual(result, undefined);
 
-                expect(result.global).toBeDefined();
-                expect(result.global.createPowerCreep).toBeDefined();
-                expect(_.isArray(result.global.createPowerCreep)).toBeTruthy();
-                expect(result.global.createPowerCreep.length).toEqual(1);
-                expect(result.global.createPowerCreep[0].name).toEqual("Test2");
-                expect(result.global.createPowerCreep[0].className).toEqual("operator");
+                assert.notStrictEqual(result.global, undefined);
+                assert.notStrictEqual(result.global.createPowerCreep, undefined);
+                assert.ok(_.isArray(result.global.createPowerCreep));
+                assert.deepStrictEqual(result.global.createPowerCreep.length, 1);
+                assert.deepStrictEqual(result.global.createPowerCreep[0].name, "Test2");
+                assert.deepStrictEqual(result.global.createPowerCreep[0].className, "operator");
             });
 
             it('Multiple global intents processed', () => {
@@ -244,20 +246,20 @@ describe('Utils', () => {
 
                 const result = utils.storeIntents('2', input, runtimeData);
 
-                expect(result).toBeDefined();
-                expect(result.global).toBeDefined();
+                assert.notStrictEqual(result, undefined);
+                assert.notStrictEqual(result.global, undefined);
 
-                expect(result.global.createPowerCreep).toBeDefined();
-                expect(_.isArray(result.global.createPowerCreep)).toBeTruthy();
-                expect(result.global.createPowerCreep.length).toEqual(1);
-                expect(result.global.createPowerCreep[0].name).toEqual("Test2");
-                expect(result.global.createPowerCreep[0].className).toEqual("operator");
+                assert.notStrictEqual(result.global.createPowerCreep, undefined);
+                assert.ok(_.isArray(result.global.createPowerCreep));
+                assert.deepStrictEqual(result.global.createPowerCreep.length, 1);
+                assert.deepStrictEqual(result.global.createPowerCreep[0].name, "Test2");
+                assert.deepStrictEqual(result.global.createPowerCreep[0].className, "operator");
 
-                expect(result.global.renamePowerCreep).toBeDefined();
-                expect(_.isArray(result.global.renamePowerCreep)).toBeTruthy();
-                expect(result.global.renamePowerCreep.length).toEqual(1);
-                expect(result.global.renamePowerCreep[0].id).toEqual("5dbaca29ca637207bc2d472b");
-                expect(result.global.renamePowerCreep[0].name).toEqual("Test3");
+                assert.notStrictEqual(result.global.renamePowerCreep, undefined);
+                assert.ok(_.isArray(result.global.renamePowerCreep));
+                assert.deepStrictEqual(result.global.renamePowerCreep.length, 1);
+                assert.deepStrictEqual(result.global.renamePowerCreep[0].id, "5dbaca29ca637207bc2d472b");
+                assert.deepStrictEqual(result.global.renamePowerCreep[0].name, "Test3");
             });
 
             it('Unknown fields removed from global intents', () => {
@@ -265,7 +267,7 @@ describe('Utils', () => {
 
                 const result = utils.storeIntents('2', input, runtimeData);
 
-                expect(result.global.createPowerCreep[0].unknownField).toBeUndefined();
+                assert.strictEqual(result.global.createPowerCreep[0].unknownField, undefined);
             });
 
             it('Unknown global intents removed', () => {
@@ -273,7 +275,7 @@ describe('Utils', () => {
 
                 const result = utils.storeIntents('2', input, runtimeData);
 
-                expect(_.size(result.global)).toEqual(0);
+                assert.deepStrictEqual(_.size(result.global), 0);
             });
         });
 
@@ -291,16 +293,16 @@ describe('Utils', () => {
 
                 const result = utils.storeIntents('2', input, runtimeData);
 
-                expect(result).toBeDefined();
+                assert.notStrictEqual(result, undefined);
 
-                expect(result['E2S5']).toBeDefined();
-                expect(result['E2S5'].room).toBeDefined();
-                expect(result['E2S5'].room.createConstructionSite).toBeDefined();
-                expect(_.isArray(result['E2S5'].room.createConstructionSite)).toBeTruthy();
-                expect(result['E2S5'].room.createConstructionSite.length).toEqual(1);
-                expect(result['E2S5'].room.createConstructionSite[0].x).toEqual(20);
-                expect(result['E2S5'].room.createConstructionSite[0].y).toEqual(30);
-                expect(result['E2S5'].room.createConstructionSite[0].structureType).toEqual("road");
+                assert.notStrictEqual(result['E2S5'], undefined);
+                assert.notStrictEqual(result['E2S5'].room, undefined);
+                assert.notStrictEqual(result['E2S5'].room.createConstructionSite, undefined);
+                assert.ok(_.isArray(result['E2S5'].room.createConstructionSite));
+                assert.deepStrictEqual(result['E2S5'].room.createConstructionSite.length, 1);
+                assert.deepStrictEqual(result['E2S5'].room.createConstructionSite[0].x, 20);
+                assert.deepStrictEqual(result['E2S5'].room.createConstructionSite[0].y, 30);
+                assert.deepStrictEqual(result['E2S5'].room.createConstructionSite[0].structureType, "road");
             });
 
             it('Multiple room intents in a single room processed', () => {
@@ -314,12 +316,12 @@ describe('Utils', () => {
                 };
 
                 const result = utils.storeIntents('2', input, runtimeData);
-                expect(result).toBeDefined();
-                expect(result['E2S5']).toBeDefined();
-                expect(result['E2S5'].room).toBeDefined();
-                expect(result['E2S5'].room.createConstructionSite).toBeDefined();
-                expect(_.isArray(result['E2S5'].room.createConstructionSite)).toBeTruthy();
-                expect(result['E2S5'].room.createConstructionSite.length).toEqual(2);
+                assert.notStrictEqual(result, undefined);
+                assert.notStrictEqual(result['E2S5'], undefined);
+                assert.notStrictEqual(result['E2S5'].room, undefined);
+                assert.notStrictEqual(result['E2S5'].room.createConstructionSite, undefined);
+                assert.ok(_.isArray(result['E2S5'].room.createConstructionSite));
+                assert.deepStrictEqual(result['E2S5'].room.createConstructionSite.length, 2);
             });
 
             it('Multiple room intents in multiple rooms processed', () => {
@@ -334,17 +336,17 @@ describe('Utils', () => {
                 };
 
                 const result = utils.storeIntents('2', input, runtimeData);
-                expect(result).toBeDefined();
-                expect(result['E2S5']).toBeDefined();
-                expect(result['E2S5'].room).toBeDefined();
-                expect(result['E2S5'].room.createConstructionSite).toBeDefined();
-                expect(_.isArray(result['E2S5'].room.createConstructionSite)).toBeTruthy();
-                expect(result['E2S5'].room.createConstructionSite.length).toEqual(1);
-                expect(result['E2S7']).toBeDefined();
-                expect(result['E2S7'].room).toBeDefined();
-                expect(result['E2S7'].room.createConstructionSite).toBeDefined();
-                expect(_.isArray(result['E2S7'].room.createConstructionSite)).toBeTruthy();
-                expect(result['E2S7'].room.createConstructionSite.length).toEqual(2);
+                assert.notStrictEqual(result, undefined);
+                assert.notStrictEqual(result['E2S5'], undefined);
+                assert.notStrictEqual(result['E2S5'].room, undefined);
+                assert.notStrictEqual(result['E2S5'].room.createConstructionSite, undefined);
+                assert.ok(_.isArray(result['E2S5'].room.createConstructionSite));
+                assert.deepStrictEqual(result['E2S5'].room.createConstructionSite.length, 1);
+                assert.notStrictEqual(result['E2S7'], undefined);
+                assert.notStrictEqual(result['E2S7'].room, undefined);
+                assert.notStrictEqual(result['E2S7'].room.createConstructionSite, undefined);
+                assert.ok(_.isArray(result['E2S7'].room.createConstructionSite));
+                assert.deepStrictEqual(result['E2S7'].room.createConstructionSite.length, 2);
             });
 
             it('Unknown fields removed from room intents', () => {
@@ -356,7 +358,7 @@ describe('Utils', () => {
 
                 const result = utils.storeIntents('2', input, runtimeData);
 
-                expect(result['E2S5'].room.createConstructionSite[0].unknownField).toBeUndefined();
+                assert.strictEqual(result['E2S5'].room.createConstructionSite[0].unknownField, undefined);
             });
 
             it('Unknown room intents removed', () => {
@@ -368,8 +370,8 @@ describe('Utils', () => {
 
                 const result = utils.storeIntents('2', input, runtimeData);
 
-                expect(result).toBeDefined();
-                expect(_.size(result)).toEqual(0);
+                assert.notStrictEqual(result, undefined);
+                assert.deepStrictEqual(_.size(result), 0);
             });
         });
 
@@ -381,12 +383,12 @@ describe('Utils', () => {
 
                 const result = utils.storeIntents('2', input, runtimeData);
 
-                expect(result).toBeDefined();
+                assert.notStrictEqual(result, undefined);
 
-                expect(result['E2S7']).toBeDefined();
-                expect(result['E2S7']['5c3f86c72071261a0c27cd9e']).toBeDefined();
-                expect(result['E2S7']['5c3f86c72071261a0c27cd9e'].observeRoom).toBeDefined();
-                expect(result['E2S7']['5c3f86c72071261a0c27cd9e'].observeRoom.roomName).toEqual('E0N0');
+                assert.notStrictEqual(result['E2S7'], undefined);
+                assert.notStrictEqual(result['E2S7']['5c3f86c72071261a0c27cd9e'], undefined);
+                assert.notStrictEqual(result['E2S7']['5c3f86c72071261a0c27cd9e'].observeRoom, undefined);
+                assert.deepStrictEqual(result['E2S7']['5c3f86c72071261a0c27cd9e'].observeRoom.roomName, 'E0N0');
             });
 
             it('Multiple object intents processed in a single room', () => {
@@ -397,17 +399,17 @@ describe('Utils', () => {
 
                 const result = utils.storeIntents('2', input, runtimeData);
 
-                expect(result['E2S7']).toBeDefined();
+                assert.notStrictEqual(result['E2S7'], undefined);
 
-                expect(result['E2S7']['5c3f86c72071261a0c27cd9e']).toBeDefined();
-                expect(result['E2S7']['5c3f86c72071261a0c27cd9e'].observeRoom).toBeDefined();
-                expect(result['E2S7']['5c3f86c72071261a0c27cd9e'].observeRoom.roomName).toEqual('E0N0');
+                assert.notStrictEqual(result['E2S7']['5c3f86c72071261a0c27cd9e'], undefined);
+                assert.notStrictEqual(result['E2S7']['5c3f86c72071261a0c27cd9e'].observeRoom, undefined);
+                assert.deepStrictEqual(result['E2S7']['5c3f86c72071261a0c27cd9e'].observeRoom.roomName, 'E0N0');
 
-                expect(result['E2S7']['597eac723cab64605b6de01f']).toBeDefined();
-                expect(result['E2S7']['597eac723cab64605b6de01f'].transfer).toBeDefined();
-                expect(result['E2S7']['597eac723cab64605b6de01f'].transfer.id).toEqual('5d028696b51b9c0ae4056d57');
-                expect(result['E2S7']['597eac723cab64605b6de01f'].transfer.resourceType).toEqual('energy');
-                expect(result['E2S7']['597eac723cab64605b6de01f'].transfer.amount).toEqual(800);
+                assert.notStrictEqual(result['E2S7']['597eac723cab64605b6de01f'], undefined);
+                assert.notStrictEqual(result['E2S7']['597eac723cab64605b6de01f'].transfer, undefined);
+                assert.deepStrictEqual(result['E2S7']['597eac723cab64605b6de01f'].transfer.id, '5d028696b51b9c0ae4056d57');
+                assert.deepStrictEqual(result['E2S7']['597eac723cab64605b6de01f'].transfer.resourceType, 'energy');
+                assert.deepStrictEqual(result['E2S7']['597eac723cab64605b6de01f'].transfer.amount, 800);
             });
 
             it('Multiple object intents processed in multiple rooms', () => {
@@ -418,18 +420,18 @@ describe('Utils', () => {
 
                 const result = utils.storeIntents('2', input, runtimeData);
 
-                expect(result['E2N7']).toBeDefined();
+                assert.notStrictEqual(result['E2N7'], undefined);
 
-                expect(result['E2N7']['5c3f86c72071261a0c27cd9f']).toBeDefined();
-                expect(result['E2N7']['5c3f86c72071261a0c27cd9f'].observeRoom).toBeDefined();
-                expect(result['E2N7']['5c3f86c72071261a0c27cd9f'].observeRoom.roomName).toEqual('E0N0');
+                assert.notStrictEqual(result['E2N7']['5c3f86c72071261a0c27cd9f'], undefined);
+                assert.notStrictEqual(result['E2N7']['5c3f86c72071261a0c27cd9f'].observeRoom, undefined);
+                assert.deepStrictEqual(result['E2N7']['5c3f86c72071261a0c27cd9f'].observeRoom.roomName, 'E0N0');
 
-                expect(result['E2S7']).toBeDefined();
-                expect(result['E2S7']['597eac723cab64605b6de01f']).toBeDefined();
-                expect(result['E2S7']['597eac723cab64605b6de01f'].transfer).toBeDefined();
-                expect(result['E2S7']['597eac723cab64605b6de01f'].transfer.id).toEqual('5d028696b51b9c0ae4056d57');
-                expect(result['E2S7']['597eac723cab64605b6de01f'].transfer.resourceType).toEqual('energy');
-                expect(result['E2S7']['597eac723cab64605b6de01f'].transfer.amount).toEqual(800);
+                assert.notStrictEqual(result['E2S7'], undefined);
+                assert.notStrictEqual(result['E2S7']['597eac723cab64605b6de01f'], undefined);
+                assert.notStrictEqual(result['E2S7']['597eac723cab64605b6de01f'].transfer, undefined);
+                assert.deepStrictEqual(result['E2S7']['597eac723cab64605b6de01f'].transfer.id, '5d028696b51b9c0ae4056d57');
+                assert.deepStrictEqual(result['E2S7']['597eac723cab64605b6de01f'].transfer.resourceType, 'energy');
+                assert.deepStrictEqual(result['E2S7']['597eac723cab64605b6de01f'].transfer.amount, 800);
             });
 
             it('Unknown fields removed from object intents', () => {
@@ -439,7 +441,7 @@ describe('Utils', () => {
 
                 const result = utils.storeIntents('2', input, runtimeData);
 
-                expect(result['E2S7']['5c3f86c72071261a0c27cd9e'].observeRoom.unknownField).toBeUndefined();
+                assert.strictEqual(result['E2S7']['5c3f86c72071261a0c27cd9e'].observeRoom.unknownField, undefined);
             });
 
             it('Unknown object intents removed', () => {
@@ -449,8 +451,8 @@ describe('Utils', () => {
 
                 const result = utils.storeIntents('2', input, runtimeData);
 
-                expect(result).toBeDefined();
-                expect(_.size(result['E2S7']['5c3f86c72071261a0c27cd9e'])).toEqual(0);
+                assert.notStrictEqual(result, undefined);
+                assert.deepStrictEqual(_.size(result['E2S7']['5c3f86c72071261a0c27cd9e']), 0);
             });
         });
     });

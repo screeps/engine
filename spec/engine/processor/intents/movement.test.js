@@ -1,4 +1,6 @@
-const _ =require('lodash'),
+const {describe, it, beforeEach} = require('node:test'),
+    assert = require('node:assert/strict'),
+    _ = require('lodash'),
     utils =  require('../../../../src/utils'),
     driver = utils.getDriver(),
     C = driver.constants,
@@ -30,7 +32,7 @@ describe('movement', ()=>{
             movement.check(false);
             intents.ticks();
 
-            expect(noMove.x).toBe(24); expect(noMove.y).toBe(24);
+            assert.strictEqual(noMove.x, 24); assert.strictEqual(noMove.y, 24);
         });
 
         it('does not move with all MOVE parts dead',()=>{
@@ -38,7 +40,7 @@ describe('movement', ()=>{
             movement.check(false);
             intents.ticks();
 
-            expect(damaged.x).toBe(23); expect(damaged.y).toBe(28);
+            assert.strictEqual(damaged.x, 23); assert.strictEqual(damaged.y, 28);
         });
 
         it('blocks his tile when can not move',()=>{
@@ -49,8 +51,8 @@ describe('movement', ()=>{
             movement.check(false);
             intents.ticks();
 
-            expect(damaged.x).toBe(23); expect(damaged.y).toBe(28);
-            expect(fullSpeed.x).toBe(22); expect(fullSpeed.y).toBe(27);
+            assert.strictEqual(damaged.x, 23); assert.strictEqual(damaged.y, 28);
+            assert.strictEqual(fullSpeed.x, 22); assert.strictEqual(fullSpeed.y, 27);
         });
 
         describe('Offroad creep', ()=>{
@@ -66,7 +68,7 @@ describe('movement', ()=>{
                 movement.check(false);
                 intents.ticks();
 
-                expect(scout.x).toBe(23); expect(scout.y).toBe(24); expect(scout.fatigue).toBe(0);
+                assert.strictEqual(scout.x, 23); assert.strictEqual(scout.y, 24); assert.strictEqual(scout.fatigue, 0);
             });
 
             it("does not move into wall",()=>{
@@ -74,7 +76,7 @@ describe('movement', ()=>{
                 movement.check(false);
                 intents.ticks();
 
-                expect(scout.x).toBe(24); expect(scout.y).toBe(24); expect(scout.fatigue).toBe(0);
+                assert.strictEqual(scout.x, 24); assert.strictEqual(scout.y, 24); assert.strictEqual(scout.fatigue, 0);
             });
 
             it("does not move into another creep",()=>{
@@ -82,8 +84,8 @@ describe('movement', ()=>{
                 movement.check(false);
                 intents.ticks();
 
-                expect(scout.x).toBe(24); expect(scout.y).toBe(24); expect(scout.fatigue).toBe(0);
-                expect(scout2.x).toBe(24); expect(scout2.y).toBe(25); expect(scout2.fatigue).toBe(0);
+                assert.strictEqual(scout.x, 24); assert.strictEqual(scout.y, 24); assert.strictEqual(scout.fatigue, 0);
+                assert.strictEqual(scout2.x, 24); assert.strictEqual(scout2.y, 25); assert.strictEqual(scout2.fatigue, 0);
             });
         });
 
@@ -100,8 +102,8 @@ describe('movement', ()=>{
                 movement.check(false);
                 intents.ticks();
 
-                expect(creep.x).toBe(24); expect(creep.y).toBe(24);
-                expect(creep.fatigue).toBe(0); // rested this tick
+                assert.strictEqual(creep.x, 24); assert.strictEqual(creep.y, 24);
+                assert.strictEqual(creep.fatigue, 0); // rested this tick
             });
 
             it("is not tired after moving over plain tile",()=>{
@@ -109,7 +111,7 @@ describe('movement', ()=>{
                 movement.check(false);
                 intents.ticks();
 
-                expect(creep.x).toBe(25); expect(creep.y).toBe(23); expect(creep.fatigue).toBe(0);
+                assert.strictEqual(creep.x, 25); assert.strictEqual(creep.y, 23); assert.strictEqual(creep.fatigue, 0);
             });
 
             it("is tired after moving over swamp tile ",()=>{
@@ -117,7 +119,7 @@ describe('movement', ()=>{
                 movement.check(false);
                 intents.ticks();
 
-                expect(creep.x).toBe(25); expect(creep.y).toBe(24); expect(creep.fatigue).toBe(8);
+                assert.strictEqual(creep.x, 25); assert.strictEqual(creep.y, 24); assert.strictEqual(creep.fatigue, 8);
             });
         });
 
@@ -133,7 +135,7 @@ describe('movement', ()=>{
                 movement.check(false);
                 intents.ticks();
 
-                expect(creep.x).toBe(25); expect(creep.y).toBe(23); expect(creep.fatigue).toBe(2);
+                assert.strictEqual(creep.x, 25); assert.strictEqual(creep.y, 23); assert.strictEqual(creep.fatigue, 2);
             });
 
             it("is tired after moving over swamp tile",()=>{
@@ -141,7 +143,7 @@ describe('movement', ()=>{
                 movement.check(false);
                 intents.ticks();
 
-                expect(creep.x).toBe(25); expect(creep.y).toBe(24); expect(creep.fatigue).toBe(18);
+                assert.strictEqual(creep.x, 25); assert.strictEqual(creep.y, 24); assert.strictEqual(creep.fatigue, 18);
             });
 
             it("is not tired after moving over road",()=>{
@@ -149,7 +151,7 @@ describe('movement', ()=>{
                 movement.check(false);
                 intents.ticks();
 
-                expect(creep.x).toBe(23); expect(creep.y).toBe(24); expect(creep.fatigue).toBe(0);
+                assert.strictEqual(creep.x, 23); assert.strictEqual(creep.y, 24); assert.strictEqual(creep.fatigue, 0);
             });
         });
     });
@@ -168,8 +170,8 @@ describe('movement', ()=>{
             movement.check(false);
             intents.ticks();
 
-            expect(scout1.x).toBe(24); expect(scout1.y).toBe(25);
-            expect(scout2.x).toBe(24); expect(scout2.y).toBe(26);
+            assert.strictEqual(scout1.x, 24); assert.strictEqual(scout1.y, 25);
+            assert.strictEqual(scout2.x, 24); assert.strictEqual(scout2.y, 26);
         });
 
         it("should swap positions",()=>{
@@ -178,8 +180,8 @@ describe('movement', ()=>{
             movement.check(false);
             intents.ticks();
 
-            expect(scout1.x).toBe(24); expect(scout1.y).toBe(25);
-            expect(scout2.x).toBe(24); expect(scout2.y).toBe(24);
+            assert.strictEqual(scout1.x, 24); assert.strictEqual(scout1.y, 25);
+            assert.strictEqual(scout2.x, 24); assert.strictEqual(scout2.y, 24);
         });
     });
 
@@ -198,7 +200,7 @@ describe('movement', ()=>{
             movement.check(false);
             intents.ticks();
 
-            expect(fullSpeed.x).toBe(22); expect(fullSpeed.y).toBe(27);
+            assert.strictEqual(fullSpeed.x, 22); assert.strictEqual(fullSpeed.y, 27);
         });
 
         it('swaps position with a regular creep',()=>{
@@ -209,8 +211,8 @@ describe('movement', ()=>{
             movement.check(false);
             intents.ticks();
 
-            expect(operator.x).toBe(22); expect(operator.y).toBe(27);
-            expect(fullSpeed.x).toBe(21); expect(fullSpeed.y).toBe(26);
+            assert.strictEqual(operator.x, 22); assert.strictEqual(operator.y, 27);
+            assert.strictEqual(fullSpeed.x, 21); assert.strictEqual(fullSpeed.y, 26);
         });
 
 
@@ -233,8 +235,8 @@ describe('movement', ()=>{
             movement.check(false);
             intents.ticks();
 
-            expect(fullSpeed1.x).toBe(23); expect(fullSpeed1.y).toBe(25);
-            expect(halfSpeed1.x).toBe(24); expect(halfSpeed1.y).toBe(25);
+            assert.strictEqual(fullSpeed1.x, 23); assert.strictEqual(fullSpeed1.y, 25);
+            assert.strictEqual(halfSpeed1.x, 24); assert.strictEqual(halfSpeed1.y, 25);
         });
 
         it('creep having follower takes priority',()=>{
@@ -244,8 +246,8 @@ describe('movement', ()=>{
             movement.check(false);
             intents.ticks();
 
-            expect(fullSpeed1.x).toBe(24); expect(fullSpeed1.y).toBe(24);
-            expect(halfSpeed1.x).toBe(23); expect(halfSpeed1.y).toBe(25);
+            assert.strictEqual(fullSpeed1.x, 24); assert.strictEqual(fullSpeed1.y, 24);
+            assert.strictEqual(halfSpeed1.x, 23); assert.strictEqual(halfSpeed1.y, 25);
         });
 
         it('creep that pulls someone takes priority',()=>{
@@ -257,8 +259,8 @@ describe('movement', ()=>{
             movement.check(false);
             intents.ticks();
 
-            expect(fullSpeed2.x).toBe(23); expect(fullSpeed2.y).toBe(26);
-            expect(halfSpeed1.x).toBe(23); expect(halfSpeed1.y).toBe(25);
+            assert.strictEqual(fullSpeed2.x, 23); assert.strictEqual(fullSpeed2.y, 26);
+            assert.strictEqual(halfSpeed1.x, 23); assert.strictEqual(halfSpeed1.y, 25);
         });
 
         it('creep that being pulled takes priority',()=>{
@@ -269,8 +271,8 @@ describe('movement', ()=>{
             movement.check(false);
             intents.ticks();
 
-            expect(halfSpeed2.x).toBe(24); expect(halfSpeed2.y).toBe(25);
-            expect(fullSpeed1.x).toBe(24); expect(fullSpeed1.y).toBe(24);
+            assert.strictEqual(halfSpeed2.x, 24); assert.strictEqual(halfSpeed2.y, 25);
+            assert.strictEqual(fullSpeed1.x, 24); assert.strictEqual(fullSpeed1.y, 24);
         });
     });
 
@@ -291,10 +293,10 @@ describe('movement', ()=>{
             movement.check(false);
             intents.ticks();
 
-            expect(fullSpeed.x).toBe(24); expect(fullSpeed.y).toBe(26);
-            expect(halfSpeed.x).toBe(24); expect(halfSpeed.y).toBe(25);
-            expect(halfSpeed.fatigue).toBe(0);
-            expect(fullSpeed.fatigue).toBe(2); // he carries 1 his own TOUGH plus 2 TOUGH of halfSpeed using 1 his MOVE part plus 1 MOVE part of halfSpeed
+            assert.strictEqual(fullSpeed.x, 24); assert.strictEqual(fullSpeed.y, 26);
+            assert.strictEqual(halfSpeed.x, 24); assert.strictEqual(halfSpeed.y, 25);
+            assert.strictEqual(halfSpeed.fatigue, 0);
+            assert.strictEqual(fullSpeed.fatigue, 2); // he carries 1 his own TOUGH plus 2 TOUGH of halfSpeed using 1 his MOVE part plus 1 MOVE part of halfSpeed
         });
 
         it("receives another creep's fatigue if he follows (creep syntax)",()=>{
@@ -304,10 +306,10 @@ describe('movement', ()=>{
             movement.check(false);
             intents.ticks();
 
-            expect(fullSpeed.x).toBe(24); expect(fullSpeed.y).toBe(26);
-            expect(halfSpeed.x).toBe(24); expect(halfSpeed.y).toBe(25);
-            expect(halfSpeed.fatigue).toBe(0);
-            expect(fullSpeed.fatigue).toBe(2); // he carries 1 his own tough plus 2 tough of halfSpeed using 1 his MOVE part plus 1 MOVE part of halfSpeed
+            assert.strictEqual(fullSpeed.x, 24); assert.strictEqual(fullSpeed.y, 26);
+            assert.strictEqual(halfSpeed.x, 24); assert.strictEqual(halfSpeed.y, 25);
+            assert.strictEqual(halfSpeed.fatigue, 0);
+            assert.strictEqual(fullSpeed.fatigue, 2); // he carries 1 his own tough plus 2 tough of halfSpeed using 1 his MOVE part plus 1 MOVE part of halfSpeed
         });
 
         it("does not receive another creep's fatigue if he does not follow",()=>{
@@ -317,10 +319,10 @@ describe('movement', ()=>{
             movement.check(false);
             intents.ticks();
 
-            expect(fullSpeed.x).toBe(24); expect(fullSpeed.y).toBe(26);
-            expect(halfSpeed.x).toBe(23); expect(halfSpeed.y).toBe(23);
-            expect(halfSpeed.fatigue).toBe(2);
-            expect(fullSpeed.fatigue).toBe(0);
+            assert.strictEqual(fullSpeed.x, 24); assert.strictEqual(fullSpeed.y, 26);
+            assert.strictEqual(halfSpeed.x, 23); assert.strictEqual(halfSpeed.y, 23);
+            assert.strictEqual(halfSpeed.fatigue, 2);
+            assert.strictEqual(fullSpeed.fatigue, 0);
         });
 
         it("moves a creep without MOVE parts",()=>{
@@ -330,10 +332,10 @@ describe('movement', ()=>{
             movement.check(false);
             intents.ticks();
 
-            expect(fullSpeed.x).toBe(23); expect(fullSpeed.y).toBe(24);
-            expect(noMove.x).toBe(24); expect(noMove.y).toBe(25);
-            expect(noMove.fatigue).toBe(0);
-            expect(fullSpeed.fatigue).toBeGreaterThan(0);
+            assert.strictEqual(fullSpeed.x, 23); assert.strictEqual(fullSpeed.y, 24);
+            assert.strictEqual(noMove.x, 24); assert.strictEqual(noMove.y, 25);
+            assert.strictEqual(noMove.fatigue, 0);
+            assert.ok(fullSpeed.fatigue > 0);
         });
 
         it("moves a creep with fatigue",()=>{
@@ -345,10 +347,10 @@ describe('movement', ()=>{
             movement.check(false);
             intents.ticks();
 
-            expect(fullSpeed.x).toBe(24); expect(fullSpeed.y).toBe(26);
-            expect(halfSpeed.x).toBe(24); expect(halfSpeed.y).toBe(25);
-            expect(halfSpeed.fatigue).toBe(0);
-            expect(fullSpeed.fatigue).toBe(4); // TOUGH parts: 3, MOVE parts: 1 (halfspeed's MOVE can't be used because of fatigue)
+            assert.strictEqual(fullSpeed.x, 24); assert.strictEqual(fullSpeed.y, 26);
+            assert.strictEqual(halfSpeed.x, 24); assert.strictEqual(halfSpeed.y, 25);
+            assert.strictEqual(halfSpeed.fatigue, 0);
+            assert.strictEqual(fullSpeed.fatigue, 4); // TOUGH parts: 3, MOVE parts: 1 (halfspeed's MOVE can't be used because of fatigue)
         });
 
         it("prevents circular/sequental pulls (2 creeps)",()=>{
@@ -359,12 +361,12 @@ describe('movement', ()=>{
             movement.check(false);
             intents.ticks();
 
-            expect(halfSpeed.x).toBe(25); expect(halfSpeed.y).toBe(23);
-            expect(halfSpeed2.x).toBe(24); expect(halfSpeed2.y).toBe(24);
+            assert.strictEqual(halfSpeed.x, 25); assert.strictEqual(halfSpeed.y, 23);
+            assert.strictEqual(halfSpeed2.x, 24); assert.strictEqual(halfSpeed2.y, 24);
 
             // in this case, one and only one pull should succeeded, either of them, so expectations changed to:
-            expect(halfSpeed.fatigue*halfSpeed2.fatigue).toBe(0); // at least one of fatigues should be 0
-            expect(halfSpeed.fatigue+halfSpeed2.fatigue).toBeGreaterThan(0); // and the other shouldn't be 0
+            assert.strictEqual(halfSpeed.fatigue*halfSpeed2.fatigue, 0); // at least one of fatigues should be 0
+            assert.ok(halfSpeed.fatigue+halfSpeed2.fatigue > 0); // and the other shouldn't be 0
         });
     });
 
@@ -386,12 +388,12 @@ describe('movement', ()=>{
             movement.check(false);
             intents.ticks();
 
-            expect(fullSpeed.x).toBe(24); expect(fullSpeed.y).toBe(26);
-            expect(halfSpeed.x).toBe(24); expect(halfSpeed.y).toBe(25);
-            expect(halfSpeed2.x).toBe(24); expect(halfSpeed2.y).toBe(24);
-            expect(fullSpeed.fatigue).toBe(4); // total TOUGH parts: 5, total MOVE parts: 3
-            expect(halfSpeed.fatigue).toBe(0);
-            expect(halfSpeed2.fatigue).toBe(0);
+            assert.strictEqual(fullSpeed.x, 24); assert.strictEqual(fullSpeed.y, 26);
+            assert.strictEqual(halfSpeed.x, 24); assert.strictEqual(halfSpeed.y, 25);
+            assert.strictEqual(halfSpeed2.x, 24); assert.strictEqual(halfSpeed2.y, 24);
+            assert.strictEqual(fullSpeed.fatigue, 4); // total TOUGH parts: 5, total MOVE parts: 3
+            assert.strictEqual(halfSpeed.fatigue, 0);
+            assert.strictEqual(halfSpeed2.fatigue, 0);
         });
 
         it('receives MOVE parts contribution of all pulled creeps', ()=>{
@@ -403,12 +405,12 @@ describe('movement', ()=>{
             movement.check(false);
             intents.ticks();
 
-            expect(fullSpeed.x).toBe(24); expect(fullSpeed.y).toBe(26);
-            expect(halfSpeed.x).toBe(24); expect(halfSpeed.y).toBe(25);
-            expect(halfSpeed2.x).toBe(24); expect(halfSpeed2.y).toBe(24);
-            expect(fullSpeed.fatigue).toBe(4); // total TOUGH parts: 5, total MOVE parts: 1 (pulled moves can't be used)
-            expect(halfSpeed.fatigue).toBe(0);
-            expect(halfSpeed2.fatigue).toBe(0);
+            assert.strictEqual(fullSpeed.x, 24); assert.strictEqual(fullSpeed.y, 26);
+            assert.strictEqual(halfSpeed.x, 24); assert.strictEqual(halfSpeed.y, 25);
+            assert.strictEqual(halfSpeed2.x, 24); assert.strictEqual(halfSpeed2.y, 24);
+            assert.strictEqual(fullSpeed.fatigue, 4); // total TOUGH parts: 5, total MOVE parts: 1 (pulled moves can't be used)
+            assert.strictEqual(halfSpeed.fatigue, 0);
+            assert.strictEqual(halfSpeed2.fatigue, 0);
         });
 
         it('receives MOVE parts contribution of all pulled creeps except fatigued', ()=>{
@@ -423,12 +425,12 @@ describe('movement', ()=>{
             movement.check(false);
             intents.ticks();
 
-            expect(fullSpeed.x).toBe(24); expect(fullSpeed.y).toBe(26);
-            expect(halfSpeed.x).toBe(24); expect(halfSpeed.y).toBe(25);
-            expect(halfSpeed2.x).toBe(24); expect(halfSpeed2.y).toBe(24);
-            expect(fullSpeed.fatigue).toBe(8); // total TOUGH parts: 5, total MOVE parts: 1 (pulled moves can't be used)
-            expect(halfSpeed.fatigue).toBe(0);
-            expect(halfSpeed2.fatigue).toBe(0);
+            assert.strictEqual(fullSpeed.x, 24); assert.strictEqual(fullSpeed.y, 26);
+            assert.strictEqual(halfSpeed.x, 24); assert.strictEqual(halfSpeed.y, 25);
+            assert.strictEqual(halfSpeed2.x, 24); assert.strictEqual(halfSpeed2.y, 24);
+            assert.strictEqual(fullSpeed.fatigue, 8); // total TOUGH parts: 5, total MOVE parts: 1 (pulled moves can't be used)
+            assert.strictEqual(halfSpeed.fatigue, 0);
+            assert.strictEqual(halfSpeed2.fatigue, 0);
         });
     });
 });

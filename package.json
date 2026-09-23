@@ -8,7 +8,7 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "test": "cross-env DRIVER_MODULE=../spec/helpers/test-driver jasmine",
+    "test": "cross-env DRIVER_MODULE=../spec/helpers/driver-fixture node --test",
     "prepublish": "gulp"
   },
   "dependencies": {
@@ -27,8 +27,7 @@
     "gulp-babel": "^6.1.2",
     "gulp-plumber": "^1.1.0",
     "gulp-sourcemaps": "^2.6.0",
-    "gulp-watch": "^4.3.11",
-    "jasmine": "3.99.0"
+    "gulp-watch": "^4.3.11"
   },
   "license": "ISC",
   "author": "Artem Chivchalov <contact@screeps.com>",

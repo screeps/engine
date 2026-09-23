@@ -1,4 +1,6 @@
-const _ =require('lodash'),
+const {describe, it, beforeEach} = require('node:test'),
+    assert = require('node:assert/strict'),
+    _ = require('lodash'),
     utils =  require('../../../../../src/utils'),
     driver = utils.getDriver(),
     C = driver.constants,
@@ -22,7 +24,7 @@ describe("Creep transferring resource", () => {
         lorry1.transfer(lorry2._id, C.RESOURCE_ENERGY, 100);
         intents.ticks();
 
-        expect(lorry1.store.energy).toBe(100);
-        expect(lorry2.store.energy).toBe(0);
+        assert.strictEqual(lorry1.store.energy, 100);
+        assert.strictEqual(lorry2.store.energy, 0);
     });
 });

@@ -1,4 +1,6 @@
-const _ =require('lodash'),
+const {describe, it, beforeEach} = require('node:test'),
+    assert = require('node:assert/strict'),
+    _ = require('lodash'),
     utils = require('../../../src/utils'),
     driver = utils.getDriver(),
     C = driver.constants,
@@ -21,16 +23,16 @@ describe('rooms', () => {
         });
 
         it('Exists',()=>{
-            expect(globals.RoomPosition).toBeDefined();
+            assert.notStrictEqual(globals.RoomPosition, undefined);
         });
 
         it('Preserves coordinates', ()=>{
             const pos = new globals.RoomPosition(11,14,'E2S7');
 
-            expect(pos).toBeDefined();
-            expect(pos.x).toBe(11);
-            expect(pos.y).toBe(14);
-            expect(pos.roomName).toBe('E2S7');
+            assert.notStrictEqual(pos, undefined);
+            assert.strictEqual(pos.x, 11);
+            assert.strictEqual(pos.y, 14);
+            assert.strictEqual(pos.roomName, 'E2S7');
         });
 
         it('Mutates x properly', ()=>{
@@ -38,10 +40,10 @@ describe('rooms', () => {
 
             pos.x++;
 
-            expect(pos).toBeDefined();
-            expect(pos.x).toBe(12);
-            expect(pos.y).toBe(14);
-            expect(pos.roomName).toBe('E2S7');
+            assert.notStrictEqual(pos, undefined);
+            assert.strictEqual(pos.x, 12);
+            assert.strictEqual(pos.y, 14);
+            assert.strictEqual(pos.roomName, 'E2S7');
         });
 
         it('Mutates y properly', ()=>{
@@ -49,10 +51,10 @@ describe('rooms', () => {
 
             pos.y++;
 
-            expect(pos).toBeDefined();
-            expect(pos.x).toBe(11);
-            expect(pos.y).toBe(15);
-            expect(pos.roomName).toBe('E2S7');
+            assert.notStrictEqual(pos, undefined);
+            assert.strictEqual(pos.x, 11);
+            assert.strictEqual(pos.y, 15);
+            assert.strictEqual(pos.roomName, 'E2S7');
         });
     });
 });
