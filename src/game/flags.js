@@ -47,7 +47,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 throw new Error('Could not set flag memory');
             }
             globals.Memory.flags[this.name] = value;
-        }
+        },
+        configurable: true
     });
 
     Flag.prototype.toString = register.wrapFn(function() {
