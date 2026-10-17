@@ -21,7 +21,7 @@ module.exports = function(object, intent, scope) {
     if(Math.abs(target.x - object.x) > 1 || Math.abs(target.y - object.y) > 1) {
         return;
     }
-    if(_.filter(target.body, (i) => i.type == C.CLAIM).length > 0) {
+    if(target.body.some((i) => i.type == C.CLAIM)) {
         return;
     }
 
