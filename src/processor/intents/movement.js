@@ -158,7 +158,7 @@ exports.check = function(roomIsInSafeMode) {
 
         if(object) {
             var key = `${object.x},${object.y}`;
-            if(matrix[key]) {
+            if(matrix[key] && !(roomIsInSafeMode == matrix[key].user && object.user != matrix[key].user)) {
                 removeFromMatrix(key);
             }
         }
