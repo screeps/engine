@@ -137,8 +137,8 @@ exports.checkConstructionSite = function(objects, structureType, x, y) {
 
     if(_.isString(objects) || objects instanceof Uint8Array) {
         if(borderTiles) {
-            for(var i in borderTiles) {
-                if(!exports.checkTerrain(objects, borderTiles[i][0], borderTiles[i][1], C.TERRAIN_MASK_WALL)) {
+            for(const tile of borderTiles) {
+                if(!exports.checkTerrain(objects, tile[0], tile[1], C.TERRAIN_MASK_WALL)) {
                     return false;
                 }
             }
@@ -154,8 +154,8 @@ exports.checkConstructionSite = function(objects, structureType, x, y) {
 
     if(objects && _.isArray(objects[0]) && _.isString(objects[0][0])) {
         if(borderTiles) {
-            for(var i in borderTiles) {
-                if(!(objects[borderTiles[i][1]][borderTiles[i][0]] & C.TERRAIN_MASK_WALL)) {
+            for(const tile of borderTiles) {
+                if(!(objects[tile[1]][tile[0]] & C.TERRAIN_MASK_WALL)) {
                     return false;
                 }
             }
