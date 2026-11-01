@@ -335,6 +335,31 @@ exports.checkTerrain = function(terrain, x, y, mask) {
     return (code & mask) > 0;
 };
 
+exports.checkObstacleAtXY = function(x, y, object, roomIsInSafeMode, roomObjects, roomTerrain, movingObjects) {
+    movingObjects = movingObjects || {};
+    var hasObstacle = false, hasRoad = false;
+    _.forEach(roomObjects, (i) => {
+        if (i.x != x || i.y != y) {
+            return;
+        }
+        if ((i.type == 'creep' || i.type == 'powerCreep') && !movingObjects[i._id] && (!roomIsInSafeMode || roomIsInSafeMode != object.user || roomIsInSafeMode == object.user && object.user == i.user) ||
+            i.type != 'creep' && i.type != 'powerCreep' && _.contains(C.OBSTACLE_OBJECT_TYPES, i.type) ||
+            i.type == 'rampart' && !i.isPublic && i.user != object.user ||
+            i.type == 'constructionSite' && i.user == object.user && _.contains(C.OBSTACLE_OBJECT_TYPES,
+                i.structureType)) {
+            hasObstacle = true;
+            return false;
+        }
+        if(i.type == 'road') {
+            hasRoad = true;
+        }
+    });
+    if(hasObstacle) {
+        return true;
+    }
+    return exports.checkTerrain(roomTerrain, x, y, C.TERRAIN_MASK_WALL) && !hasRoad;
+};
+
 exports.checkControllerAvailability = function(type, roomObjects, roomController, offset) {
     var rcl = 0;
 
