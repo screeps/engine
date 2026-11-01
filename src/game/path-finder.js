@@ -32,7 +32,7 @@ exports.make = function(runtimeData, intents, register, globals) {
     });
 
     CostMatrix.prototype.clone = register.wrapFn(function() {
-        var newMatrix = new CostMatrix;
+        const newMatrix = Object.create(CostMatrix.prototype);
         newMatrix._bits = new Uint8Array(this._bits);
         return newMatrix;
     });
