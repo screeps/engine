@@ -13,7 +13,7 @@ module.exports = function(intent, user, {userPowerCreeps, bulkObjects, bulkUsers
         return;
     }
 
-    var name = intent.name.substring(0,50);
+    var name = intent.name.substring(0,100);
 
     if(_.any(thisUserPowerCreeps, {name})) {
         return;
