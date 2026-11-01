@@ -69,7 +69,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         carry: _storeGetter,
         store: _storeGetter,
         carryCapacity: o => o.storeCapacity,
-        ticksToLive: (o) => o.ageTime - runtimeData.time,
+        ticksToLive: (o) => o.ageTime ? o.ageTime - runtimeData.time : undefined,
     });
 
     Object.defineProperty(PowerCreep.prototype, 'memory', {

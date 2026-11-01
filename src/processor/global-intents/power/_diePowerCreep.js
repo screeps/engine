@@ -54,6 +54,7 @@ module.exports = function(object, {roomObjects, bulkObjects, bulkUsersPowerCreep
 
     bulkUsersPowerCreeps.update(object._id, {
         shard: null,
-        spawnCooldownTime: Date.now() + C.POWER_CREEP_SPAWN_COOLDOWN
+        spawnCooldownTime: Date.now() + C.POWER_CREEP_SPAWN_COOLDOWN,
+        ageTime: undefined,
     });
 };
