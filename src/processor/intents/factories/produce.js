@@ -14,7 +14,7 @@ module.exports = function(object, intent, scope) {
         return;
     }
 
-    if(!utils.checkStructureAgainstController(object, roomObjects, roomController)) {
+    if(object.off) {
         return;
     }
 
