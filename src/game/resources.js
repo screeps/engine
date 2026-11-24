@@ -45,3 +45,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     Object.defineProperty(globals, 'Resource', {enumerable: true, value: Resource});
     Object.defineProperty(globals, 'Energy', {enumerable: true, value: Resource});
 };
+
+exports.clear = function() {
+    runtimeData = intents = register = globals = null;
+};

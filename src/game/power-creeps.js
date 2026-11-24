@@ -414,3 +414,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     Object.defineProperty(globals, 'PowerCreep', {enumerable: true, value: PowerCreep});
 };
 
+
+exports.clear = function() {
+    runtimeData = intents = register = globals = null;
+};

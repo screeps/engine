@@ -43,3 +43,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     Object.defineProperty(globals, 'Deposit', {enumerable: true, value: Deposit});
 };
+
+exports.clear = function() {
+    runtimeData = intents = register = globals = null;
+};

@@ -71,3 +71,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     Object.defineProperty(globals, 'Ruin', {enumerable: true, value: Ruin});
 };
+
+exports.clear = function() {
+    runtimeData = intents = register = globals = null;
+};

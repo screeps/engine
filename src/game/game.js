@@ -437,6 +437,36 @@
         return game;
     };
 
+    function clearGameObject(cache) {
+        if (cache) {
+            if (cache.globals) {
+                cache.globals.Game = null;
+            }
+            cache.runtimeData = null;
+            cache.intents = null;
+            cache.consoleCommands = null;
+        }
+
+        require('./rooms').clear();
+        require('./creeps').clear();
+        require('./structures').clear();
+        require('./sources').clear();
+        require('./minerals').clear();
+        require('./deposits').clear();
+        require('./nukes').clear();
+        require('./resources').clear();
+        require('./flags').clear();
+        require('./tombstones').clear();
+        require('./construction-sites').clear();
+        require('./path-finder').clear();
+        require('./power-creeps').clear();
+        require('./ruins').clear();
+        require('./store').clear();
+        customPrototypes.clear();
+        map.clear();
+        market.clear();
+    };
+
     (function() {
 
         var runCodeCache = objectCreate(null);
@@ -545,6 +575,8 @@
                     }
                 }
             }
+
+            clearGameObject(runCodeCache[userId]);
         };
     })();
 

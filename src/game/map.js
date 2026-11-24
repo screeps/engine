@@ -378,3 +378,5 @@ exports.makeMap = function(runtimeData, register, globals) {
 
     return map;
 };
+
+exports.clear = function() {};

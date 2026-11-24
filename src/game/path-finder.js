@@ -85,3 +85,7 @@ exports.make = function(runtimeData, intents, register, globals) {
     Object.defineProperty(globals, 'PathFinder', {enumerable: true, value: PathFinder});
 
 };
+
+exports.clear = function() {
+    currentRegister = null;
+};

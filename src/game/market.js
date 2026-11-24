@@ -251,3 +251,5 @@ exports.make = function(runtimeData, intents, register) {
 
     return market;
 };
+
+exports.clear = function() {};

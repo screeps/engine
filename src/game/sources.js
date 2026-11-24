@@ -44,3 +44,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     Object.defineProperty(globals, 'Source', {enumerable: true, value: Source});
 };
+
+exports.clear = function() {
+    runtimeData = intents = register = globals = null;
+};
