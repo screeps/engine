@@ -32,9 +32,13 @@ function loop() {
         .then((users) => {
             stage = 'addUsersToQueue';
             driver.config.emit('mainLoopStage',stage, users);
+            var userWeights = users.reduce((result, user) => {
+                result[user._id.toString()] = user.lastUsedDirtyTime;
+                return result;
+            }, {});
             return usersQueue.addMulti(
-                users.map(user => user._id.toString()),
-                users.map(user => user.lastUsedDirtyTime)
+                Object.keys(userWeights),
+                userWeights
             );
         })
         .then(() => {
