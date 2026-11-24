@@ -270,7 +270,7 @@
             if (object.type == 'creep') {
                 register._objects[i] = new globals.Creep(i);
                 addObjectToRegister(register, 'creeps', register._objects[i], object);
-                if (runtimeData.userObjects[i]) {
+                if (object.user == runtimeData.user._id) {
                     if (game.creeps[register.creeps[i].name]) {
                         register.creeps[i].suicide();
                     }
@@ -300,7 +300,7 @@
                 addObjectToRegister(register, 'structures', register._objects[i], object);
 
                 if (register._objects[i] instanceof globals.OwnedStructure) {
-                    if (runtimeData.userObjects[i]) {
+                    if (object.user == runtimeData.user._id) {
                         game.structures[register.structures[i].id] = register.structures[i];
                     }
                     addObjectToRegister(register, 'ownedStructures', register._objects[i], object);
@@ -313,7 +313,7 @@
                 if(object.type == 'spawn') {
                     addObjectToRegister(register, 'spawns', register._objects[i], object);
 
-                    if (runtimeData.userObjects[i]) {
+                    if (object.user == runtimeData.user._id) {
                         game.spawns[register.spawns[i].name] = register.spawns[i];
                     }
 
@@ -365,11 +365,11 @@
 
             if (object.type == 'constructionSite') {
                 register._objects[i] = new globals.ConstructionSite(i);
-                if (runtimeData.userObjects[i]) {
+                if (object.user == runtimeData.user._id) {
                     game.constructionSites[register._objects[i].id] = register._objects[i];
-                    if (!register.byRoom[runtimeData.userObjects[i].room]) {
-                        register.byRoom[runtimeData.userObjects[i].room] = {};
-                        populateRegister(register.byRoom[runtimeData.userObjects[i].room], true);
+                    if (!register.byRoom[object.room]) {
+                        register.byRoom[object.room] = {};
+                        populateRegister(register.byRoom[object.room], true);
                     }
                 }
 

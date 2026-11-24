@@ -84,7 +84,7 @@ exports.make = function(runtimeData, intents, register) {
                 return C.ERR_NOT_ENOUGH_RESOURCES;
             }
             if(!_.contains(C.INTERSHARD_RESOURCES, resourceType) &&
-                (!roomName || !_.any(runtimeData.userObjects, {type: 'terminal', room: roomName}))) {
+                (!roomName || !_.any(runtimeData.roomObjects, {type: 'terminal', room: roomName, user: runtimeData.user._id}))) {
                 return C.ERR_NOT_OWNER;
             }
             if(_.size(this.orders) + ordersCreatedDuringTick >= C.MARKET_MAX_ORDERS) {
@@ -123,7 +123,7 @@ exports.make = function(runtimeData, intents, register) {
                 if(!targetRoomName) {
                     return C.ERR_INVALID_ARGS;
                 }
-                var terminal = _.find(runtimeData.userObjects, {type: 'terminal', room: targetRoomName}),
+                var terminal = _.find(runtimeData.roomObjects, {type: 'terminal', room: targetRoomName, user: runtimeData.user._id}),
                     transferCost = this.calcTransactionCost(amount, targetRoomName, order.roomName);
                 if(!terminal) {
                     return C.ERR_NOT_OWNER;

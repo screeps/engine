@@ -1068,7 +1068,9 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             return C.ERR_INVALID_TARGET;
         }
 
-        if(_(runtimeData.userObjects).filter({type: 'constructionSite'}).size() + createdConstructionSites >= C.MAX_CONSTRUCTION_SITES) {
+        if(_(runtimeData.roomObjects).filter(
+            {type: 'constructionSite', user: runtimeData.user._id}).size() +
+            createdConstructionSites >= C.MAX_CONSTRUCTION_SITES) {
             return C.ERR_FULL;
         }
 
