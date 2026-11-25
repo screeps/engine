@@ -5,7 +5,11 @@ let utils = require('../utils');
 let driver = utils.getRuntimeDriver();
 let C = driver.constants;
 
+let currentRegister;
+
 exports.make = function(runtimeData, intents, register, globals) {
+
+    currentRegister = register;
 
     driver.pathFinder.make(globals);
 
@@ -47,6 +51,8 @@ exports.make = function(runtimeData, intents, register, globals) {
         return instance;
     });
 
+    let oldPFDeprecationShown = false;
+
     var PathFinder = Object.create(Object.prototype, {
 
         CostMatrix: {
@@ -67,10 +73,11 @@ exports.make = function(runtimeData, intents, register, globals) {
         use: {
             enumerable: true,
             value: register.wrapFn(function (isActive) {
-                if (!isActive) {
-                    register.deprecated('`PathFinder.use` is considered deprecated and will be removed soon.');
+                if (!isActive && !oldPFDeprecationShown) {
+                    oldPFDeprecationShown = true;
+                    globals.console.log('`PathFinder.use` is considered deprecated and will be removed soon.');
                 }
-                register._useNewPathFinder = !!isActive;
+                currentRegister._useNewPathFinder = !!isActive;
             })
         }
     });
