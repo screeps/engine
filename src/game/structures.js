@@ -53,6 +53,10 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
             if(_data.type == C.STRUCTURE_TERMINAL) {
                 register.rooms[_data.room].terminal = this;
             }
+
+            if(_data.type == C.STRUCTURE_FACTORY) {
+                register.rooms[_data.room].factory = this;
+            }
         }
     });
 
