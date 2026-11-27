@@ -8,6 +8,7 @@
         market = require('./market'),
         customPrototypes = require('./custom-prototypes'),
         bindFunction = Function.call.bind(Function.bind),
+        hasOwnProperty = Function.call.bind(Object.prototype.hasOwnProperty),
         objectCreate = Object.create,
         jsonStringify = JSON.stringify,
         jsonParse = JSON.parse;
@@ -507,7 +508,8 @@
                     runCodeCache[userId].globals.require.cache.main.loop)) {
 
                 runCodeCache[userId].globals.require = bindFunction(requireFn, runCodeCache[userId]);
-                runCodeCache[userId].globals.require.cache = {lodash: runCodeCache[userId].globals._};
+                runCodeCache[userId].globals.require.cache = objectCreate(null);
+                runCodeCache[userId].globals.require.cache.lodash = runCodeCache[userId].globals._;
                 runCodeCache[userId].globals.require.timestamp = runCodeCache[userId].runtimeData.userCodeTimestamp;
             }
 
@@ -552,9 +554,9 @@
 
         moduleName = moduleName.replace(/^\.\//,'');
 
-        if (!(moduleName in this.globals.require.cache)) {
+        if (!hasOwnProperty(this.globals.require.cache, moduleName)) {
 
-            if (_.isUndefined(this.codeModules[moduleName])) {
+            if (!hasOwnProperty(this.codeModules, moduleName) || _.isUndefined(this.codeModules[moduleName])) {
                 throw new Error(`Unknown module '${moduleName}'`);
             }
 
@@ -582,7 +584,7 @@
 
                 this.globals.require.cache[moduleName] = moduleObject.exports;
                 if (moduleObject.__initGlobals) {
-                    this.globals.require.initGlobals = this.globals.require.initGlobals || {};
+                    this.globals.require.initGlobals = this.globals.require.initGlobals || objectCreate(null);
                     this.globals.require.initGlobals[moduleName] = moduleObject.__initGlobals;
                 }
             }
