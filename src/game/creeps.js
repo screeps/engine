@@ -270,8 +270,8 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
                 }
                 var result = this.moveByPath(path);
 
-                if(result == C.OK) {
-                    return C.OK;
+                if(result == C.OK || result == C.ERR_TIRED) {
+                    return result;
                 }
             }
         }
