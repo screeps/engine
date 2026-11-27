@@ -45,3 +45,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     Object.defineProperty(globals, 'Mineral', {enumerable: true, value: Mineral});
 };
+
+exports.clear = function() {
+    runtimeData = intents = register = globals = null;
+};

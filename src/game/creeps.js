@@ -1123,3 +1123,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
     Object.defineProperty(globals, 'Creep', {enumerable: true, value: Creep});
 };
 
+
+exports.clear = function() {
+    runtimeData = intents = register = globals = null;
+};

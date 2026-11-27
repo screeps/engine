@@ -43,3 +43,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     Object.defineProperty(globals, 'Nuke', {enumerable: true, value: Nuke});
 };
+
+exports.clear = function() {
+    runtimeData = intents = register = globals = null;
+};

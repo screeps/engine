@@ -58,3 +58,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     Object.defineProperty(globals, 'ConstructionSite', {enumerable: true, value: ConstructionSite});
 };
+
+exports.clear = function() {
+    runtimeData = intents = register = globals = null;
+};

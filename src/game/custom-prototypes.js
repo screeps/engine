@@ -56,3 +56,7 @@ module.exports = function(name, parent, properties, prototypeExtender, userOwned
         scope.globals[name] = _CustomObject;
     }
 };
+
+module.exports.clear = function() {
+    scope.runtimeData = scope.intents = scope.register = scope.globals = null;
+};

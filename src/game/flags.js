@@ -95,3 +95,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
         value: Flag
     });
 };
+
+exports.clear = function() {
+    runtimeData = intents = register = globals = null;
+};

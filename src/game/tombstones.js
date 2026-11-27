@@ -239,3 +239,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     Object.defineProperty(globals, 'Tombstone', {enumerable: true, value: Tombstone});
 };
+
+exports.clear = function() {
+    runtimeData = intents = register = globals = null;
+};

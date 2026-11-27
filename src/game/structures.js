@@ -1489,3 +1489,7 @@ exports.make = function(_runtimeData, _intents, _register, _globals) {
 
     Object.defineProperty(globals, 'StructureInvaderCore', {enumerable: true, value: StructureInvaderCore});
 };
+
+exports.clear = function() {
+    runtimeData = intents = register = globals = createdCreepNames = lastActivateSafeMode = null;
+};
